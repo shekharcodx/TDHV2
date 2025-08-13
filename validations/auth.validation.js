@@ -111,3 +111,18 @@ exports.loginValidation = [
 
   body("password").notEmpty().withMessage("Password is required"),
 ];
+
+exports.changePasswordValidation = [
+  body("email")
+    .trim()
+    .notEmpty()
+    .withMessage("Email is required")
+    .isEmail()
+    .withMessage("Email must be valid"),
+  body("oldPassword").notEmpty().withMessage("Old password is required"),
+  body("newPassword")
+    .notEmpty()
+    .withMessage("New password is required")
+    .isLength({ min: 6 })
+    .withMessage("New password must be at least 6 characters"),
+];

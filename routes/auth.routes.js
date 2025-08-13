@@ -8,14 +8,28 @@ const {
   register,
   login,
   updateProfile,
+  createNewPassword,
+  getCurrentLoggedInUser,
 } = require("../controllers/auth.controller");
 const {
   registerValidation,
   loginValidation,
   updateProfileValidation,
+  changePasswordValidation,
 } = require("../validations/auth.validation");
 
 router.post("/register", cpUpload, registerValidation, validate, register);
+
+router.post("/login", loginValidation, validate, login);
+
+router.patch(
+  "/createNewPassword",
+  changePasswordValidation,
+  validate,
+  createNewPassword
+);
+
+router.get("/getCurrentUser", protect, getCurrentLoggedInUser);
 
 router.put(
   "/updateProfile",
@@ -25,7 +39,5 @@ router.put(
   protect,
   updateProfile
 );
-
-router.post("/login", loginValidation, validate, login);
 
 module.exports = router;

@@ -188,6 +188,62 @@ exports.login = async (req, res) => {
   }
 };
 
+exports.createNewPassword = async (req, res) => {
+  const { email, oldPassword, newPassword } = req.body;
+  try {
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res
+        .status(404)
+        .json({ success: false, ...messages.AUTH_USER_NOT_FOUND });
+    }
+
+    const isMatch = await bcrypt.compare(oldPassword, user.password);
+
+    if (!isMatch) {
+      return res
+        .status(400)
+        .json({ success: false, ...messages.AUTH_INVALID_PASSWORD });
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    user.password = hashedPassword;
+    user.temporaryPassword = false;
+    await user.save();
+
+    res.json({ success: true, ...messages.AUTH_PASSWORD_CHANGED });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+exports.getCurrentLoggedInUser = async (req, res) => {
+  const { id } = req.user;
+  try {
+    const user = await User.findById(id).populate("profilePicture");
+    if (!user) {
+      return res
+        .status(404)
+        .json({ success: false, ...messages.AUTH_USER_NOT_FOUND });
+    }
+
+    res.json({
+      success: true,
+      ...messages.USER_FOUND,
+      data: {
+        _id: user._id,
+        email: user.email,
+        name: user.name,
+        token: generateToken(user._id, user.role, user.email),
+        role: user.role,
+        profilePicture: user.profilePicture.url || null,
+      },
+    });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
 exports.updateProfile = async (req, res) => {
   try {
     const user = await User.findById(req.user.id);

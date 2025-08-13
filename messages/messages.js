@@ -48,6 +48,14 @@ module.exports = {
     code: "AUTH_LOGIN_SUCCESS",
     message: "Login successful",
   },
+  AUTH_PASSWORD_CHANGED: {
+    code: "AUTH_PASSWORD_CHANGED",
+    message: "Password updated successfully, Please login with new password",
+  },
+  USER_FOUND: {
+    code: "USER_FOUND",
+    message: "User found",
+  },
   GENERAL_SERVER_ERROR: {
     code: "GENERAL_SERVER_ERROR",
     message: "An unexpected error occurred",
