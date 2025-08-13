@@ -5,7 +5,12 @@ const validate = (req, res, next) => {
   if (!errors.isEmpty()) {
     return res
       .status(400)
-      .json({ errors: errors.array().map((err) => err.msg) });
+      .json({
+        success: false,
+        errors: errors
+          .array()
+          .map((err) => ({ field: err.param, message: err.msg })),
+      });
   }
   next();
 };

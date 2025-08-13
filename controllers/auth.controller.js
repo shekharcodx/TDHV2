@@ -4,13 +4,25 @@ const generateToken = require("../utils/generateToken");
 const messages = require("../messages/messages");
 const uploadBufferToCloudinary = require("../utils/uploadToClaudinary");
 const deleteImage = require("../utils/deleteImage");
-const { accountStatus } = require("../utils/constants");
+const { ACCOUNT_STATUS, USER_ROLES } = require("../utils/constants");
+const generateRandomPassword = require("../utils/generatePassword");
+const { sendEmailFromTemplate } = require("../utils/sendEmail");
 
 exports.register = async (req, res) => {
-  const { name, email, role, password } = req.body;
+  let {
+    name,
+    email,
+    role,
+    password,
+    businessName,
+    address,
+    contact,
+    vendorInformation,
+  } = req.body;
+
   role = parseInt(role);
 
-  if (![2, 3].includes(role)) {
+  if (![USER_ROLES.VENDOR, USER_ROLES.CUSTOMER].includes(role)) {
     return res
       .status(400)
       .json({ success: false, ...messages.AUTH_REGISTRAION_ROLE_INVALID });
@@ -23,38 +35,94 @@ exports.register = async (req, res) => {
         .status(400)
         .json({ success: false, ...messages.AUTH_USER_ALREADY_EXISTS });
 
-    let profilePictureData = null;
-    if (req.file) {
+    let status = ACCOUNT_STATUS.APPROVED;
+    let documents = {};
+
+    if (role === USER_ROLES.VENDOR) {
+      status = ACCOUNT_STATUS.PENDING;
+      password = generateRandomPassword(10);
+
+      // Upload vendor documents
+      const docFields = [
+        "ijariCertificate",
+        "tradeLicense",
+        "vatCertificate",
+        "noc",
+        "emiratesId",
+        "poa",
+      ];
+
+      for (const field of docFields) {
+        if (req.files && req.files[field]) {
+          const fileBuffer = req.files[field][0].buffer;
+          const result = await uploadBufferToCloudinary(
+            fileBuffer,
+            "vendor_documents"
+          );
+
+          documents[field] = {
+            url: result.secure_url,
+            public_id: result.public_id,
+          };
+        }
+      }
+    }
+
+    // Upload profile picture if present
+    if (req.files && req.files["profilePicture"]) {
+      const fileBuffer = req.files["profilePicture"][0].buffer;
       const result = await uploadBufferToCloudinary(
-        req.file.buffer,
+        fileBuffer,
         "profile_pictures"
       );
-      profilePictureData = {
+      documents["profilePicture"] = {
         url: result.secure_url,
         public_id: result.public_id,
       };
     }
 
-    let status = "approved";
-    if (role === 2) status = "pending";
-
     const hashedPassword = await bcrypt.hash(password, 10);
-    const user = await User.create({
+
+    // Prepare user data for DB
+    const userData = {
       name,
       email,
       password: hashedPassword,
       role,
-      status: accountStatus[status],
-      profilePicture: profilePictureData,
+      status,
+    };
+
+    if (role === USER_ROLES.VENDOR) {
+      userData.businessName = businessName;
+      userData.address = address;
+      userData.contact = contact;
+      userData.temporaryPassword = true;
+      userData.vendorInformation = {
+        fleetSize: vendorInformation?.fleetSize,
+        documents,
+      };
+    }
+
+    if (documents.profilePicture) {
+      userData.profilePicture = documents.profilePicture;
+    }
+
+    const user = await User.create(userData);
+
+    await sendEmailFromTemplate("temporary_password", user.email, {
+      name: user.name,
+      tempPassword: password,
     });
 
     let messageObj =
-      role === 2
-        ? messages.AUTH_REGISTRATION_APPROVAL_PENDING
+      role === USER_ROLES.VENDOR
+        ? messages.AUTH_CHECK_EMAIL_FOR_TEMP_PASSWORD
         : messages.AUTH_REGISTRATION_SUCCESS;
 
     let info =
-      role === 3 ? { token: generateToken(user._id, user.role) } : null;
+      role === USER_ROLES.CUSTOMER
+        ? { token: generateToken(user._id, user.role, user.email) }
+        : null;
 
     res.status(201).json({
       success: true,
@@ -64,7 +132,6 @@ exports.register = async (req, res) => {
         name: user.name,
         email: user.email,
         ...info,
-        profilePicture: user.profilePicture?.url || null,
       },
     });
   } catch (error) {
@@ -91,12 +158,18 @@ exports.login = async (req, res) => {
         .json({ success: false, ...messages.AUTH_INVALID_CREDENTIALS });
     }
 
-    // Block vendors with pending approval
-    if (user.role === 2 && user.status === accountStatus.pending) {
+    if (user.temporaryPassword) {
       return res
         .status(403)
-        .json({ success: false, ...messages.AUTH_VENDOR_PENDING_APPROVAL });
+        .json({ success: false, ...messages.AUTH_VENDOR_CREATE_NEW_PASSWORD });
     }
+
+    // Block vendors with pending approval
+    // if (user.role === 2 && user.status === ACCOUNT_STATUS.PENDING) {
+    //   return res
+    //     .status(403)
+    //     .json({ success: false, ...messages.AUTH_VENDOR_PENDING_APPROVAL });
+    // }
 
     res.json({
       success: true,
@@ -105,7 +178,7 @@ exports.login = async (req, res) => {
         _id: user._id,
         name: user.name,
         email: user.email,
-        token: generateToken(user._id, user.role),
+        token: generateToken(user._id, user.role, user.email),
         role: user.role,
         profilePicture: user.profilePicture?.url || null,
       },

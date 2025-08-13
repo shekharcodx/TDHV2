@@ -1,6 +1,8 @@
 let mongoose = require("mongoose");
 const bcrypt = require("bcrypt");
 const User = require("../models/user.model");
+const EmailTemplate = require("../models/emailTemplates.model");
+const { templates } = require("../utils/constants");
 
 module.exports = async function runMigration() {
   try {
@@ -13,13 +15,21 @@ module.exports = async function runMigration() {
           email: process.env.ADMIN_EMAIL,
           password: hashedPassword,
           role: 1,
-          status: 1,
+          status: 2,
           profilePicture: null,
         },
       },
       { upsert: true, new: true }
     );
     console.log("SuperAdmin Inserted Successfully:", user);
+
+    for (let tpl of templates) {
+      const exists = await EmailTemplate.findOne({ name: tpl.name });
+      if (!exists) {
+        await EmailTemplate.create(tpl);
+        console.log("Email template(s) created", tpl.name);
+      }
+    }
   } catch (err) {
     console.error("Error running migrations:", err);
   }

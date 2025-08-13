@@ -1,27 +1,21 @@
 const express = require("express");
 const router = express.Router();
-
+const validate = require("../middlewares/validate.middleware");
+const protect = require("../middlewares/auth.middleware");
+const upload = require("../middlewares/upload.middleware");
+const cpUpload = require("../middlewares/registerFiles.middleware");
 const {
   register,
   login,
   updateProfile,
 } = require("../controllers/auth.controller");
-const validate = require("../middlewares/validate.middleware");
-const protect = require("../middlewares/auth.middleware");
 const {
   registerValidation,
   loginValidation,
+  updateProfileValidation,
 } = require("../validations/auth.validation");
-const upload = require("../middlewares/upload.middleware");
-const { updateProfileValidation } = require("../validations/auth.validation");
 
-router.post(
-  "/register",
-  upload.single("profilePicture"),
-  registerValidation,
-  validate,
-  register
-);
+router.post("/register", cpUpload, registerValidation, validate, register);
 
 router.put(
   "/updateProfile",

@@ -31,9 +31,18 @@ module.exports = {
     code: "AUTH_REGISTRATION_SUCCESS_APPROVAL_PENDING",
     message: "Registration successful, Please wait for admin's approval",
   },
+  AUTH_CHECK_EMAIL_FOR_TEMP_PASSWORD: {
+    code: "AUTH_CHECK_EMAIL_FOR_TEMP_PASSWORD",
+    message:
+      "Registration successful, Please check your email for login link and password",
+  },
   AUTH_VENDOR_PENDING_APPROVAL: {
     code: "AUTH_VENDOR_PENDING_APPROVAL",
     message: "Vendor registration pending for admin's approval",
+  },
+  AUTH_VENDOR_CREATE_NEW_PASSWORD: {
+    code: "AUTH_VENDOR_CREATE_NEW_PASSWORD",
+    message: "Please create a new password before proceeding!",
   },
   AUTH_LOGIN_SUCCESS: {
     code: "AUTH_LOGIN_SUCCESS",
