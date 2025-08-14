@@ -69,7 +69,7 @@ module.exports = {
     message: "You are not authorized to perform this action",
   },
   NOT_AUTHORIZED_NO_TOKEN: {
-    code: "NOT_AUTHORIZED_NO_TOKEN",
+    code: "UNAUTHORIZED_NO_TOKEN",
     message:
       "You are not authorized to perform this action, Please login first",
   },
