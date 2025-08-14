@@ -22,7 +22,7 @@ router.post("/register", cpUpload, registerValidation, validate, register);
 
 router.post("/login", loginValidation, validate, login);
 
-router.patch(
+router.put(
   "/createNewPassword",
   changePasswordValidation,
   validate,
@@ -33,10 +33,10 @@ router.get("/getCurrentUser", protect, getCurrentLoggedInUser);
 
 router.put(
   "/updateProfile",
+  protect,
   upload.single("profilePicture"),
   updateProfileValidation,
   validate,
-  protect,
   updateProfile
 );
 

@@ -1,0 +1,20 @@
+{
+  "1": {
+    "post": ["login", "register"],
+    "get": ["getCurrentUser"],
+    "put": ["updateProfile"],
+    "delete": []
+  },
+  "2": {
+    "post": ["login", "register", "updateProfile"],
+    "get": ["getCurrentUser"],
+    "put": ["createNewPassword", "updateProfile"],
+    "delete": []
+  },
+  "3": {
+    "post": ["login", "register", "updateProfile"],
+    "get": ["getCurrentUser"],
+    "put": ["updateProfile"],
+    "delete": []
+  }
+}

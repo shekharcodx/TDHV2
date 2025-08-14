@@ -73,4 +73,20 @@ module.exports = {
     message:
       "You are not authorized to perform this action, Please login first",
   },
+  API_NOT_FOUND: {
+    code: "API_NOT_FOUND",
+    message: "API not found",
+  },
+  NOT_ALLOWED_TO_PERFORM_THIS_OPERATION: {
+    code: "NOT_ALLOWED_TO_PERFORM_THIS_OPERATION",
+    message: "You are not allowed to perform this operation",
+  },
+  ACCESS_DENIED: {
+    code: "ACCESS_DENIED",
+    message: "You are not allowed to perform this operation",
+  },
+  INTERNAL_SERVER_ERROR: {
+    code: "INTERNAL_SERVER_ERROR",
+    message: "Internal server error",
+  },
 };
