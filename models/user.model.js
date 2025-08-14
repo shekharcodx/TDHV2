@@ -38,17 +38,17 @@ const userSchema = new mongoose.Schema(
     vendorInformation: {
       fleetSize: { type: Number },
       documents: {
-        ijariCertificate: { url: String, public_id: String },
-        tradeLicense: { url: String, public_id: String },
-        vatCertificate: { url: String, public_id: String },
-        noc: { url: String, public_id: String },
-        emiratesId: { url: String, public_id: String },
-        poa: { url: String, public_id: String },
+        ijariCertificate: { key: String, filename: String },
+        tradeLicense: { key: String, filename: String },
+        vatCertificate: { key: String, filename: String },
+        noc: { key: String, filename: String },
+        emiratesId: { key: String, filename: String },
+        poa: { key: String, filename: String },
       },
     },
     profilePicture: {
       url: String,
-      public_id: String,
+      key: String,
     },
   },
   { timestamps: true }

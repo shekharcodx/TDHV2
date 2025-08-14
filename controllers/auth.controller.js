@@ -7,6 +7,7 @@ const deleteImage = require("../utils/deleteImage");
 const { ACCOUNT_STATUS, USER_ROLES } = require("../utils/constants");
 const generateRandomPassword = require("../utils/generatePassword");
 const { sendEmailFromTemplate } = require("../utils/sendEmail");
+const { uploadFile, deleteFile } = require("../utils/s3");
 
 exports.register = async (req, res) => {
   let {
@@ -54,15 +55,23 @@ exports.register = async (req, res) => {
 
       for (const field of docFields) {
         if (req.files && req.files[field]) {
-          const fileBuffer = req.files[field][0].buffer;
-          const result = await uploadBufferToCloudinary(
+          const file = req.files[field][0];
+          const fileBuffer = file.buffer;
+          const fileName = file.originalname;
+          // const result = await uploadBufferToCloudinary(
+          //   fileBuffer,
+          //   "vendor_documents"
+          // );
+
+          const result = await uploadFile(
             fileBuffer,
-            "vendor_documents"
+            "vendor_documents",
+            fileName
           );
 
           documents[field] = {
-            url: result.secure_url,
-            public_id: result.public_id,
+            key: result.key,
+            filename: result.filename,
           };
         }
       }
@@ -70,14 +79,15 @@ exports.register = async (req, res) => {
 
     // Upload profile picture if present
     if (req.files && req.files["profilePicture"]) {
-      const fileBuffer = req.files["profilePicture"][0].buffer;
-      const result = await uploadBufferToCloudinary(
-        fileBuffer,
-        "profile_pictures"
-      );
+      const file = req.files["profilePicture"][0];
+      const fileBuffer = file.buffer;
+      const fileName = file.originalname;
+
+      const result = await uploadFile(fileBuffer, "profile_pictures", fileName);
+
       documents["profilePicture"] = {
-        url: result.secure_url,
-        public_id: result.public_id,
+        url: result.url,
+        key: result.key,
       };
     }
 
