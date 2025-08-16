@@ -8,4 +8,8 @@ const countrySchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+countrySchema.index(
+  { name: 1 },
+  { collation: { locale: "en", strength: 2 }, unique: true }
+);
 module.exports = mongoose.model("Country", countrySchema);

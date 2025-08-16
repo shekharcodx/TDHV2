@@ -5,14 +5,24 @@
       "getCurrentUser",
       "getAllVendors",
       "getPendingVendors",
-      "getAllCustomers"
+      "getAllCustomers",
+      "getCountries",
+      "getCountriesData",
+      "getStates",
+      "getCities"
     ],
     "put": ["updateProfile", "updateAccountStatus"],
     "delete": []
   },
   "2": {
     "post": ["login", "register", "updateProfile"],
-    "get": ["getCurrentUser"],
+    "get": [
+      "getCurrentUser",
+      "getCountries",
+      "getCountriesData",
+      "getStates",
+      "getCities"
+    ],
     "put": ["createNewPassword", "updateProfile"],
     "delete": []
   },

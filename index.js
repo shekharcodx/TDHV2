@@ -45,6 +45,8 @@ app.use(aclMiddleware);
 
 app.use("/api", require("./routes/admin/users.routes"));
 
+app.use("/api", require("./routes/vendor/listing.routes"));
+
 // Connect DB and run migrations
 connectDB().then(() => runMigration());
 

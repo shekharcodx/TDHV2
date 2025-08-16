@@ -10,5 +10,9 @@
   "getAllCustomers",
   "addCountry",
   "addStates",
-  "addCities"
+  "addCities",
+  "getCountries",
+  "getCountriesData",
+  "getStates",
+  "getCities"
 ]
