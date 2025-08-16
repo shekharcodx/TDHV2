@@ -4,10 +4,10 @@ const generateToken = require("../utils/generateToken");
 const messages = require("../messages/messages");
 const uploadBufferToCloudinary = require("../utils/uploadToClaudinary");
 const deleteImage = require("../utils/deleteImage");
-const { ACCOUNT_STATUS, USER_ROLES } = require("../utils/constants");
 const generateRandomPassword = require("../utils/generatePassword");
 const { sendEmailFromTemplate } = require("../utils/sendEmail");
 const { uploadFile, deleteFile } = require("../utils/s3");
+const { ACCOUNT_STATUS, USER_ROLES } = require("../utils/constants");
 
 exports.register = async (req, res) => {
   let {
@@ -174,13 +174,6 @@ exports.login = async (req, res) => {
         .json({ success: false, ...messages.AUTH_VENDOR_CREATE_NEW_PASSWORD });
     }
 
-    // Block vendors with pending approval
-    // if (user.role === 2 && user.status === ACCOUNT_STATUS.PENDING) {
-    //   return res
-    //     .status(403)
-    //     .json({ success: false, ...messages.AUTH_VENDOR_PENDING_APPROVAL });
-    // }
-
     res.json({
       success: true,
       ...messages.AUTH_LOGIN_SUCCESS,
@@ -190,6 +183,7 @@ exports.login = async (req, res) => {
         email: user.email,
         token: generateToken(user._id, user.role, user.email),
         role: user.role,
+        status: user.status,
         profilePicture: user.profilePicture?.url || null,
       },
     });
@@ -246,6 +240,7 @@ exports.getCurrentLoggedInUser = async (req, res) => {
         name: user.name,
         token: generateToken(user._id, user.role, user.email),
         role: user.role,
+        status: user.status,
         profilePicture: user.profilePicture.url || null,
       },
     });

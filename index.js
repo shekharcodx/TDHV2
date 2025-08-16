@@ -9,6 +9,8 @@ dotenv.config();
 
 const runMigration = require("./migrations/migration");
 const apisMiddleware = require("./middlewares/api.middleware");
+const aclMiddleware = require("./middlewares/acl.middleware");
+const authMiddleware = require("./middlewares/auth.middleware");
 
 const app = express();
 
@@ -24,7 +26,13 @@ const corsOptions = {
 app.use(cors(corsOptions));
 
 // Body parser
-app.use(bodyParser.json({ strict: false }));
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// Root endpoint
+app.get("/", (req, res) => {
+  res.json("Welcome to THE DRIVE HUB Api");
+});
 
 // Custom middleware
 app.use(apisMiddleware);
@@ -32,10 +40,10 @@ app.use(apisMiddleware);
 // Routes
 app.use("/api", require("./routes/auth.routes"));
 
-// Root endpoint
-app.get("/", (req, res) => {
-  res.json("Welcome to THE DRIVE HUB Api");
-});
+app.use(authMiddleware);
+app.use(aclMiddleware);
+
+app.use("/api", require("./routes/admin/users.routes"));
 
 // Connect DB and run migrations
 connectDB().then(() => runMigration());

@@ -10,7 +10,7 @@ async function checkAccess(req, res, next) {
     );
     const permissionsJson = JSON.parse(apisContent);
 
-    const { role } = req.decoded;
+    const { role } = req.user;
 
     const method = req.method.toLowerCase(); // e.g., get, post
     let url = req.url.replace("/api/", "").split("/")[0].split("?")[0];

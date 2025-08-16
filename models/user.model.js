@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const mongoosePaginate = require("mongoose-paginate-v2");
 const { USER_ROLES, ACCOUNT_STATUS } = require("../utils/constants");
 
 const userSchema = new mongoose.Schema(
@@ -55,5 +56,7 @@ const userSchema = new mongoose.Schema(
 );
 
 userSchema.index({ "address.city": 1 });
+
+userSchema.plugin(mongoosePaginate);
 
 module.exports = mongoose.model("User", userSchema);

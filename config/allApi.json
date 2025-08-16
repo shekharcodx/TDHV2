@@ -1,1 +1,14 @@
-["register", "login", "createNewPassword", "updateProfile", "getCurrentUser"]
+[
+  "register",
+  "login",
+  "createNewPassword",
+  "updateProfile",
+  "getCurrentUser",
+  "updateAccountStatus",
+  "getAllVendors",
+  "getPendingVendors",
+  "getAllCustomers",
+  "addCountry",
+  "addStates",
+  "addCities"
+]

@@ -1,8 +1,13 @@
 {
   "1": {
-    "post": ["login", "register"],
-    "get": ["getCurrentUser"],
-    "put": ["updateProfile"],
+    "post": ["addCountry", "addStates", "addCities"],
+    "get": [
+      "getCurrentUser",
+      "getAllVendors",
+      "getPendingVendors",
+      "getAllCustomers"
+    ],
+    "put": ["updateProfile", "updateAccountStatus"],
     "delete": []
   },
   "2": {

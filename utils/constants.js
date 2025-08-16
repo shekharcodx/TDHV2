@@ -11,6 +11,13 @@ exports.ACCOUNT_STATUS = {
   BLOCKED: 4,
 };
 
+exports.ACCOUNT_STATUS_NUM = {
+  1: "PENDING",
+  2: "APPROVED",
+  3: "ON_HOLD",
+  4: "BLOCKED",
+};
+
 exports.templates = [
   {
     name: "temporary_password",
