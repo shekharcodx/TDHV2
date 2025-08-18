@@ -1,11 +1,11 @@
 const mongoose = require("mongoose");
 
-const stateSchema = new mongoose.Schema(
+const TrimSchema = new mongoose.Schema(
   {
     name: { type: String, required: true },
-    country: {
+    carModel: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Country",
+      ref: "CarModel",
       required: true,
     },
     isActive: { type: Boolean, default: true },
@@ -13,4 +13,4 @@ const stateSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-module.exports = mongoose.model("State", stateSchema);
+module.exports = mongoose.model("Trim", TrimSchema);

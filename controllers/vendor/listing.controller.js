@@ -8,25 +8,50 @@ exports.getCountriesData = async (req, res) => {
   try {
     const pipeline = [
       {
+        $match: { isActive: true }, // ✅ only active countries
+      },
+      {
         $lookup: {
           from: "states",
-          localField: "_id",
-          foreignField: "country",
-          as: "states",
+          let: { countryId: "$_id" },
           pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $and: [
+                    { $eq: ["$country", "$$countryId"] },
+                    { $eq: ["$isActive", true] }, // ✅ only active states
+                  ],
+                },
+              },
+            },
             {
               $lookup: {
                 from: "cities",
-                localField: "_id",
-                foreignField: "state",
+                let: { stateId: "$_id" },
+                pipeline: [
+                  {
+                    $match: {
+                      $expr: {
+                        $and: [
+                          { $eq: ["$state", "$$stateId"] },
+                          { $eq: ["$isActive", true] }, // ✅ only active cities
+                        ],
+                      },
+                    },
+                  },
+                ],
                 as: "cities",
               },
             },
           ],
+          as: "states",
         },
       },
     ];
+
     const countries = await countryModel.aggregate(pipeline);
+
     res.status(200).json({ success: true, countries });
   } catch (err) {
     console.error(err);
@@ -36,7 +61,9 @@ exports.getCountriesData = async (req, res) => {
 
 exports.getCountries = async (req, res) => {
   try {
-    const countries = await countryModel.find().select("_id name code");
+    const countries = await countryModel
+      .find({ isActive: true })
+      .select("_id name code");
     res.status(200).json({ success: true, countries });
   } catch (err) {
     console.error(err);
@@ -48,7 +75,7 @@ exports.getStates = async (req, res) => {
   const { countryId } = req.params;
   try {
     const states = await stateModel
-      .find({ country: countryId })
+      .find({ country: countryId, isActive: true })
       .select("_id name country");
     res.status(200).json({ success: true, states });
   } catch (err) {
@@ -61,7 +88,7 @@ exports.getCities = async (req, res) => {
   const { stateId } = req.params;
   try {
     const cities = await cityModel
-      .find({ state: stateId })
+      .find({ state: stateId, isActive: true })
       .select("_id name state");
     res.status(200).json({ success: true, cities });
   } catch (err) {

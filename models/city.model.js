@@ -8,6 +8,7 @@ const citySchema = new mongoose.Schema(
       ref: "State",
       required: true,
     },
+    isActive: { type: Boolean, default: true },
   },
   { timestamps: true }
 );

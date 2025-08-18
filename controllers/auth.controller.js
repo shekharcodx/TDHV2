@@ -141,6 +141,7 @@ exports.register = async (req, res) => {
         _id: user._id,
         name: user.name,
         email: user.email,
+        role: user.role,
         ...info,
       },
     });
@@ -159,6 +160,12 @@ exports.login = async (req, res) => {
       return res
         .status(400)
         .json({ success: false, ...messages.AUTH_INVALID_CREDENTIALS });
+    }
+
+    if (!user.isActive) {
+      return res
+        .status(403)
+        .json({ success: false, ...messages.ACCOUNT_DEACTIVATED });
     }
 
     const isMatch = await bcrypt.compare(password, user.password);

@@ -1,6 +1,16 @@
 {
   "1": {
-    "post": ["addCountry", "addStates", "addCities"],
+    "post": [
+      "addCountry",
+      "addStates",
+      "addCities",
+      "createAdmin",
+      "addCarBrand",
+      "addCarModels",
+      "addCarTrims",
+      "addCarBodyTypes",
+      "addYears"
+    ],
     "get": [
       "getCurrentUser",
       "getAllVendors",
@@ -9,10 +19,29 @@
       "getCountries",
       "getCountriesData",
       "getStates",
-      "getCities"
+      "getCities",
+      "getAllAdmins",
+      "getEmailTempates",
+      "getCarBrands",
+      "getCarModels",
+      "getCarTrims",
+      "getYears"
     ],
-    "put": ["updateProfile", "updateAccountStatus"],
-    "delete": []
+    "put": [
+      "updateProfile",
+      "updateAccountStatus",
+      "updateIsUserActive",
+      "editEmailTemplate"
+    ],
+    "delete": [
+      "deleteCountry",
+      "deleteState",
+      "deleteCity",
+      "deleteCarBrand",
+      "deleteCarModel",
+      "deleteCarTrim",
+      "deleteYear"
+    ]
   },
   "2": {
     "post": ["login", "register", "updateProfile"],

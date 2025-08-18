@@ -66,4 +66,49 @@ module.exports = {
     error: "CITY_NOT_FOUND",
     message: "City not found",
   },
+  ADMIN_CREATED: {
+    code: 1500,
+    message: "Admin created successfully",
+  },
+  ADMIN_ALREADY_EXISTS: {
+    code: 1501,
+    error: "ADMIN_ALREADY_EXISTS",
+    message: "Admin already exists",
+  },
+  EMAIL_TEMPLATE_UPDATED: {
+    code: 1600,
+    message: "Email template updated successfully",
+  },
+  CAR_BRAND_CREATED: {
+    code: 1700,
+    message: "Car brand created successfully",
+  },
+  CAR_MODEL_CREATED: {
+    code: 1701,
+    message: "Car model created successfully",
+  },
+  CAR_TRIM_CREATED: {
+    code: 1702,
+    message: "Car trim created successfully",
+  },
+  CAR_BODY_TYPE_CREATED: {
+    code: 1703,
+    message: "Car body type created successfully",
+  },
+  BRAND_DELETED: {
+    code: 1704,
+    message: "Car model deleted successfully",
+  },
+  MODEL_DELETED: {
+    code: 1705,
+    message: "Car model deleted successfully",
+  },
+  TRIM_DELETED: {
+    code: 1706,
+    message: "Car trim deleted successfully",
+  },
+  YEAR_DELETED: {
+    code: 1707,
+    message: "Model year deleted successfully",
+  },
 };
