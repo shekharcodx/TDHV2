@@ -95,10 +95,37 @@ exports.getAllAdmins = async (req, res) => {
 };
 
 exports.updateIsUserActive = async (req, res) => {
+  const { userId, isActive } = req.body;
   try {
-    const { userId, isActive } = req.body;
-    await User.findByIdAndUpdate(userId, { $set: { isActive } }, { new: true });
-    res.status(200).json({ success: true, ...messages.USER_UPDATED });
+    const user = await User.findById(userId);
+
+    if (!user) {
+      return res
+        .status(404)
+        .json({ success: false, ...messages.AUTH_USER_NOT_FOUND });
+    }
+
+    if (user && user.email === process.env.ADMIN_EMAIL) {
+      return res.status(403).json({
+        success: false,
+        ...messages.NOT_ALLOWED_TO_PERFORM_THIS_OPERATION,
+      });
+    }
+
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      { $set: { isActive } },
+      { new: true }
+    );
+    res.status(200).json({
+      success: true,
+      ...messages.USER_UPDATED,
+      data: {
+        name: updatedUser.name,
+        email: updatedUser.email,
+        isActive: updatedUser.isActive,
+      },
+    });
   } catch (err) {
     console.error(err);
     res.status(500).json({ success: false, ...messages.INTERNAL_SERVER_ERROR });

@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 
 const seatingCapacitySchema = new mongoose.Schema(
   {
-    name: { type: Number, required: true },
+    seats: { type: Number, required: true },
     isActive: { type: Boolean, default: true },
   },
   { timestamps: true }

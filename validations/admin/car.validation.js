@@ -192,3 +192,59 @@ exports.deleteYearValidation = [
     .isMongoId()
     .withMessage("Invalid year id"),
 ];
+
+exports.deleteBodyTypeValidate = [
+  param("bodyTypeId")
+    .exists()
+    .withMessage("bodyTypeId is required")
+    .isMongoId()
+    .withMessage("Invalid bodyTypeId"),
+];
+
+exports.deleteRegionalSpecsValidate = [
+  param("specsId")
+    .exists()
+    .withMessage("specsId is required")
+    .isMongoId()
+    .withMessage("Invalid specsId"),
+];
+
+exports.deleteCarHorsePowersValidate = [
+  param("horsePowerId")
+    .exists()
+    .withMessage("horsePowerId is required")
+    .isMongoId()
+    .withMessage("Invalid horsePowerId"),
+];
+
+exports.deleteCarSeatingCapacityValidate = [
+  param("seatingId")
+    .exists()
+    .withMessage("seatingId is required")
+    .isMongoId()
+    .withMessage("Invalid seatingId"),
+];
+
+exports.deleteCarColorsValidate = [
+  param("colorId")
+    .exists()
+    .withMessage("colorId is required")
+    .isMongoId()
+    .withMessage("Invalid colorId"),
+];
+
+exports.deleteCarTechFeaturesValidate = [
+  param("featureId")
+    .exists()
+    .withMessage("featureId is required")
+    .isMongoId()
+    .withMessage("Invalid featureId"),
+];
+
+exports.deleteCarOtherFeaturesValidate = [
+  param("featureId")
+    .exists()
+    .withMessage("featureId is required")
+    .isMongoId()
+    .withMessage("Invalid featureId"),
+];

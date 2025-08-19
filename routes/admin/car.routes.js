@@ -17,6 +17,7 @@ const {
   getCarModels,
   getCarTrims,
   getYears,
+  getBodyTypes,
   getCarRegionalSpecs,
   getCarHorsePowers,
   getCarSeatingCapacities,
@@ -27,6 +28,13 @@ const {
   deleteCarModel,
   deleteCarTrim,
   deleteYear,
+  deleteBodyType,
+  deleteCarRegionalSpecs,
+  deleteCarHorsePower,
+  deleteCarSeatingCapacity,
+  deleteCarColors,
+  deleteCarTechFeatures,
+  deleteCarOtherFeatures,
 } = require("../../controllers/admin/cars.controller");
 
 const {
@@ -46,6 +54,13 @@ const {
   deleteCarModelValidation,
   deleteCarTrimValidation,
   deleteYearValidation,
+  deleteBodyTypeValidate,
+  deleteRegionalSpecsValidate,
+  deleteCarHorsePowersValidate,
+  deleteCarSeatingCapacityValidate,
+  deleteCarColorsValidate,
+  deleteCarTechFeaturesValidate,
+  deleteCarOtherFeaturesValidate,
 } = require("../../validations/admin/car.validation");
 
 const upload = require("../../middlewares/upload.middleware");
@@ -128,6 +143,8 @@ router.get(
 
 router.get("/getYears", getYears);
 
+router.get("/getBodyTypes", getBodyTypes);
+
 router.get("/getCarRegionalSpecs", getCarRegionalSpecs);
 
 router.get("/getCarHorsePowers", getCarHorsePowers);
@@ -141,31 +158,75 @@ router.get("/getCarTechFeatures", getCarTechFeatures);
 router.get("/getCarOtherFeatures", getCarOtherFeatures);
 
 router.delete(
-  "/deleteCarBrand/:brandId",
+  "/carBrand/:brandId",
   deleteCarBrandValidation,
   validate,
   deleteCarBrand
 );
 
 router.delete(
-  "/deleteCarModel/:modelId",
+  "/carModel/:modelId",
   deleteCarModelValidation,
   validate,
   deleteCarModel
 );
 
 router.delete(
-  "/deleteCarTrim/:trimId",
+  "/carTrim/:trimId",
   deleteCarTrimValidation,
   validate,
   deleteCarTrim
 );
 
+router.delete("/year/:yearId", deleteYearValidation, validate, deleteYear);
+
 router.delete(
-  "/deleteYear/:yearId",
-  deleteYearValidation,
+  "/bodyType/:bodyTypeId",
+  deleteBodyTypeValidate,
   validate,
-  deleteYear
+  deleteBodyType
+);
+
+router.delete(
+  "/carRegionalSpecs/:specsId",
+  deleteRegionalSpecsValidate,
+  validate,
+  deleteCarRegionalSpecs
+);
+
+router.delete(
+  "/carHorsePower/:horsePowerId",
+  deleteCarHorsePowersValidate,
+  validate,
+  deleteCarHorsePower
+);
+
+router.delete(
+  "/carSeating/:seatingId",
+  deleteCarSeatingCapacityValidate,
+  validate,
+  deleteCarSeatingCapacity
+);
+
+router.delete(
+  "/carColor/:colorId",
+  deleteCarColorsValidate,
+  validate,
+  deleteCarColors
+);
+
+router.delete(
+  "/carTechFeature/:featureId",
+  deleteCarTechFeaturesValidate,
+  validate,
+  deleteCarTechFeatures
+);
+
+router.delete(
+  "/carOtherFeature/:featureId",
+  deleteCarOtherFeaturesValidate,
+  validate,
+  deleteCarOtherFeatures
 );
 
 module.exports = router;

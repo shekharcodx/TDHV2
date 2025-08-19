@@ -13,6 +13,8 @@ const OtherFeature = require("../../models/carOtherFeatures.model");
 const messages = require("../../messages/messages");
 const adminMessages = require("../../messages/admin");
 
+const softDelete = require("../../utils/softDelete");
+
 const { uploadFile } = require("../../utils/s3");
 
 exports.addCarBrand = async (req, res) => {
@@ -42,9 +44,18 @@ exports.addCarBrand = async (req, res) => {
 exports.addCarModels = async (req, res) => {
   const { names, brandId } = req.body;
   try {
-    const carModel = await CarModel.insertMany(
-      names.map((name) => ({ name, carBrand: brandId }))
+    await CarModel.bulkWrite(
+      names.map((name) => ({
+        updateOne: {
+          filter: { name, carBrand: brandId },
+          update: { $set: { name, isActive: true } },
+          upsert: true,
+        },
+      }))
     );
+
+    const carModel = await CarModel.find({ name: { $in: names } });
+
     res.status(200).json({
       success: true,
       ...adminMessages.CAR_MODEL_CREATED,
@@ -60,9 +71,18 @@ exports.addCarModels = async (req, res) => {
 exports.addCarTrims = async (req, res) => {
   const { names, modelId } = req.body;
   try {
-    const carTrim = await CarTrim.insertMany(
-      names.map((name) => ({ name, carModel: modelId }))
+    await CarTrim.bulkWrite(
+      names.map((name) => ({
+        updateOne: {
+          filter: { name, carModel: modelId },
+          update: { $set: { name, isActive: true } },
+          upsert: true,
+        },
+      }))
     );
+
+    const carTrim = await CarTrim.find({ name: { $in: names } });
+
     res.status(200).json({
       success: true,
       ...adminMessages.CAR_TRIM_CREATED,
@@ -78,9 +98,20 @@ exports.addCarTrims = async (req, res) => {
 exports.addCarBodyTypes = async (req, res) => {
   const { names } = req.body;
   try {
-    const carBodyType = await CarBodyType.insertMany(
-      names.map((name) => ({ name }))
+    await CarBodyType.bulkWrite(
+      names.map((name) => ({
+        updateOne: {
+          filter: { name: name },
+          update: { $set: { name, isActive: true } },
+          upsert: true,
+        },
+      }))
     );
+
+    const carBodyType = await CarBodyType.find({
+      name: { $in: names },
+    });
+
     res.status(200).json({
       success: true,
       ...adminMessages.CAR_BODY_TYPE_CREATED,
@@ -96,7 +127,18 @@ exports.addCarBodyTypes = async (req, res) => {
 exports.addYears = async (req, res) => {
   const { years } = req.body;
   try {
-    const year = await Year.insertMany(years.map((year) => ({ year })));
+    await Year.bulkWrite(
+      years.map((year) => ({
+        updateOne: {
+          filter: { year },
+          update: { $set: { year, isActive: true } },
+          upsert: true,
+        },
+      }))
+    );
+
+    const year = await Year.find({ year: { $in: years } });
+
     res
       .status(200)
       .json({ success: true, ...adminMessages.YEAR_CREATED, data: year });
@@ -110,9 +152,17 @@ exports.addYears = async (req, res) => {
 exports.addCarRegionalSpecs = async (req, res) => {
   const { specs } = req.body;
   try {
-    const regionalSpecs = await RegionalSpecs.insertMany(
-      specs.map((spec) => ({ name: spec }))
+    await RegionalSpecs.bulkWrite(
+      specs.map((spec) => ({
+        updateOne: {
+          filter: { name: spec },
+          update: { $set: { name: spec, isActive: true } },
+          upsert: true,
+        },
+      }))
     );
+
+    const regionalSpecs = await RegionalSpecs.find({ name: { $in: specs } });
 
     res.status(200).json({
       success: true,
@@ -132,14 +182,14 @@ exports.addCarHorsePowers = async (req, res) => {
     await HorsePower.bulkWrite(
       horsePowers.map((power) => ({
         updateOne: {
-          filter: { name: power },
-          update: { $set: { name: power } },
+          filter: { power },
+          update: { $set: { power, isActive: true } },
           upsert: true,
         },
       }))
     );
 
-    const powers = await HorsePower.find({ name: { $in: horsePowers } });
+    const powers = await HorsePower.find({ power: { $in: horsePowers } });
 
     res.status(200).json({
       success: true,
@@ -159,15 +209,15 @@ exports.addCarSeatingCapacity = async (req, res) => {
     await SeatingCapacity.bulkWrite(
       seatingCapacities.map((cap) => ({
         updateOne: {
-          filter: { name: cap },
-          update: { $set: { name: cap } },
+          filter: { seats: cap },
+          update: { $set: { seats: cap, isActive: true } },
           upsert: true,
         },
       }))
     );
 
     const capacities = await SeatingCapacity.find({
-      name: { $in: seatingCapacities },
+      seats: { $in: seatingCapacities },
     });
 
     res.status(200).json({
@@ -189,7 +239,7 @@ exports.addCarColors = async (req, res) => {
       colors.map((color) => ({
         updateOne: {
           filter: { name: color },
-          update: { $set: { name: color } },
+          update: { $set: { name: color, isActive: true } },
           upsert: true,
         },
       }))
@@ -216,7 +266,7 @@ exports.addCarTechFeatures = async (req, res) => {
       features.map((feature) => ({
         updateOne: {
           filter: { name: feature },
-          update: { $set: { name: feature } },
+          update: { $set: { name: feature, isActive: true } },
           upsert: true,
         },
       }))
@@ -245,7 +295,7 @@ exports.addCarOtherFeatures = async (req, res) => {
       features.map((feature) => ({
         updateOne: {
           filter: { name: feature },
-          update: { $set: { name: feature } },
+          update: { $set: { name: feature, isActive: true } },
           upsert: true,
         },
       }))
@@ -324,6 +374,18 @@ exports.getYears = async (req, res) => {
   }
 };
 
+exports.getBodyTypes = async (req, res) => {
+  try {
+    const bodyTypes = await CarBodyType.find({ isActive: true });
+
+    res.status(200).json({ success: true, bodyTypes });
+  } catch (err) {
+    return res
+      .status(500)
+      .json({ success: false, ...messages.INTERNAL_SERVER_ERROR });
+  }
+};
+
 exports.getCarRegionalSpecs = async (req, res) => {
   try {
     const specs = await RegionalSpecs.find({ isActive: true }).select("name");
@@ -393,11 +455,14 @@ exports.getCarOtherFeatures = async (req, res) => {
 exports.deleteCarBrand = async (req, res) => {
   const { brandId } = req.params;
   try {
-    await CarBrand.findOneAndUpdate(
-      { _id: brandId },
-      { isActive: false },
-      { new: true }
-    );
+    const brandDeleted = await softDelete(CarBrand, brandId);
+
+    if (!brandDeleted) {
+      return res
+        .status(404)
+        .json({ success: false, ...adminMessages.RESOURCE_NOT_FOUND });
+    }
+
     res.status(200).json({ success: true, ...adminMessages.BRAND_DELETED });
   } catch (err) {
     return res
@@ -409,11 +474,14 @@ exports.deleteCarBrand = async (req, res) => {
 exports.deleteCarModel = async (req, res) => {
   const { modelId } = req.params;
   try {
-    await CarModel.findOneAndUpdate(
-      { _id: modelId },
-      { isActive: false },
-      { new: true }
-    );
+    const modelDeleted = await softDelete(CarModel, modelId);
+
+    if (!modelDeleted) {
+      return res
+        .status(404)
+        .json({ success: false, ...adminMessages.RESOURCE_NOT_FOUND });
+    }
+
     res.status(200).json({ success: true, ...adminMessages.MODEL_DELETED });
   } catch (err) {
     return res
@@ -425,11 +493,14 @@ exports.deleteCarModel = async (req, res) => {
 exports.deleteCarTrim = async (req, res) => {
   const { trimId } = req.params;
   try {
-    await CarTrim.findOneAndUpdate(
-      { _id: trimId },
-      { isActive: false },
-      { new: true }
-    );
+    const trimDeleted = await softDelete(CarTrim, trimId);
+
+    if (!trimDeleted) {
+      return res
+        .status(404)
+        .json({ success: false, ...adminMessages.RESOURCE_NOT_FOUND });
+    }
+
     res.status(200).json({ success: true, ...adminMessages.TRIM_DELETED });
   } catch (err) {
     return res
@@ -441,12 +512,162 @@ exports.deleteCarTrim = async (req, res) => {
 exports.deleteYear = async (req, res) => {
   const { yearId } = req.params;
   try {
-    await Year.findOneAndUpdate(
-      { _id: yearId },
-      { isActive: false },
-      { new: true }
-    );
+    const yearDeleted = await softDelete(Year, yearId);
+
+    if (!yearDeleted) {
+      return res
+        .status(404)
+        .json({ success: false, ...adminMessages.RESOURCE_NOT_FOUND });
+    }
+
     res.status(200).json({ success: true, ...adminMessages.YEAR_DELETED });
+  } catch (err) {
+    return res
+      .status(500)
+      .json({ success: false, ...messages.INTERNAL_SERVER_ERROR });
+  }
+};
+
+exports.deleteBodyType = async (req, res) => {
+  const { bodyTypeId } = req.params;
+  try {
+    const bodyTypeDeleted = await softDelete(CarBodyType, bodyTypeId);
+
+    if (!bodyTypeDeleted) {
+      return res
+        .status(404)
+        .json({ success: false, ...adminMessages.RESOURCE_NOT_FOUND });
+    }
+
+    res
+      .status(200)
+      .json({ success: true, ...adminMessages.CAR_BODY_TYPE_DELETED });
+  } catch (err) {
+    return res
+      .status(500)
+      .json({ success: false, ...messages.INTERNAL_SERVER_ERROR });
+  }
+};
+//new
+exports.deleteCarRegionalSpecs = async (req, res) => {
+  const { specsId } = req.params;
+  try {
+    const specDeleted = await softDelete(RegionalSpecs, specsId);
+
+    if (!specDeleted) {
+      return res
+        .status(404)
+        .json({ success: false, ...adminMessages.RESOURCE_NOT_FOUND });
+    }
+
+    res
+      .status(200)
+      .json({ success: true, ...adminMessages.REGIONAL_SPECS_DELETED });
+  } catch (err) {
+    return res
+      .status(500)
+      .json({ success: false, ...messages.INTERNAL_SERVER_ERROR });
+  }
+};
+
+exports.deleteCarHorsePower = async (req, res) => {
+  const { horsePowerId } = req.params;
+  try {
+    const powerDeleted = await softDelete(HorsePower, horsePowerId);
+
+    if (!powerDeleted) {
+      return res
+        .status(404)
+        .json({ success: false, ...adminMessages.RESOURCE_NOT_FOUND });
+    }
+
+    res
+      .status(200)
+      .json({ success: true, ...adminMessages.HORSE_POWER_DELETED });
+  } catch (err) {
+    return res
+      .status(500)
+      .json({ success: false, ...messages.INTERNAL_SERVER_ERROR });
+  }
+};
+
+exports.deleteCarSeatingCapacity = async (req, res) => {
+  const { seatingId } = req.params;
+  try {
+    const seatingDeleted = await softDelete(SeatingCapacity, seatingId);
+
+    if (!seatingDeleted) {
+      return res
+        .status(404)
+        .json({ success: false, ...adminMessages.RESOURCE_NOT_FOUND });
+    }
+
+    res
+      .status(200)
+      .json({ success: true, ...adminMessages.SEATING_CAPACITY_DELETED });
+  } catch (err) {
+    return res
+      .status(500)
+      .json({ success: false, ...messages.INTERNAL_SERVER_ERROR });
+  }
+};
+
+exports.deleteCarColors = async (req, res) => {
+  const { colorId } = req.params;
+  try {
+    const colorDeleted = await softDelete(CarColor, colorId);
+
+    if (!colorDeleted) {
+      return res
+        .status(404)
+        .json({ success: false, ...adminMessages.RESOURCE_NOT_FOUND });
+    }
+
+    res.status(200).json({ success: true, ...adminMessages.CAR_COLOR_DELETED });
+  } catch (err) {
+    return res
+      .status(500)
+      .json({ success: false, ...messages.INTERNAL_SERVER_ERROR });
+  }
+};
+
+exports.deleteCarTechFeatures = async (req, res) => {
+  const { featureId } = req.params;
+  try {
+    const deletedFeature = await TechnicalFeature.findOneAndDelete({
+      _id: featureId,
+    });
+
+    if (!deletedFeature) {
+      return res.status(404).json({
+        success: false,
+        ...adminMessages.RESOURCE_NOT_FOUND,
+      });
+    }
+
+    res.status(200).json({ success: true, ...adminMessages.FEATURE_DELETED });
+  } catch (err) {
+    return res
+      .status(500)
+      .json({ success: false, ...messages.INTERNAL_SERVER_ERROR });
+  }
+};
+
+exports.deleteCarOtherFeatures = async (req, res) => {
+  const { featureId } = req.params;
+  try {
+    const deletedFeature = await OtherFeature.findOneAndDelete({
+      _id: featureId,
+    });
+
+    if (!deletedFeature) {
+      return res.status(404).json({
+        success: false,
+        ...adminMessages.RESOURCE_NOT_FOUND,
+      });
+    }
+
+    res.status(200).json({ success: true, ...adminMessages.FEATURE_DELETED });
   } catch (err) {
     return res
       .status(500)

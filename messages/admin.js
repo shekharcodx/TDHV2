@@ -95,40 +95,69 @@ module.exports = {
     code: 1703,
     message: "Car body type created successfully",
   },
-  BRAND_DELETED: {
+  CAR_BODY_TYPE_DELETED: {
     code: 1704,
-    message: "Car model deleted successfully",
+    message: "Car body type deleted successfully",
   },
-  MODEL_DELETED: {
+  BRAND_DELETED: {
     code: 1705,
     message: "Car model deleted successfully",
   },
-  TRIM_DELETED: {
+  MODEL_DELETED: {
     code: 1706,
+    message: "Car model deleted successfully",
+  },
+  TRIM_DELETED: {
+    code: 1707,
     message: "Car trim deleted successfully",
   },
   YEAR_DELETED: {
-    code: 1707,
+    code: 1708,
     message: "Model year deleted successfully",
   },
   REGIONAL_SPECS_CREATED: {
-    code: 1708,
+    code: 1709,
     message: "Regional specs created successfully",
   },
-  HORSE_POWERS_CREATED: {
+  REGIONAL_SPECS_DELETED: {
     code: 1710,
+    message: "Regional specs deleted successfully",
+  },
+  HORSE_POWERS_CREATED: {
+    code: 1711,
     message: "Horse powers added successfully",
   },
-  SEATING_CAPACITIES_CREATED: {
+  HORSE_POWER_DELETED: {
     code: 1712,
+    message: "Horse power deleted successfully",
+  },
+  SEATING_CAPACITIES_CREATED: {
+    code: 1713,
     message: "Seating capacities added successfully",
   },
-  CAR_COLORS_CREATED: {
+  SEATING_CAPACITY_DELETED: {
     code: 1714,
+    message: "Seating capacity deleted successfully",
+  },
+  CAR_COLORS_CREATED: {
+    code: 1715,
     message: "Car colors added successfully",
   },
-  FEATURES_ADDED_SUCCESSFULLY: {
+  CAR_COLOR_DELETED: {
     code: 1716,
+    message: "Car color deleted successfully",
+  },
+  FEATURES_ADDED_SUCCESSFULLY: {
+    code: 1717,
     message: "Features added successfully",
+  },
+  FEATURE_DELETED: {
+    code: 1718,
+    message: "Feature deleted successfully",
+  },
+  RESOURCE_NOT_FOUND: {
+    code: 1719,
+    error: "RESOURCE_NOT_FOUND",
+    message: "Resource was not found",
   },
 };
