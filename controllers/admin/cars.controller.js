@@ -3,6 +3,12 @@ const CarModel = require("../../models/carModel.model");
 const CarBodyType = require("../../models/carBodyType.model");
 const CarTrim = require("../../models/carTrims.model");
 const Year = require("../../models/years.model");
+const RegionalSpecs = require("../../models/carRegionalSpecs.model");
+const HorsePower = require("../../models/carHoursePower.model");
+const SeatingCapacity = require("../../models/carSeatingCapacity.model");
+const CarColor = require("../../models/carColor.model");
+const TechnicalFeature = require("../../models/carTechnicalFeatures.model");
+const OtherFeature = require("../../models/carOtherFeatures.model");
 
 const messages = require("../../messages/messages");
 const adminMessages = require("../../messages/admin");
@@ -101,6 +107,166 @@ exports.addYears = async (req, res) => {
   }
 };
 
+exports.addCarRegionalSpecs = async (req, res) => {
+  const { specs } = req.body;
+  try {
+    const regionalSpecs = await RegionalSpecs.insertMany(
+      specs.map((spec) => ({ name: spec }))
+    );
+
+    res.status(200).json({
+      success: true,
+      ...adminMessages.REGIONAL_SPECS_CREATED,
+      data: regionalSpecs,
+    });
+  } catch (err) {
+    return res
+      .status(500)
+      .json({ success: false, ...messages.INTERNAL_SERVER_ERROR });
+  }
+};
+
+exports.addCarHorsePowers = async (req, res) => {
+  const { horsePowers } = req.body;
+  try {
+    await HorsePower.bulkWrite(
+      horsePowers.map((power) => ({
+        updateOne: {
+          filter: { name: power },
+          update: { $set: { name: power } },
+          upsert: true,
+        },
+      }))
+    );
+
+    const powers = await HorsePower.find({ name: { $in: horsePowers } });
+
+    res.status(200).json({
+      success: true,
+      ...adminMessages.HORSE_POWERS_CREATED,
+      data: powers,
+    });
+  } catch (err) {
+    return res
+      .status(500)
+      .json({ success: false, ...messages.INTERNAL_SERVER_ERROR });
+  }
+};
+
+exports.addCarSeatingCapacity = async (req, res) => {
+  const { seatingCapacities } = req.body;
+  try {
+    await SeatingCapacity.bulkWrite(
+      seatingCapacities.map((cap) => ({
+        updateOne: {
+          filter: { name: cap },
+          update: { $set: { name: cap } },
+          upsert: true,
+        },
+      }))
+    );
+
+    const capacities = await SeatingCapacity.find({
+      name: { $in: seatingCapacities },
+    });
+
+    res.status(200).json({
+      success: true,
+      ...adminMessages.SEATING_CAPACITIES_CREATED,
+      data: capacities,
+    });
+  } catch (err) {
+    return res
+      .status(500)
+      .json({ success: false, ...messages.INTERNAL_SERVER_ERROR });
+  }
+};
+
+exports.addCarColors = async (req, res) => {
+  const { colors } = req.body;
+  try {
+    await CarColor.bulkWrite(
+      colors.map((color) => ({
+        updateOne: {
+          filter: { name: color },
+          update: { $set: { name: color } },
+          upsert: true,
+        },
+      }))
+    );
+
+    const carColors = await CarColor.find({ name: { $in: colors } });
+
+    res.status(200).json({
+      success: true,
+      ...adminMessages.CAR_COLORS_CREATED,
+      data: carColors,
+    });
+  } catch (err) {
+    return res
+      .status(500)
+      .json({ success: false, ...messages.INTERNAL_SERVER_ERROR });
+  }
+};
+
+exports.addCarTechFeatures = async (req, res) => {
+  const { features } = req.body;
+  try {
+    await TechnicalFeature.bulkWrite(
+      features.map((feature) => ({
+        updateOne: {
+          filter: { name: feature },
+          update: { $set: { name: feature } },
+          upsert: true,
+        },
+      }))
+    );
+
+    const techFeatures = await TechnicalFeature.find({
+      name: { $in: features },
+    });
+
+    res.status(200).json({
+      success: true,
+      ...adminMessages.FEATURES_ADDED_SUCCESSFULLY,
+      data: techFeatures,
+    });
+  } catch (err) {
+    return res
+      .status(500)
+      .json({ success: false, ...messages.INTERNAL_SERVER_ERROR });
+  }
+};
+
+exports.addCarOtherFeatures = async (req, res) => {
+  const { features } = req.body;
+  try {
+    await OtherFeature.bulkWrite(
+      features.map((feature) => ({
+        updateOne: {
+          filter: { name: feature },
+          update: { $set: { name: feature } },
+          upsert: true,
+        },
+      }))
+    );
+
+    const otherFeatures = await OtherFeature.find({
+      name: { $in: features },
+    });
+
+    res.status(200).json({
+      success: true,
+      ...adminMessages.FEATURES_ADDED_SUCCESSFULLY,
+      data: otherFeatures,
+    });
+  } catch (err) {
+    return res
+      .status(500)
+      .json({ success: false, ...messages.INTERNAL_SERVER_ERROR });
+  }
+};
+
 exports.getCarBrands = async (req, res) => {
   try {
     const carBrands = await CarBrand.find({ isActive: true }).select(
@@ -151,6 +317,72 @@ exports.getYears = async (req, res) => {
   try {
     const years = await Year.find({ isActive: true }).select("year");
     res.status(200).json({ success: true, years });
+  } catch (err) {
+    return res
+      .status(500)
+      .json({ success: false, ...messages.INTERNAL_SERVER_ERROR });
+  }
+};
+
+exports.getCarRegionalSpecs = async (req, res) => {
+  try {
+    const specs = await RegionalSpecs.find({ isActive: true }).select("name");
+    res.status(200).json({ success: true, specs });
+  } catch (err) {
+    return res
+      .status(500)
+      .json({ success: false, ...messages.INTERNAL_SERVER_ERROR });
+  }
+};
+
+exports.getCarHorsePowers = async (req, res) => {
+  try {
+    const powers = await HorsePower.find({ isActive: true });
+    res.status(200).json({ success: true, horsePowers: powers });
+  } catch (err) {
+    return res
+      .status(500)
+      .json({ success: false, ...messages.INTERNAL_SERVER_ERROR });
+  }
+};
+
+exports.getCarSeatingCapacities = async (req, res) => {
+  try {
+    const capacities = await SeatingCapacity.find({ isActive: true });
+    res.status(200).json({ success: true, seatingCapacities: capacities });
+  } catch (err) {
+    return res
+      .status(500)
+      .json({ success: false, ...messages.INTERNAL_SERVER_ERROR });
+  }
+};
+
+exports.getCarColors = async (req, res) => {
+  try {
+    const colors = await CarColor.find({ isActive: true });
+    res.status(200).json({ success: true, colors });
+  } catch (err) {
+    return res
+      .status(500)
+      .json({ success: false, ...messages.INTERNAL_SERVER_ERROR });
+  }
+};
+
+exports.getCarTechFeatures = async (req, res) => {
+  try {
+    const features = await TechnicalFeature.find();
+    res.status(200).json({ success: true, features });
+  } catch (err) {
+    return res
+      .status(500)
+      .json({ success: false, ...messages.INTERNAL_SERVER_ERROR });
+  }
+};
+
+exports.getCarOtherFeatures = async (req, res) => {
+  try {
+    const features = await OtherFeature.find();
+    res.status(200).json({ success: true, features });
   } catch (err) {
     return res
       .status(500)

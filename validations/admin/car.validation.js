@@ -73,6 +73,78 @@ exports.addYearsValidation = [
     .withMessage("Name cannot be empty"),
 ];
 
+exports.addCarRegionalSpecsValidation = [
+  body("specs")
+    .exists()
+    .withMessage("Specs is required")
+    .isArray()
+    .withMessage("Specs must be an array"),
+
+  body("specs.*")
+    .isString()
+    .withMessage("Each spec must be a string")
+    .notEmpty()
+    .withMessage("Spec cannot be empty"),
+];
+
+exports.addCarHorsePowersValidate = [
+  body("horsePowers")
+    .exists()
+    .withMessage("Horse Powers is required")
+    .isArray()
+    .withMessage("Horse Powers must be an array"),
+
+  body("horsePowers.*")
+    .exists()
+    .withMessage("Horse Power array cannot be empty")
+    .isInt({ min: 10, max: 2000 })
+    .withMessage("Horse Power must be a number between 10 and 2000")
+    .toInt(),
+];
+
+exports.addCarSeatingCapacityValidate = [
+  body("seatingCapacities")
+    .exists()
+    .withMessage("seatingCapacities is required")
+    .isArray()
+    .withMessage("seatingCapacities must be an array"),
+
+  body("seatingCapacities.*")
+    .exists()
+    .withMessage("seatingCapacities array cannot be empty")
+    .isInt({ min: 2, max: 11 })
+    .withMessage("seatingCapacities must be a number between 2 and 11")
+    .toInt(),
+];
+
+exports.addCarColorsValidate = [
+  body("colors")
+    .exists()
+    .withMessage("colors is required")
+    .isArray()
+    .withMessage("colors must be an array"),
+
+  body("colors.*")
+    .exists()
+    .withMessage("colors array cannot be empty")
+    .isString()
+    .withMessage("color must be a string"),
+];
+
+exports.addCarTechFeaturesValidate = [
+  body("features")
+    .exists()
+    .withMessage("features is required")
+    .isArray()
+    .withMessage("features must be an array"),
+
+  body("features.*")
+    .exists()
+    .withMessage("features array cannot be empty")
+    .isString()
+    .withMessage("feature must be a string"),
+];
+
 exports.getCarModelsValidation = [
   param("carBrandId")
     .exists()

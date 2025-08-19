@@ -9,7 +9,13 @@
       "addCarModels",
       "addCarTrims",
       "addCarBodyTypes",
-      "addYears"
+      "addYears",
+      "addCarRegionalSpecs",
+      "addCarHorsePowers",
+      "addCarSeatingCapacities",
+      "addCarColors",
+      "addCarTechFeatures",
+      "addCarOtherFeatures"
     ],
     "get": [
       "getCurrentUser",
@@ -25,7 +31,13 @@
       "getCarBrands",
       "getCarModels",
       "getCarTrims",
-      "getYears"
+      "getYears",
+      "getCarRegionalSpecs",
+      "getCarHorsePowers",
+      "getCarSeatingCapacities",
+      "getCarColors",
+      "getCarTechFeatures",
+      "getCarOtherFeatures"
     ],
     "put": [
       "updateProfile",
@@ -50,7 +62,13 @@
       "getCountries",
       "getCountriesData",
       "getStates",
-      "getCities"
+      "getCities",
+      "getCarRegionalSpecs",
+      "getCarHorsePowers",
+      "getCarSeatingCapacities",
+      "getCarColors",
+      "getCarTechFeatures",
+      "getCarOtherFeatures"
     ],
     "put": ["createNewPassword", "updateProfile"],
     "delete": []

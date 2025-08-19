@@ -35,5 +35,17 @@
   "deleteCarBrand",
   "deleteCarModel",
   "deleteCarTrim",
-  "deleteYear"
+  "deleteYear",
+  "addCarRegionalSpecs",
+  "getCarRegionalSpecs",
+  "addCarHorsePowers",
+  "addCarSeatingCapacities",
+  "addCarColors",
+  "addCarTechFeatures",
+  "addCarOtherFeatures",
+  "getCarHorsePowers",
+  "getCarSeatingCapacities",
+  "getCarColors",
+  "getCarTechFeatures",
+  "getCarOtherFeatures"
 ]

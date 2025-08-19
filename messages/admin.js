@@ -111,4 +111,24 @@ module.exports = {
     code: 1707,
     message: "Model year deleted successfully",
   },
+  REGIONAL_SPECS_CREATED: {
+    code: 1708,
+    message: "Regional specs created successfully",
+  },
+  HORSE_POWERS_CREATED: {
+    code: 1710,
+    message: "Horse powers added successfully",
+  },
+  SEATING_CAPACITIES_CREATED: {
+    code: 1712,
+    message: "Seating capacities added successfully",
+  },
+  CAR_COLORS_CREATED: {
+    code: 1714,
+    message: "Car colors added successfully",
+  },
+  FEATURES_ADDED_SUCCESSFULLY: {
+    code: 1716,
+    message: "Features added successfully",
+  },
 };

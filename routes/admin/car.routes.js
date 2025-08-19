@@ -7,10 +7,22 @@ const {
   addCarTrims,
   addCarBodyTypes,
   addYears,
+  addCarRegionalSpecs,
+  addCarHorsePowers,
+  addCarSeatingCapacity,
+  addCarColors,
+  addCarTechFeatures,
+  addCarOtherFeatures,
   getCarBrands,
   getCarModels,
   getCarTrims,
   getYears,
+  getCarRegionalSpecs,
+  getCarHorsePowers,
+  getCarSeatingCapacities,
+  getCarColors,
+  getCarTechFeatures,
+  getCarOtherFeatures,
   deleteCarBrand,
   deleteCarModel,
   deleteCarTrim,
@@ -23,6 +35,11 @@ const {
   addCarBodyTypesValidation,
   addCarTrimsValidation,
   addYearsValidation,
+  addCarRegionalSpecsValidation,
+  addCarHorsePowersValidate,
+  addCarSeatingCapacityValidate,
+  addCarColorsValidate,
+  addCarTechFeaturesValidate,
   getCarModelsValidation,
   getCarTrimsValidation,
   deleteCarBrandValidation,
@@ -56,6 +73,43 @@ router.post(
 
 router.post("/addYears", addYearsValidation, validate, addYears);
 
+router.post(
+  "/addCarRegionalSpecs",
+  addCarRegionalSpecsValidation,
+  validate,
+  addCarRegionalSpecs
+);
+
+router.post(
+  "/addCarHorsePowers",
+  addCarHorsePowersValidate,
+  validate,
+  addCarHorsePowers
+);
+
+router.post(
+  "/addCarSeatingCapacities",
+  addCarSeatingCapacityValidate,
+  validate,
+  addCarSeatingCapacity
+);
+
+router.post("/addCarColors", addCarColorsValidate, validate, addCarColors);
+
+router.post(
+  "/addCarTechFeatures",
+  addCarTechFeaturesValidate,
+  validate,
+  addCarTechFeatures
+);
+
+router.post(
+  "/addCarOtherFeatures",
+  addCarTechFeaturesValidate,
+  validate,
+  addCarOtherFeatures
+);
+
 router.get("/getCarBrands", getCarBrands);
 
 router.get(
@@ -73,6 +127,18 @@ router.get(
 );
 
 router.get("/getYears", getYears);
+
+router.get("/getCarRegionalSpecs", getCarRegionalSpecs);
+
+router.get("/getCarHorsePowers", getCarHorsePowers);
+
+router.get("/getCarSeatingCapacities", getCarSeatingCapacities);
+
+router.get("/getCarColors", getCarColors);
+
+router.get("/getCarTechFeatures", getCarTechFeatures);
+
+router.get("/getCarOtherFeatures", getCarOtherFeatures);
 
 router.delete(
   "/deleteCarBrand/:brandId",
