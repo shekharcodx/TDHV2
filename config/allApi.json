@@ -56,5 +56,7 @@
   "carSeating",
   "carColor",
   "carTechFeature",
-  "carOtherFeature"
+  "carOtherFeature",
+  "getDocument",
+  "createListing"
 ]

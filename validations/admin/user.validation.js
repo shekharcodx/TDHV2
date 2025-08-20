@@ -1,4 +1,4 @@
-const { body } = require("express-validator");
+const { body, query } = require("express-validator");
 
 exports.createAdminValidation = [
   body("name").exists().withMessage("Name is required"),
@@ -36,4 +36,12 @@ exports.updateAccountStatusValidation = [
     .toInt()
     .isIn([2, 3, 4])
     .withMessage("Status must be either 2, 3 or 4"),
+];
+
+exports.getDocumentsValidate = [
+  query("documentKey")
+    .exists()
+    .withMessage("documentKey is required")
+    .isString()
+    .withMessage("documentKey must be a string"),
 ];

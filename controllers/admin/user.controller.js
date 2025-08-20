@@ -4,6 +4,8 @@ const adminMessages = require("../../messages/admin");
 const bcrypt = require("bcrypt");
 const { ACCOUNT_STATUS, USER_ROLES } = require("../../utils/constants");
 const generateToken = require("../../utils/generateToken");
+const { getFile } = require("../../utils/s3");
+const mime = require("mime-types");
 
 exports.updateAccountStatus = async (req, res) => {
   const { id, status } = req.body;
@@ -199,5 +201,32 @@ exports.getAllCustomers = async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ success: false, ...messages.INTERNAL_SERVER_ERROR });
+  }
+};
+
+exports.getDocuments = async (req, res) => {
+  const { documentKey } = req.query;
+  try {
+    const file = await getFile(documentKey);
+
+    if (!file) {
+      return res
+        .status(404)
+        .json({ success: false, ...adminMessages.RESOURCE_NOT_FOUND });
+    }
+
+    const contentType =
+      file.contentType ||
+      mime.lookup(file.fileName) ||
+      "application/octet-stream";
+
+    res.setHeader("Content-Type", contentType);
+    res.setHeader("Content-Disposition", `inline; filename="${file.fileName}"`);
+
+    res.send(file.buffer);
+  } catch (err) {
+    return res
+      .status(500)
+      .json({ success: false, ...messages.INTERNAL_SERVER_ERROR });
   }
 };

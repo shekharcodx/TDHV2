@@ -8,11 +8,13 @@ const {
   getAllVendors,
   getPendingVendors,
   getAllCustomers,
+  getDocuments,
 } = require("../../controllers/admin/user.controller");
 const {
   createAdminValidation,
   updateIsActiveValidation,
   updateAccountStatusValidation: accountStatusValidate,
+  getDocumentsValidate,
 } = require("../../validations/admin/user.validation");
 
 const validate = require("../../middlewares/validate.middleware");
@@ -40,5 +42,7 @@ router.get("/getAllVendors", getAllVendors);
 router.get("/getPendingVendors", getPendingVendors);
 
 router.get("/getAllCustomers", getAllCustomers);
+
+router.get("/getDocument", getDocumentsValidate, validate, getDocuments);
 
 module.exports = router;

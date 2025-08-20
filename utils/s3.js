@@ -5,6 +5,8 @@ const {
   GetObjectCommand,
 } = require("@aws-sdk/client-s3");
 
+const mime = require("mime-types");
+
 const s3 = new S3Client({
   region: process.env.AWS_REGION || "eu-north-1",
   credentials: {
@@ -20,6 +22,7 @@ const uploadFile = async (buffer, folder, filename) => {
       Bucket: process.env.S3_BUCKET_NAME,
       Key: key,
       Body: buffer,
+      ContentType: mime.lookup(filename) || "application/octet-stream",
     });
 
     await s3.send(command);
@@ -48,13 +51,18 @@ const deleteFile = async (key) => {
 
 const getFile = async (key) => {
   try {
+    console.log("key", key);
     const command = new GetObjectCommand({
       Bucket: process.env.S3_BUCKET_NAME,
       Key: key,
     });
     const response = await s3.send(command);
     const fileBuffer = await streamToBuffer(response.Body);
-    return fileBuffer;
+    return {
+      buffer: fileBuffer,
+      contentType: response.ContentType,
+      fileName: key.split("/").pop(),
+    };
   } catch (err) {
     console.error("Error getting file:", err);
     return null;

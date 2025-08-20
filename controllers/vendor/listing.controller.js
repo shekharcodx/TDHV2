@@ -3,6 +3,9 @@ const countryModel = require("../../models/country.model");
 const stateModel = require("../../models/state.model");
 const cityModel = require("../../models/city.model");
 const { default: mongoose } = require("mongoose");
+const RentalListing = require("../../models/rentalListing.model");
+const { uploadFile } = require("../../utils/s3");
+const vendorMessages = require("../../messages/vendor");
 
 exports.getCountriesData = async (req, res) => {
   try {
@@ -94,5 +97,64 @@ exports.getCities = async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ success: false, ...messages.INTERNAL_SERVER_ERROR });
+  }
+};
+
+exports.createListing = async (req, res) => {
+  try {
+    let imagesArr = [];
+
+    if (req.files && req.files.length > 0) {
+      imagesArr = await Promise.all(
+        req.files.map(async (file) => {
+          const result = await uploadFile(
+            file.buffer,
+            "listing_images",
+            file.originalname
+          );
+          return { url: result.url, key: result.key };
+        })
+      );
+    }
+
+    const carListing = new RentalListing({
+      vendor: req.user.id, // from auth middleware
+      carBrand: req.body.carBrand,
+      carModel: req.body.carModel,
+      carTrim: req.body.carTrim,
+      regionalSpecs: req.body.regionalSpecs,
+      modelYear: req.body.modelYear,
+      mileage: req.body.mileage,
+      bodyType: req.body.bodyType,
+      carInsurance: req.body.carInsurance,
+      rentPerDay: req.body.rentPerDay,
+      rentPerMonth: req.body.rentPerMonth,
+      title: req.body.title,
+      description: req.body.description,
+      fuelType: req.body.fuelType,
+      interiorColor: req.body.interiorColor,
+      exteriorColor: req.body.exteriorColor,
+      warranty: req.body.warranty,
+      carDoors: req.body.carDoors,
+      transmission: req.body.transmission,
+      seatingCapacity: req.body.seatingCapacity,
+      horsePower: req.body.horsePower,
+      techFeatures: req.body.techFeatures,
+      otherFeatures: req.body.otherFeatures,
+      location: req.body.location,
+      images: imagesArr,
+    });
+
+    await carListing.save();
+
+    res.status(201).json({
+      success: true,
+      ...vendorMessages.LISTING_CREATED,
+      data: carListing,
+    });
+  } catch (err) {
+    return res
+      .status(500)
+      .json({ success: true, ...messages.INTERNAL_SERVER_ERROR });
   }
 };
