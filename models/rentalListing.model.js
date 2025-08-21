@@ -46,7 +46,11 @@ const rentalListingSchema = new mongoose.Schema({
   rentPerMonth: { type: Number, required: true },
   title: { type: String, required: true },
   description: { type: String },
-  fuelType: { type: String, required: true },
+  fuelType: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "FuelType",
+    required: true,
+  },
   interiorColor: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "CarColor",
@@ -58,8 +62,16 @@ const rentalListingSchema = new mongoose.Schema({
     required: true,
   },
   warranty: { type: String, required: true },
-  carDoors: { type: Number, required: true },
-  transmission: { type: String, required: true },
+  carDoors: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "CarDoor",
+    required: true,
+  },
+  transmission: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Transmission",
+    required: true,
+  },
   seatingCapacity: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "SeatingCapacity",

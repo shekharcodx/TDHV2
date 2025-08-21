@@ -79,7 +79,8 @@ exports.getStates = async (req, res) => {
   try {
     const states = await stateModel
       .find({ country: countryId, isActive: true })
-      .select("_id name country");
+      .select("_id name country")
+      .populate({ path: "country", select: "name" });
     res.status(200).json({ success: true, states });
   } catch (err) {
     console.error(err);
@@ -92,7 +93,8 @@ exports.getCities = async (req, res) => {
   try {
     const cities = await cityModel
       .find({ state: stateId, isActive: true })
-      .select("_id name state");
+      .select("_id name state")
+      .populate({ path: "state", select: "name" });
     res.status(200).json({ success: true, cities });
   } catch (err) {
     console.error(err);

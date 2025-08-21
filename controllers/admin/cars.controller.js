@@ -425,7 +425,9 @@ exports.getCarModels = async (req, res) => {
     const carModels = await CarModel.find({
       isActive: true,
       carBrand: carBrandId,
-    }).select("name");
+    })
+      .select("_id name isActive")
+      .populate({ path: "carBrand", select: "_id logo name" });
 
     res.status(200).json({ success: true, carModels });
   } catch (err) {
@@ -441,7 +443,9 @@ exports.getCarTrims = async (req, res) => {
     const carTrims = await CarTrim.find({
       isActive: true,
       carModel: carModelId,
-    }).select("name");
+    })
+      .select("name")
+      .populate({ path: "carModel", select: "name" });
 
     res.status(200).json({ success: true, carTrims });
   } catch (err) {
