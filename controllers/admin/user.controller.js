@@ -17,6 +17,13 @@ exports.updateAccountStatus = async (req, res) => {
         .json({ success: false, ...messages.AUTH_USER_NOT_FOUND });
     }
 
+    if (user.email === process.env.ADMIN_EMAIL) {
+      return res.status(403).json({
+        success: false,
+        ...messages.NOT_ALLOWED_TO_PERFORM_THIS_OPERATION,
+      });
+    }
+
     let message;
 
     const statusNum = Number(status);
@@ -107,7 +114,7 @@ exports.updateIsUserActive = async (req, res) => {
         .json({ success: false, ...messages.AUTH_USER_NOT_FOUND });
     }
 
-    if (user && user.email === process.env.ADMIN_EMAIL) {
+    if (user.email === process.env.ADMIN_EMAIL) {
       return res.status(403).json({
         success: false,
         ...messages.NOT_ALLOWED_TO_PERFORM_THIS_OPERATION,
