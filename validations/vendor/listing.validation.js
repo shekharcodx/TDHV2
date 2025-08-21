@@ -60,8 +60,13 @@ exports.rentalListingValidator = [
     .isString()
     .withMessage("Description must be a string"),
 
-  body("fuelType").notEmpty().withMessage("Fuel type is required"),
+  body("fuelType")
+    .exists()
+    .withMessage("fuelType is required")
+    .isMongoId()
+    .withMessage("Invalid interior fuelType"),
 
+  ,
   body("interiorColor").isMongoId().withMessage("Invalid interior color ID"),
 
   body("exteriorColor").isMongoId().withMessage("Invalid exterior color ID"),
@@ -69,10 +74,16 @@ exports.rentalListingValidator = [
   body("warranty").notEmpty().withMessage("Warranty is required"),
 
   body("carDoors")
-    .isInt({ min: 2, max: 6 })
-    .withMessage("Car doors must be between 2 and 6"),
+    .exists()
+    .withMessage("carDoors is required")
+    .isMongoId()
+    .withMessage("Invalid interior carDoors"),
 
-  body("transmission").notEmpty().withMessage("Transmission is required"),
+  body("transmission")
+    .exists()
+    .withMessage("transmission is required")
+    .isMongoId()
+    .withMessage("Invalid interior transmission"),
 
   body("seatingCapacity")
     .isMongoId()
@@ -102,11 +113,8 @@ exports.rentalListingValidator = [
 
   body("location").notEmpty().withMessage("Location is required"),
 
-  body("images")
-    .isArray({ min: 1 })
-    .withMessage("At least one image is required"),
-
   body("images").custom((value, { req }) => {
+    console.log("images", req.files.length);
     if (!req.files || req.files.length === 0) {
       throw new Error("At least one image is required");
     }
@@ -119,4 +127,14 @@ exports.rentalListingValidator = [
     .optional()
     .isBoolean()
     .withMessage("isActive must be true or false"),
+
+  body("isFeatured")
+    .optional()
+    .isBoolean()
+    .withMessage("isFeatured must be true or false"),
+
+  body("isPremium")
+    .optional()
+    .isBoolean()
+    .withMessage("isPremium must be true or false"),
 ];

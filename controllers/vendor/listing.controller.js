@@ -6,6 +6,7 @@ const { default: mongoose } = require("mongoose");
 const RentalListing = require("../../models/rentalListing.model");
 const { uploadFile } = require("../../utils/s3");
 const vendorMessages = require("../../messages/vendor");
+const sharp = require("sharp");
 
 exports.getCountriesData = async (req, res) => {
   try {
@@ -109,10 +110,20 @@ exports.createListing = async (req, res) => {
     if (req.files && req.files.length > 0) {
       imagesArr = await Promise.all(
         req.files.map(async (file) => {
+          const optimizedImage = await sharp(file.buffer)
+            .resize(1280, 720, { fit: "cover" })
+            .toFormat("webp") // 👈 convert to webp
+            .webp({ quality: 80 })
+            .toBuffer();
           const result = await uploadFile(
-            file.buffer,
+            optimizedImage,
             "listing_images",
-            file.originalname
+            file.originalname,
+            null,
+            {
+              contentType: "image/webp",
+              extension: ".webp",
+            }
           );
           return { url: result.url, key: result.key };
         })

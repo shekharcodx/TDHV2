@@ -7,6 +7,10 @@ const {
 
 const mime = require("mime-types");
 
+const path = require("path");
+
+const { v4: uuidv4 } = require("uuid");
+
 const s3 = new S3Client({
   region: process.env.AWS_REGION || "eu-north-1",
   credentials: {
@@ -19,19 +23,31 @@ const uploadFile = async (
   buffer,
   folder,
   filename,
-  key = `${folder}/${Date.now()}-${filename}`
+  keyName,
+  {
+    contentType = mime.lookup(filename) || "application/octet-stream", // default from original file
+    extension = path.extname(filename), // default from original
+  } = {}
 ) => {
+  console.log({ contentType, extension, filename });
+  // remove original extension, append chosen one
+  const baseName = path.basename(filename, path.extname(filename));
+
+  const key =
+    keyName || `${folder}/${Date.now()}-${uuidv4()}-${baseName}${extension}`;
+
   try {
     const command = new PutObjectCommand({
       Bucket: process.env.S3_BUCKET_NAME,
       Key: key,
       Body: buffer,
-      ContentType: mime.lookup(filename) || "application/octet-stream",
+      ContentType: contentType,
     });
 
     await s3.send(command);
+
     const url = `https://${process.env.S3_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${key}`;
-    return { url, key, filename };
+    return { url, key, filename: `${baseName}${extension}` };
   } catch (err) {
     console.error("Error uploading file:", err);
     throw err;

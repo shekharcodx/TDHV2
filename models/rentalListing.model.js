@@ -107,6 +107,8 @@ const rentalListingSchema = new mongoose.Schema({
     default: LISTING_STATUS.PENDING,
   },
   isActive: { type: Boolean, default: true },
+  isFeatured: { type: Boolean, default: false },
+  isPremium: { type: Boolean, default: false },
 });
 
 rentalListingSchema.plugin(mongoosePaginate);

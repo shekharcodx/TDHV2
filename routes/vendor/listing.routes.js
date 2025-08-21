@@ -26,7 +26,7 @@ router.get("/getCities/:stateId", getCitiesValidation, validate, getCities);
 
 router.post(
   "/createListing",
-  upload.any("images"),
+  upload.array("images"),
   rentalListingValidator,
   validate,
   createListing

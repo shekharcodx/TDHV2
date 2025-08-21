@@ -13,6 +13,7 @@ exports.addCountry = async (req, res) => {
       {
         name: countryName,
         code: countryCode,
+        isActive: true,
       },
       { new: true, upsert: true, collation: { locale: "en", strength: 2 } }
     );
@@ -32,7 +33,7 @@ exports.addStates = async (req, res) => {
     const ops = stateNames.map((name) => ({
       updateOne: {
         filter: { name, country: countryId },
-        update: { name, country: countryId },
+        update: { name, country: countryId, isActive: true },
         upsert: true,
         collation: { locale: "en", strength: 2 },
       },
@@ -66,7 +67,7 @@ exports.addCities = async (req, res) => {
     const ops = cityNames.map((name) => ({
       updateOne: {
         filter: { name, state: stateId },
-        update: { name, state: stateId },
+        update: { name, state: stateId, isActive: true },
         upsert: true,
         collation: { locale: "en", strength: 2 },
       },
