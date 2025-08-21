@@ -126,3 +126,24 @@ exports.changePasswordValidation = [
     .isLength({ min: 6 })
     .withMessage("New password must be at least 6 characters"),
 ];
+
+exports.forgetPasswordValidation = [
+  body("email")
+    .exists()
+    .withMessage("Email is required")
+    .isEmail()
+    .withMessage("Email must be valid"),
+];
+
+exports.resetPasswordValidation = [
+  body("token")
+    .exists()
+    .withMessage("Token is required")
+    .isString()
+    .withMessage("Token must be a string"),
+  body("newPassword")
+    .exists()
+    .withMessage("New password is required")
+    .isLength({ min: 6 })
+    .withMessage("New password must be at least 6 characters"),
+];

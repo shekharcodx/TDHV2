@@ -1,12 +1,14 @@
 const bcrypt = require("bcrypt");
 const User = require("../models/user.model");
 const generateToken = require("../utils/generateToken");
+const jwt = require("jsonwebtoken");
 const messages = require("../messages/messages");
 const uploadBufferToCloudinary = require("../utils/uploadToClaudinary");
 const deleteImage = require("../utils/deleteImage");
 const generateRandomPassword = require("../utils/generatePassword");
 const { sendEmailFromTemplate } = require("../utils/sendEmail");
-const { uploadFile, deleteFile } = require("../utils/s3");
+const { uploadFile } = require("../utils/s3");
+const { validateJWT } = require("../utils/verifyToken");
 const { ACCOUNT_STATUS, USER_ROLES } = require("../utils/constants");
 
 exports.register = async (req, res) => {
@@ -228,6 +230,84 @@ exports.createNewPassword = async (req, res) => {
   }
 };
 
+exports.forgetPassword = async (req, res) => {
+  const { email } = req.body;
+  try {
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return res
+        .status(404)
+        .json({ success: false, ...messages.AUTH_USER_NOT_FOUND });
+    }
+
+    const resetToken = jwt.sign(
+      {
+        id: user._id,
+      },
+      process.env.JWT_RESET_SECRET,
+      { expiresIn: "15m" }
+    );
+
+    const resetLink = `${process.env.RESET_LINK}${resetToken}`;
+    await sendEmailFromTemplate("password_reset", user.email, {
+      name: user.name,
+      resetLink,
+    });
+
+    res.status(200).json({ success: true, ...messages.RESET_LINK_SENT });
+  } catch (err) {
+    console.log("Error in forgetPassword:", err);
+    res.status(500).json({ success: false, ...messages.INTERNAL_SERVER_ERROR });
+  }
+};
+
+exports.resetPassword = async (req, res) => {
+  const { token, newPassword } = req.body;
+  try {
+    if (!token) {
+      return res
+        .status(400)
+        .json({ success: false, ...messages.AUTH_RESET_TOKEN_REQUIRED });
+    }
+
+    const result = validateJWT(token, process.env.JWT_RESET_SECRET);
+
+    if (!result?.valid || result?.expired) {
+      return res
+        .status(400)
+        .json({ success: false, ...messages.AUTH_INVALID_RESET_TOKEN });
+    }
+
+    const user = await User.findById(result?.decoded?.id);
+    if (!user) {
+      return res
+        .status(404)
+        .json({ success: false, ...messages.AUTH_USER_NOT_FOUND });
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    user.password = hashedPassword;
+    user.resetPasswordToken = null;
+    await user.save();
+
+    await sendEmailFromTemplate("password_changed", user.email, {
+      name: user.name,
+    });
+
+    res.status(200).json({
+      success: true,
+      ...messages.AUTH_PASSWORD_RESET_SUCCESS,
+    });
+  } catch (err) {
+    console.error("Error in resetPassword:", err);
+    return res
+      .status(500)
+      .json({ success: false, ...messages.INTERNAL_SERVER_ERROR });
+  }
+};
+
 exports.getCurrentLoggedInUser = async (req, res) => {
   const { id } = req.user;
   try {
@@ -242,8 +322,10 @@ exports.getCurrentLoggedInUser = async (req, res) => {
       success: true,
       ...messages.USER_FOUND,
       data: {
+        ...user,
         _id: user._id,
         email: user.email,
+        businessName: user.businessName,
         name: user.name,
         token: generateToken(user._id, user.role, user.email),
         role: user.role,

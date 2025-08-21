@@ -1,6 +1,7 @@
 const jwt = require("jsonwebtoken");
 const messages = require("../messages/messages");
 const User = require("../models/user.model");
+const { validateJWT } = require("../utils/verifyToken");
 
 const protect = async (req, res, next) => {
   let token;
@@ -11,15 +12,21 @@ const protect = async (req, res, next) => {
   ) {
     try {
       token = req.headers.authorization.split(" ")[1];
-      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      const result = validateJWT(token, process.env.JWT_SECRET);
 
-      const user = await User.findById(decoded.id);
+      if (!result?.valid || result?.expired) {
+        return res
+          .status(403)
+          .json({ success: false, ...messages.AUTH_INVALID_RESET_TOKEN });
+      }
+
+      const user = await User.findById(result?.decoded?.id);
       if (!user.isActive)
         return res
           .status(403)
           .json({ success: false, ...messages.ACCOUNT_DEACTIVATED });
 
-      req.user = decoded;
+      req.user = result?.decoded;
       return next();
     } catch (error) {
       return res

@@ -113,4 +113,22 @@ module.exports = {
     code: 9023,
     message: "User status updated successfully",
   },
+  AUTH_PASSWORD_RESET_SUCCESS: {
+    code: 9024,
+    message: "Password reset successful, Please login with new password",
+  },
+  RESET_LINK_SENT: {
+    code: 9025,
+    message: "Password reset link sent to your email",
+  },
+  AUTH_INVALID_RESET_TOKEN: {
+    code: 9026,
+    error: "AUTH_INVALID_RESET_TOKEN",
+    message: "Invalid or expired token",
+  },
+  AUTH_RESET_TOKEN_REQUIRED: {
+    code: 9027,
+    error: "AUTH_RESET_TOKEN_REQUIRED",
+    message: "Password reset token is required",
+  },
 };

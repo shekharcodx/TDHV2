@@ -10,12 +10,16 @@ const {
   updateProfile,
   createNewPassword,
   getCurrentLoggedInUser,
+  forgetPassword,
+  resetPassword,
 } = require("../controllers/auth.controller");
 const {
   registerValidation,
   loginValidation,
   updateProfileValidation,
   changePasswordValidation,
+  forgetPasswordValidation,
+  resetPasswordValidation,
 } = require("../validations/auth.validation");
 
 router.post("/register", cpUpload, registerValidation, validate, register);
@@ -39,5 +43,14 @@ router.put(
   validate,
   updateProfile
 );
+
+router.post(
+  "/forgetPassword",
+  forgetPasswordValidation,
+  validate,
+  forgetPassword
+);
+
+router.put("/resetPassword", resetPasswordValidation, validate, resetPassword);
 
 module.exports = router;
