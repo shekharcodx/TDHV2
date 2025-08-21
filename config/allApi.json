@@ -60,5 +60,15 @@
   "getDocument",
   "createListing",
   "forgetPassword",
-  "resetPassword"
+  "resetPassword",
+  "editVendorProfile",
+  "getCarDoors",
+  "getCarTransmissions",
+  "getCarFuelTypes",
+  "carFuelType",
+  "carDoors",
+  "carTransmission",
+  "addCarDoors",
+  "addCarTransmissions",
+  "addCarFuelTypes"
 ]

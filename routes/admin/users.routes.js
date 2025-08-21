@@ -9,13 +9,17 @@ const {
   getPendingVendors,
   getAllCustomers,
   getDocuments,
+  editVendorProfile,
 } = require("../../controllers/admin/user.controller");
 const {
   createAdminValidation,
   updateIsActiveValidation,
   updateAccountStatusValidation: accountStatusValidate,
   getDocumentsValidate,
+  editVendorProfileValidation,
 } = require("../../validations/admin/user.validation");
+
+const cpUpload = require("../../middlewares/registerFiles.middleware");
 
 const validate = require("../../middlewares/validate.middleware");
 
@@ -44,5 +48,13 @@ router.get("/getPendingVendors", getPendingVendors);
 router.get("/getAllCustomers", getAllCustomers);
 
 router.get("/getDocument", getDocumentsValidate, validate, getDocuments);
+
+router.put(
+  "/editVendorProfile",
+  cpUpload,
+  editVendorProfileValidation,
+  validate,
+  editVendorProfile
+);
 
 module.exports = router;

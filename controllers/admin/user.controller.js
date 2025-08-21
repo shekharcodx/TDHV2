@@ -4,7 +4,7 @@ const adminMessages = require("../../messages/admin");
 const bcrypt = require("bcrypt");
 const { ACCOUNT_STATUS, USER_ROLES } = require("../../utils/constants");
 const generateToken = require("../../utils/generateToken");
-const { getFile } = require("../../utils/s3");
+const { getFile, uploadFile } = require("../../utils/s3");
 const mime = require("mime-types");
 
 exports.updateAccountStatus = async (req, res) => {
@@ -235,5 +235,127 @@ exports.getDocuments = async (req, res) => {
     return res
       .status(500)
       .json({ success: false, ...messages.INTERNAL_SERVER_ERROR });
+  }
+};
+
+exports.editVendorProfile = async (req, res) => {
+  let {
+    name,
+    email,
+    role,
+    password,
+    businessName,
+    address,
+    contact,
+    vendorInformation,
+    status,
+  } = req.body;
+
+  role = parseInt(role);
+
+  if (2 !== role) {
+    return res
+      .status(400)
+      .json({ success: false, ...messages.AUTH_REGISTRAION_ROLE_INVALID });
+  }
+
+  try {
+    let userObj = await User.findOne({ email });
+    if (!userObj)
+      return res
+        .status(400)
+        .json({ success: false, ...messages.AUTH_USER_NOT_FOUND });
+
+    let documents = {};
+
+    // Upload vendor documents
+    const docFields = [
+      "ijariCertificate",
+      "tradeLicense",
+      "vatCertificate",
+      "noc",
+      "emiratesId",
+      "poa",
+    ];
+
+    for (const field of docFields) {
+      if (req.files && req.files[field]) {
+        const file = req.files[field][0];
+        const fileBuffer = file.buffer;
+        const fileName = file.originalname;
+
+        const result = await uploadFile(
+          fileBuffer,
+          "vendor_documents",
+          fileName,
+          userObj.vendorInformation?.documents?.[field]?.key
+        );
+
+        documents[field] = {
+          key: result.key,
+          filename: result.filename,
+        };
+      }
+    }
+
+    // Upload profile picture if present
+    let profilePictureData = null;
+    if (req.files && req.files["profilePicture"]) {
+      const file = req.files["profilePicture"][0];
+      const result = await uploadFile(
+        file.buffer,
+        "profile_pictures",
+        file.originalname,
+        userObj?.profilePicture?.key
+      );
+      profilePictureData = {
+        url: result.url,
+        key: result.key,
+      };
+    }
+
+    // Prepare user data for DB
+    const userData = {
+      name,
+      email,
+      password: password ? await bcrypt.hash(password, 10) : userObj.password,
+      role,
+      status,
+      businessName,
+      address,
+      contact,
+      vendorInformation: {
+        fleetSize: vendorInformation?.fleetSize,
+        documents,
+      },
+    };
+
+    if (documents.profilePicture) {
+      userData.profilePicture = documents.profilePicture;
+    }
+
+    Object.assign(userObj, userData);
+
+    await userObj.save();
+
+    // await sendEmailFromTemplate("temporary_password", user.email, {
+    //   name: user.name,
+    //   tempPassword: password,
+    // });
+
+    res.status(201).json({
+      success: true,
+      ...messages.PROFILE_UPDATED,
+      data: {
+        _id: userObj._id,
+        name: userObj.name,
+        email: userObj.email,
+        role: userObj.role,
+        profilePicture: userObj.profilePicture,
+        documents: userObj.vendorInformation.documents,
+      },
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
 };

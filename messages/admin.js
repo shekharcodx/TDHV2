@@ -160,4 +160,8 @@ module.exports = {
     error: "RESOURCE_NOT_FOUND",
     message: "Resource was not found",
   },
+  DELETED_SUCCESSFULLY: {
+    code: 1720,
+    message: "Resource deleted successfully",
+  },
 };

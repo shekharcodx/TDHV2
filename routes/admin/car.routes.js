@@ -24,6 +24,9 @@ const {
   getCarColors,
   getCarTechFeatures,
   getCarOtherFeatures,
+  getCarFuelType,
+  getCarDoors,
+  getCarTransmission,
   deleteCarBrand,
   deleteCarModel,
   deleteCarTrim,
@@ -35,6 +38,12 @@ const {
   deleteCarColors,
   deleteCarTechFeatures,
   deleteCarOtherFeatures,
+  deleteCarTransmission,
+  deleteCarDoors,
+  deleteCarFuelType,
+  addCarTransmissions,
+  addCarFuelTypes,
+  addCarDoors,
 } = require("../../controllers/admin/cars.controller");
 
 const {
@@ -61,6 +70,12 @@ const {
   deleteCarColorsValidate,
   deleteCarTechFeaturesValidate,
   deleteCarOtherFeaturesValidate,
+  deleteCarFuelTypesValidation,
+  deleteCarDoorsValidation,
+  deleteCarTransmissionValidation,
+  addCarTransmissionValidation,
+  addCarDoorsValidation,
+  addCarFuelTypesValidation,
 } = require("../../validations/admin/car.validation");
 
 const upload = require("../../middlewares/upload.middleware");
@@ -125,6 +140,22 @@ router.post(
   addCarOtherFeatures
 );
 
+router.post(
+  "/addCarFuelTypes",
+  addCarFuelTypesValidation,
+  validate,
+  addCarFuelTypes
+);
+
+router.post(
+  "/addCarTransmissions",
+  addCarTransmissionValidation,
+  validate,
+  addCarTransmissions
+);
+
+router.post("/addCarDoors", addCarDoorsValidation, validate, addCarDoors);
+
 router.get("/getCarBrands", getCarBrands);
 
 router.get(
@@ -156,6 +187,12 @@ router.get("/getCarColors", getCarColors);
 router.get("/getCarTechFeatures", getCarTechFeatures);
 
 router.get("/getCarOtherFeatures", getCarOtherFeatures);
+
+router.get("/getCarFuelTypes", getCarFuelType);
+
+router.get("/getCarTransmissions", getCarTransmission);
+
+router.get("/getCarDoors", getCarDoors);
 
 router.delete(
   "/carBrand/:brandId",
@@ -227,6 +264,27 @@ router.delete(
   deleteCarOtherFeaturesValidate,
   validate,
   deleteCarOtherFeatures
+);
+
+router.delete(
+  "/carFuelType/:fuelTypeId",
+  deleteCarFuelTypesValidation,
+  validate,
+  deleteCarFuelType
+);
+
+router.delete(
+  "/carDoors/:doorsId",
+  deleteCarDoorsValidation,
+  validate,
+  deleteCarDoors
+);
+
+router.delete(
+  "/carTransmission/:transmissionId",
+  deleteCarTransmissionValidation,
+  validate,
+  deleteCarTransmission
 );
 
 module.exports = router;

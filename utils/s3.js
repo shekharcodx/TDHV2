@@ -15,9 +15,13 @@ const s3 = new S3Client({
   },
 });
 
-const uploadFile = async (buffer, folder, filename) => {
+const uploadFile = async (
+  buffer,
+  folder,
+  filename,
+  key = `${folder}/${Date.now()}-${filename}`
+) => {
   try {
-    const key = `${folder}/${Date.now()}-${filename}`;
     const command = new PutObjectCommand({
       Bucket: process.env.S3_BUCKET_NAME,
       Key: key,

@@ -322,15 +322,18 @@ exports.getCurrentLoggedInUser = async (req, res) => {
       success: true,
       ...messages.USER_FOUND,
       data: {
-        ...user,
         _id: user._id,
+        name: user.name,
         email: user.email,
         businessName: user.businessName,
-        name: user.name,
+        address: user.address,
+        contact: user.contact,
+        vendorInformation: user.vendorInformation,
         token: generateToken(user._id, user.role, user.email),
         role: user.role,
         status: user.status,
         profilePicture: user.profilePicture.url || null,
+        isActive: user.isActive,
       },
     });
   } catch (err) {

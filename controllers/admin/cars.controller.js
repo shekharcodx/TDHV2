@@ -9,6 +9,9 @@ const SeatingCapacity = require("../../models/carSeatingCapacity.model");
 const CarColor = require("../../models/carColor.model");
 const TechnicalFeature = require("../../models/carTechnicalFeatures.model");
 const OtherFeature = require("../../models/carOtherFeatures.model");
+const FuelType = require("../../models/carFuelType.model");
+const Transmission = require("../../models/carTransmission.model");
+const CarDoors = require("../../models/carDoors.model");
 
 const messages = require("../../messages/messages");
 const adminMessages = require("../../messages/admin");
@@ -317,6 +320,91 @@ exports.addCarOtherFeatures = async (req, res) => {
   }
 };
 
+exports.addCarFuelTypes = async (req, res) => {
+  const { fuelTypes } = req.body;
+  try {
+    await FuelType.bulkWrite(
+      fuelTypes.map((type) => ({
+        updateOne: {
+          filter: { name: type },
+          update: { $set: { name: type, isActive: true } },
+          upsert: true,
+        },
+      }))
+    );
+
+    const types = await FuelType.find({ name: { $in: fuelTypes } });
+
+    res.status(200).json({
+      success: true,
+      ...adminMessages.CAR_COLORS_CREATED,
+      data: types,
+    });
+  } catch (err) {
+    return res
+      .status(500)
+      .json({ success: false, ...messages.INTERNAL_SERVER_ERROR });
+  }
+};
+
+exports.addCarTransmissions = async (req, res) => {
+  const { transmissions } = req.body;
+  try {
+    await Transmission.bulkWrite(
+      transmissions.map((type) => ({
+        updateOne: {
+          filter: { transmission: type },
+          update: { $set: { transmission: type, isActive: true } },
+          upsert: true,
+        },
+      }))
+    );
+
+    const types = await Transmission.find({
+      transmission: { $in: transmissions },
+    });
+
+    res.status(200).json({
+      success: true,
+      ...adminMessages.CAR_COLORS_CREATED,
+      data: types,
+    });
+  } catch (err) {
+    return res
+      .status(500)
+      .json({ success: false, ...messages.INTERNAL_SERVER_ERROR });
+  }
+};
+
+exports.addCarDoors = async (req, res) => {
+  const { doors } = req.body;
+  try {
+    await CarDoors.bulkWrite(
+      doors.map((door) => ({
+        updateOne: {
+          filter: { doors: door },
+          update: { $set: { doors: door, isActive: true } },
+          upsert: true,
+        },
+      }))
+    );
+
+    const types = await CarDoors.find({
+      doors: { $in: doors },
+    });
+
+    res.status(200).json({
+      success: true,
+      ...adminMessages.CAR_COLORS_CREATED,
+      data: types,
+    });
+  } catch (err) {
+    return res
+      .status(500)
+      .json({ success: false, ...messages.INTERNAL_SERVER_ERROR });
+  }
+};
+
 exports.getCarBrands = async (req, res) => {
   try {
     const carBrands = await CarBrand.find({ isActive: true }).select(
@@ -445,6 +533,45 @@ exports.getCarOtherFeatures = async (req, res) => {
   try {
     const features = await OtherFeature.find();
     res.status(200).json({ success: true, features });
+  } catch (err) {
+    return res
+      .status(500)
+      .json({ success: false, ...messages.INTERNAL_SERVER_ERROR });
+  }
+};
+
+exports.getCarFuelType = async (req, res) => {
+  try {
+    const fuelTypes = await FuelType.find({ isActive: true }).select(
+      "name isActive"
+    );
+    res.status(200).json({ success: true, fuelTypes });
+  } catch (err) {
+    return res
+      .status(500)
+      .json({ success: false, ...messages.INTERNAL_SERVER_ERROR });
+  }
+};
+
+exports.getCarTransmission = async (req, res) => {
+  try {
+    const transmissions = await Transmission.find({ isActive: true }).select(
+      "transmission isActive"
+    );
+    res.status(200).json({ success: true, transmissions });
+  } catch (err) {
+    return res
+      .status(500)
+      .json({ success: false, ...messages.INTERNAL_SERVER_ERROR });
+  }
+};
+
+exports.getCarDoors = async (req, res) => {
+  try {
+    const doors = await CarDoors.find({ isActive: true }).select(
+      "doors isActive"
+    );
+    res.status(200).json({ success: true, doors });
   } catch (err) {
     return res
       .status(500)
@@ -668,6 +795,63 @@ exports.deleteCarOtherFeatures = async (req, res) => {
     }
 
     res.status(200).json({ success: true, ...adminMessages.FEATURE_DELETED });
+  } catch (err) {
+    return res
+      .status(500)
+      .json({ success: false, ...messages.INTERNAL_SERVER_ERROR });
+  }
+};
+
+exports.deleteCarFuelType = async (req, res) => {
+  const { fuelTypeId } = req.params;
+  try {
+    const deleted = await softDelete(FuelType, fuelTypeId);
+    if (!deleted) {
+      return res
+        .status(404)
+        .json({ success: false, ...adminMessages.RESOURCE_NOT_FOUND });
+    }
+    res
+      .status(200)
+      .json({ success: true, ...adminMessages.DELETED_SUCCESSFULLY });
+  } catch (err) {
+    return res
+      .status(500)
+      .json({ success: false, ...messages.INTERNAL_SERVER_ERROR });
+  }
+};
+
+exports.deleteCarTransmission = async (req, res) => {
+  const { transmissionId } = req.params;
+  try {
+    const deleted = await softDelete(Transmission, transmissionId);
+    if (!deleted) {
+      return res
+        .status(404)
+        .json({ success: false, ...adminMessages.RESOURCE_NOT_FOUND });
+    }
+    res
+      .status(200)
+      .json({ success: true, ...adminMessages.DELETED_SUCCESSFULLY });
+  } catch (err) {
+    return res
+      .status(500)
+      .json({ success: false, ...messages.INTERNAL_SERVER_ERROR });
+  }
+};
+
+exports.deleteCarDoors = async (req, res) => {
+  const { doorsId } = req.params;
+  try {
+    const deleted = await softDelete(CarDoors, doorsId);
+    if (!deleted) {
+      return res
+        .status(404)
+        .json({ success: false, ...adminMessages.RESOURCE_NOT_FOUND });
+    }
+    res
+      .status(200)
+      .json({ success: true, ...adminMessages.DELETED_SUCCESSFULLY });
   } catch (err) {
     return res
       .status(500)

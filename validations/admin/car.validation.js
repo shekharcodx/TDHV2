@@ -145,6 +145,49 @@ exports.addCarTechFeaturesValidate = [
     .withMessage("feature must be a string"),
 ];
 
+exports.addCarFuelTypesValidation = [
+  body("fuelTypes")
+    .exists()
+    .withMessage("fuelTypes is required")
+    .isArray()
+    .withMessage("fuelTypes must be an array"),
+
+  body("fuelTypes.*")
+    .exists()
+    .withMessage("fuelTypes array cannot be empty")
+    .isString()
+    .withMessage("fuelTypes must be a string"),
+];
+
+exports.addCarDoorsValidation = [
+  body("doors")
+    .exists()
+    .withMessage("doors is required")
+    .isArray()
+    .withMessage("doors must be an array"),
+
+  body("doors.*")
+    .exists()
+    .withMessage("doors array cannot be empty")
+    .isInt({ min: 2, max: 8 })
+    .withMessage("doors must be an integar between 2 and 8")
+    .toInt(),
+];
+
+exports.addCarTransmissionValidation = [
+  body("transmissions")
+    .exists()
+    .withMessage("transmissions is required")
+    .isArray()
+    .withMessage("transmissions must be an array"),
+
+  body("transmissions.*")
+    .exists()
+    .withMessage("transmissions array cannot be empty")
+    .isString()
+    .withMessage("transmissions must be a string"),
+];
+
 exports.getCarModelsValidation = [
   param("carBrandId")
     .exists()
@@ -247,4 +290,31 @@ exports.deleteCarOtherFeaturesValidate = [
     .withMessage("featureId is required")
     .isMongoId()
     .withMessage("Invalid featureId"),
+];
+
+exports.deleteCarFuelTypesValidation = [
+  param("fuelTypeId")
+    .exists()
+    .withMessage("fuelTypeId is required")
+    .isMongoId()
+    .withMessage("Invalid fuelTypeId"),
+  ,
+];
+
+exports.deleteCarDoorsValidation = [
+  param("doorsId")
+    .exists()
+    .withMessage("doorsId is required")
+    .isMongoId()
+    .withMessage("Invalid doorsId"),
+  ,
+];
+
+exports.deleteCarTransmissionValidation = [
+  param("transmissionId")
+    .exists()
+    .withMessage("transmissionId is required")
+    .isMongoId()
+    .withMessage("Invalid transmissionId"),
+  ,
 ];
