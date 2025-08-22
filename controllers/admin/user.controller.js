@@ -88,6 +88,52 @@ exports.createAdmin = async (req, res) => {
   }
 };
 
+exports.editCurrentAdminProfile = async (req, res) => {
+  const { name, password } = req.body;
+  try {
+    const admin = await User.findById(req.user.id);
+    if (!admin) {
+      return res
+        .status(404)
+        .json({ success: false, ...messages.AUTH_USER_NOT_FOUND });
+    }
+
+    if (name) admin.name = name;
+    if (password) admin.password = await bcrypt.hash(password, 10);
+
+    if (req.file && req.file.mimetype.startsWith("image/")) {
+      const file = req.file;
+      const result = await uploadFile(
+        file.buffer,
+        "profile_pictures",
+        file.originalname,
+        admin?.profilePicture?.key
+      );
+      admin.profilePicture = {
+        url: result.url,
+        key: result.key,
+      };
+    }
+
+    await admin.save();
+
+    res.status(200).json({
+      success: true,
+      ...messages.USER_UPDATED,
+      data: {
+        id: admin._id,
+        name: admin.name,
+        profilePicture: admin.profilePicture,
+      },
+    });
+  } catch (err) {
+    console.log("error editing admin", err);
+    return res
+      .status(500)
+      .json({ success: false, ...messages.INTERNAL_SERVER_ERROR });
+  }
+};
+
 exports.getAllAdmins = async (req, res) => {
   try {
     const admins = await User.find({
@@ -188,25 +234,25 @@ exports.getPendingVendors = async (req, res) => {
   }
 };
 
-exports.getUser = async (req, res) => {
-  const { userId } = req.params;
-  try {
-    const user = await User.findById(userId).select("-createdAt -updatedAt");
+// exports.getUser = async (req, res) => {
+//   const { userId } = req.params;
+//   try {
+//     const user = await User.findById(userId).select("-createdAt -updatedAt");
 
-    if (!user) {
-      return res
-        .status(404)
-        .json({ success: false, ...messages.AUTH_USER_NOT_FOUND });
-    }
+//     if (!user) {
+//       return res
+//         .status(404)
+//         .json({ success: false, ...messages.AUTH_USER_NOT_FOUND });
+//     }
 
-    res.status(200).json({ success: true, data: user });
-  } catch (err) {
-    console.log("User fetching err", err);
-    return res
-      .status(500)
-      .json({ success: false, ...messages.INTERNAL_SERVER_ERROR });
-  }
-};
+//     res.status(200).json({ success: true, data: user });
+//   } catch (err) {
+//     console.log("User fetching err", err);
+//     return res
+//       .status(500)
+//       .json({ success: false, ...messages.INTERNAL_SERVER_ERROR });
+//   }
+// };
 
 exports.getAllCustomers = async (req, res) => {
   try {

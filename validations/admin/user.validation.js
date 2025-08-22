@@ -110,3 +110,15 @@ exports.getUserValidation = [
     .isMongoId()
     .withMessage("userId is invalid"),
 ];
+
+exports.editCurrentAdminProfileValidate = [
+  body("name")
+    .notEmpty()
+    .withMessage("name is required")
+    .isString()
+    .withMessage("name must be a string"),
+  body("password")
+    .optional()
+    .isLength({ min: 6 })
+    .withMessage("Password must be at least 6 characters"),
+];

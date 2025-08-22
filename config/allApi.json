@@ -73,5 +73,7 @@
   "addCarFuelTypes",
   "getVendorListings",
   "getUser",
-  "updateCurrentVendorProfile"
+  "updateCurrentVendorProfile",
+  "editCurrentAdminProfile",
+  "getAllListings"
 ]

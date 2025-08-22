@@ -46,14 +46,16 @@
       "getCarDoors",
       "getCarTransmissions",
       "getCarFuelTypes",
-      "getUser"
+      "getUser",
+      "getAllListings"
     ],
     "put": [
       "updateProfile",
       "updateAccountStatus",
       "updateIsUserActive",
       "editEmailTemplate",
-      "editVendorProfile"
+      "editVendorProfile",
+      "editCurrentAdminProfile"
     ],
     "delete": [
       "deleteCountry",
@@ -65,7 +67,6 @@
       "year",
       "bodyType",
       "carRegionalSpecs",
-      "carHorsePower",
       "carHorsePower",
       "carSeating",
       "carColor",
