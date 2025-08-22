@@ -68,6 +68,8 @@ app.use(checkIsApproved);
 
 app.use("/api", require("./routes/vendor/listing.routes"));
 
+app.use("/api", require("./routes/vendor/user.routes"));
+
 // Connect DB and run migrations
 connectDB().then(() => runMigration());
 

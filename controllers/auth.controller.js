@@ -311,30 +311,45 @@ exports.resetPassword = async (req, res) => {
 exports.getCurrentLoggedInUser = async (req, res) => {
   const { id } = req.user;
   try {
-    const user = await User.findById(id).populate("profilePicture");
+    const user = await User.findById(id)
+      .select("-password -createdAt -updatedAt")
+      .populate("profilePicture");
     if (!user) {
       return res
         .status(404)
         .json({ success: false, ...messages.AUTH_USER_NOT_FOUND });
     }
 
+    const userObj =
+      user.role === 1
+        ? {
+            name: user.name,
+            email: user.email,
+            role: user.role,
+            status: user.status,
+            isActive: user.isActive,
+            token: generateToken(user._id, user.role, user.email),
+            profilePicture: user.profilePicture.url || null,
+          }
+        : {
+            _id: user._id,
+            name: user.name,
+            email: user.email,
+            businessName: user.businessName,
+            address: user.address,
+            contact: user.contact,
+            vendorInformation: user.vendorInformation,
+            token: generateToken(user._id, user.role, user.email),
+            role: user.role,
+            status: user.status,
+            profilePicture: user.profilePicture.url || null,
+            isActive: user.isActive,
+          };
+
     res.json({
       success: true,
       ...messages.USER_FOUND,
-      data: {
-        _id: user._id,
-        name: user.name,
-        email: user.email,
-        businessName: user.businessName,
-        address: user.address,
-        contact: user.contact,
-        vendorInformation: user.vendorInformation,
-        token: generateToken(user._id, user.role, user.email),
-        role: user.role,
-        status: user.status,
-        profilePicture: user.profilePicture.url || null,
-        isActive: user.isActive,
-      },
+      data: userObj,
     });
   } catch (err) {
     res.status(500).json({ message: err.message });

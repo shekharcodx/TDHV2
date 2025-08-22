@@ -36,6 +36,8 @@ const uploadFile = async (
   const key =
     keyName || `${folder}/${Date.now()}-${uuidv4()}-${baseName}${extension}`;
 
+  console.log({ buffer, folder, filename, keyName });
+
   try {
     const command = new PutObjectCommand({
       Bucket: process.env.S3_BUCKET_NAME,

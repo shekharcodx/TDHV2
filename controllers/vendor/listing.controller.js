@@ -173,7 +173,6 @@ exports.createListing = async (req, res) => {
 };
 
 exports.getListings = async (req, res) => {
-  console.log("vendorId", req.user.id);
   try {
     let pipeline = [
       { $match: { vendor: new mongoose.Types.ObjectId(req.user.id) } },
@@ -185,7 +184,9 @@ exports.getListings = async (req, res) => {
           localField: "vendor",
           foreignField: "_id",
           as: "vendor",
-          pipeline: [{ $project: { name: 1, email: 1, _id: 0 } }],
+          pipeline: [
+            { $project: { name: 1, email: 1, _id: 0, address: 1, contact: 1 } },
+          ],
         },
       },
       { $unwind: "$vendor" },

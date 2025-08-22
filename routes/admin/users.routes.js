@@ -10,6 +10,7 @@ const {
   getAllCustomers,
   getDocuments,
   editVendorProfile,
+  getUser,
 } = require("../../controllers/admin/user.controller");
 const {
   createAdminValidation,
@@ -17,6 +18,7 @@ const {
   updateAccountStatusValidation: accountStatusValidate,
   getDocumentsValidate,
   editVendorProfileValidation,
+  getUserValidation,
 } = require("../../validations/admin/user.validation");
 
 const cpUpload = require("../../middlewares/registerFiles.middleware");
@@ -48,6 +50,8 @@ router.get("/getPendingVendors", getPendingVendors);
 router.get("/getAllCustomers", getAllCustomers);
 
 router.get("/getDocument", getDocumentsValidate, validate, getDocuments);
+
+router.get("/getUser/:userId", getUserValidation, validate, getUser);
 
 router.put(
   "/editVendorProfile",

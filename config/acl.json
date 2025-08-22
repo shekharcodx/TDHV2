@@ -45,7 +45,8 @@
       "getDocument",
       "getCarDoors",
       "getCarTransmissions",
-      "getCarFuelTypes"
+      "getCarFuelTypes",
+      "getUser"
     ],
     "put": [
       "updateProfile",
@@ -100,7 +101,12 @@
       "getCarFuelTypes",
       "getVendorListings"
     ],
-    "put": ["createNewPassword", "updateProfile", "editVendorProfile"],
+    "put": [
+      "createNewPassword",
+      "updateProfile",
+      "editVendorProfile",
+      "updateCurrentVendorProfile"
+    ],
     "delete": []
   },
   "3": {

@@ -1,4 +1,4 @@
-const { body } = require("express-validator");
+const { body, param } = require("express-validator");
 const { USER_ROLES } = require("../config/constants");
 
 exports.registerValidation = [
@@ -73,6 +73,77 @@ exports.registerValidation = [
     .if(body("role").equals(USER_ROLES.VENDOR.toString()))
     .isInt({ min: 1 })
     .withMessage("Fleet size must be a positive number"),
+
+  body("ijariCertificate")
+    .if(body("role").equals(USER_ROLES.VENDOR.toString()))
+    .custom((value, { req }) => {
+      // console.log("ijariCertificate", req.files.ijariCertificate);
+      if (
+        !req.files ||
+        !req.files.ijariCertificate ||
+        req.files.ijariCertificate.length === 0
+      ) {
+        throw new Error("ijariCertificate is required");
+      }
+      return true;
+    }),
+  body("tradeLicense")
+    .if(body("role").equals(USER_ROLES.VENDOR.toString()))
+    .custom((value, { req }) => {
+      // console.log("tradeLicense", req.files.tradeLicense);
+      if (
+        !req.files ||
+        !req.files.tradeLicense ||
+        req.files.tradeLicense.length === 0
+      ) {
+        throw new Error("tradeLicense is required");
+      }
+      return true;
+    }),
+  body("vatCertificate")
+    .if(body("role").equals(USER_ROLES.VENDOR.toString()))
+    .custom((value, { req }) => {
+      // console.log("vatCertificate", req.files.vatCertificate);
+      if (
+        !req.files ||
+        !req.files.vatCertificate ||
+        req.files.vatCertificate.length === 0
+      ) {
+        throw new Error("vatCertificate is required");
+      }
+      return true;
+    }),
+  body("noc")
+    .if(body("role").equals(USER_ROLES.VENDOR.toString()))
+    .custom((value, { req }) => {
+      // console.log("noc", req.files.noc);
+      if (!req.files || !req.files.noc || req.files.noc.length === 0) {
+        throw new Error("noc is required");
+      }
+      return true;
+    }),
+  body("emiratesId")
+    .if(body("role").equals(USER_ROLES.VENDOR.toString()))
+    .custom((value, { req }) => {
+      // console.log("emiratesId", req.files.emiratesId);
+      if (
+        !req.files ||
+        !req.files.emiratesId ||
+        req.files.emiratesId.length === 0
+      ) {
+        throw new Error("emiratesId is required");
+      }
+      return true;
+    }),
+  body("poa")
+    .if(body("role").equals(USER_ROLES.VENDOR.toString()))
+    .custom((value, { req }) => {
+      // console.log("poa", req.files.poa);
+      if (!req.files || !req.files.poa || req.files.poa.length === 0) {
+        throw new Error("poa is required");
+      }
+      return true;
+    }),
 ];
 
 exports.updateProfileValidation = [

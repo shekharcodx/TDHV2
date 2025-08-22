@@ -1,4 +1,4 @@
-const { body, query } = require("express-validator");
+const { body, query, param } = require("express-validator");
 
 exports.createAdminValidation = [
   body("name").exists().withMessage("Name is required"),
@@ -47,13 +47,17 @@ exports.getDocumentsValidate = [
 ];
 
 exports.editVendorProfileValidation = [
+  body("vendorId")
+    .exists()
+    .withMessage("vendorId is required")
+    .isMongoId()
+    .withMessage("vendorId is invalid"),
   body("name")
     .notEmpty()
-    .withMessage("Name is required")
-    .isLength({ min: 2 })
-    .withMessage("Name must be at least 2 characters long"),
+    .withMessage("name is required")
+    .isString()
+    .withMessage("name must be a string"),
 
-  // Email
   body("email")
     .notEmpty()
     .withMessage("Email is required")
@@ -62,47 +66,47 @@ exports.editVendorProfileValidation = [
     .isLowercase()
     .withMessage("Email ID must be in lowercase letters"),
 
-  // Role
-  body("role")
-    .notEmpty()
-    .withMessage("Role is required")
-    .isIn([2])
-    .withMessage("Role must be vendor (2) or customer (3)"),
-
-  // Password
   body("password")
     .optional()
     .isLength({ min: 6 })
     .withMessage("Password must be at least 6 characters"),
 
-  // Vendor-specific fields
   body("businessName")
-    .exists()
-    .withMessage("Business name is required for vendors"),
+    .notEmpty()
+    .withMessage("businessName is required for vendors"),
 
   body("address.street")
-    .exists()
-    .withMessage("Street address is required for vendors"),
+    .notEmpty()
+    .withMessage("street is required for vendors"),
 
   body("address.country")
-    .exists()
-    .withMessage("Country is required for vendors"),
+    .notEmpty()
+    .withMessage("country is required for vendors"),
 
-  body("address.city").exists().withMessage("City is required for vendors"),
+  body("address.city").notEmpty().withMessage("city is required for vendors"),
 
   body("contact.mobileNum")
-    .exists()
+    .notEmpty()
     .withMessage("Mobile number is required for vendors"),
 
   body("contact.whatsappNum")
-    .exists()
+    .notEmpty()
     .withMessage("WhatsApp number is required for vendors"),
 
   body("contact.landlineNum")
-    .exists()
+    .notEmpty()
     .withMessage("LandLine number is required for vendors"),
 
   body("vendorInformation.fleetSize")
+    .optional()
     .isInt({ min: 1 })
     .withMessage("Fleet size must be a positive number"),
+];
+
+exports.getUserValidation = [
+  param("userId")
+    .exists()
+    .withMessage("userId is required")
+    .isMongoId()
+    .withMessage("userId is invalid"),
 ];

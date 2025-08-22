@@ -188,6 +188,26 @@ exports.getPendingVendors = async (req, res) => {
   }
 };
 
+exports.getUser = async (req, res) => {
+  const { userId } = req.params;
+  try {
+    const user = await User.findById(userId).select("-createdAt -updatedAt");
+
+    if (!user) {
+      return res
+        .status(404)
+        .json({ success: false, ...messages.AUTH_USER_NOT_FOUND });
+    }
+
+    res.status(200).json({ success: true, data: user });
+  } catch (err) {
+    console.log("User fetching err", err);
+    return res
+      .status(500)
+      .json({ success: false, ...messages.INTERNAL_SERVER_ERROR });
+  }
+};
+
 exports.getAllCustomers = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
@@ -238,37 +258,71 @@ exports.getDocuments = async (req, res) => {
   }
 };
 
-exports.editVendorProfile = async (req, res) => {
-  let {
-    name,
-    email,
-    role,
-    password,
-    businessName,
-    address,
-    contact,
-    vendorInformation,
-    status,
-  } = req.body;
-
-  role = parseInt(role);
-
-  if (2 !== role) {
-    return res
-      .status(400)
-      .json({ success: false, ...messages.AUTH_REGISTRAION_ROLE_INVALID });
-  }
-
+exports.getUser = async (req, res) => {
+  const { userId } = req.params;
   try {
-    let userObj = await User.findOne({ email });
-    if (!userObj)
+    const user = await User.findById(userId).select(
+      "-createdAt -updatedAt -password"
+    );
+
+    if (!user) {
+      return res
+        .status(404)
+        .json({ success: false, ...messages.AUTH_USER_NOT_FOUND });
+    }
+
+    res.status(200).json({ success: true, data: user });
+  } catch (err) {
+    console.log("User fetching err", err);
+    return res
+      .status(500)
+      .json({ success: false, ...messages.INTERNAL_SERVER_ERROR });
+  }
+};
+
+exports.editVendorProfile = async (req, res) => {
+  try {
+    const {
+      vendorId,
+      name,
+      email,
+      password,
+      businessName,
+      address,
+      contact,
+      vendorInformation,
+      status,
+    } = req.body;
+
+    // Find the user
+    const userObj = await User.findById(vendorId);
+    if (!userObj) {
       return res
         .status(400)
         .json({ success: false, ...messages.AUTH_USER_NOT_FOUND });
+    }
 
-    let documents = {};
+    // Prevent editing super admin if needed
+    if (userObj.role === 1) {
+      return res.status(403).json({
+        success: false,
+        ...messages.NOT_ALLOWED_TO_PERFORM_THIS_OPERATION,
+      });
+    }
 
-    // Upload vendor documents
+    // Check email uniqueness
+    if (email) {
+      const userExists = await User.findOne({ email });
+      if (userExists && userExists._id.toString() !== userObj._id.toString()) {
+        return res
+          .status(403)
+          .json({ success: false, ...messages.AUTH_USER_ALREADY_EXISTS });
+      }
+    }
+
+    const documents = {};
+
+    // Upload only newly uploaded files
     const docFields = [
       "ijariCertificate",
       "tradeLicense",
@@ -278,17 +332,17 @@ exports.editVendorProfile = async (req, res) => {
       "poa",
     ];
 
+    // Only include uploaded files
     for (const field of docFields) {
-      if (req.files && req.files[field]) {
+      if (req.files && req.files[field] && req.files[field][0]) {
         const file = req.files[field][0];
-        const fileBuffer = file.buffer;
-        const fileName = file.originalname;
+        const previousKey = userObj.vendorInformation?.documents?.[field]?.key;
 
         const result = await uploadFile(
-          fileBuffer,
+          file.buffer,
           "vendor_documents",
-          fileName,
-          userObj.vendorInformation?.documents?.[field]?.key
+          file.originalname,
+          previousKey
         );
 
         documents[field] = {
@@ -298,8 +352,14 @@ exports.editVendorProfile = async (req, res) => {
       }
     }
 
-    // Upload profile picture if present
-    let profilePictureData = null;
+    // Update only uploaded fields
+    if (!userObj.vendorInformation.documents)
+      userObj.vendorInformation.documents = {};
+    for (const field of Object.keys(documents)) {
+      userObj.vendorInformation.documents[field] = documents[field];
+    }
+
+    // Handle profile picture
     if (req.files && req.files["profilePicture"]) {
       const file = req.files["profilePicture"][0];
       const result = await uploadFile(
@@ -308,42 +368,27 @@ exports.editVendorProfile = async (req, res) => {
         file.originalname,
         userObj?.profilePicture?.key
       );
-      profilePictureData = {
+      userObj.profilePicture = {
         url: result.url,
         key: result.key,
       };
     }
 
-    // Prepare user data for DB
-    const userData = {
-      name,
-      email,
-      password: password ? await bcrypt.hash(password, 10) : userObj.password,
-      role,
-      status,
-      businessName,
-      address,
-      contact,
-      vendorInformation: {
-        fleetSize: vendorInformation?.fleetSize,
-        documents,
-      },
-    };
+    // Update optional fields safely
+    if (name) userObj.name = name;
+    if (email) userObj.email = email;
+    if (password) userObj.password = await bcrypt.hash(password, 10);
+    if (status !== undefined) userObj.status = status;
+    if (businessName) userObj.businessName = businessName;
+    if (address) userObj.address = address;
+    if (contact) userObj.contact = contact;
+    if (vendorInformation?.fleetSize)
+      userObj.vendorInformation.fleetSize = vendorInformation.fleetSize;
 
-    if (documents.profilePicture) {
-      userData.profilePicture = documents.profilePicture;
-    }
-
-    Object.assign(userObj, userData);
-
+    // Save the user
     await userObj.save();
 
-    // await sendEmailFromTemplate("temporary_password", user.email, {
-    //   name: user.name,
-    //   tempPassword: password,
-    // });
-
-    res.status(201).json({
+    res.status(200).json({
       success: true,
       ...messages.PROFILE_UPDATED,
       data: {
@@ -356,6 +401,7 @@ exports.editVendorProfile = async (req, res) => {
       },
     });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error(error);
+    res.status(500).json({ success: false, ...messages.INTERNAL_SERVER_ERROR });
   }
 };

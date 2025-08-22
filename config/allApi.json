@@ -71,5 +71,7 @@
   "addCarDoors",
   "addCarTransmissions",
   "addCarFuelTypes",
-  "getVendorListings"
+  "getVendorListings",
+  "getUser",
+  "updateCurrentVendorProfile"
 ]
