@@ -2,7 +2,7 @@ let mongoose = require("mongoose");
 const bcrypt = require("bcrypt");
 const User = require("../models/user.model");
 const EmailTemplate = require("../models/emailTemplates.model");
-const { templates } = require("../utils/constants");
+const { templates } = require("../config/emailTemplates");
 
 module.exports = async function runMigration() {
   try {

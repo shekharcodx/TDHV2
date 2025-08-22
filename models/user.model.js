@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 const mongoosePaginate = require("mongoose-paginate-v2");
-const { USER_ROLES, ACCOUNT_STATUS } = require("../utils/constants");
+const { USER_ROLES, ACCOUNT_STATUS } = require("../config/constants");
 
 const userSchema = new mongoose.Schema(
   {

@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 const mongoosePaginate = require("mongoose-paginate-v2");
-const { LISTING_STATUS } = require("../utils/constants");
+const { LISTING_STATUS } = require("../config/constants");
 
 const rentalListingSchema = new mongoose.Schema({
   vendor: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },

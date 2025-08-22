@@ -97,7 +97,8 @@
       "getDocument",
       "getCarDoors",
       "getCarTransmissions",
-      "getCarFuelTypes"
+      "getCarFuelTypes",
+      "getVendorListings"
     ],
     "put": ["createNewPassword", "updateProfile", "editVendorProfile"],
     "delete": []

@@ -9,7 +9,7 @@ const generateRandomPassword = require("../utils/generatePassword");
 const { sendEmailFromTemplate } = require("../utils/sendEmail");
 const { uploadFile } = require("../utils/s3");
 const { validateJWT } = require("../utils/verifyToken");
-const { ACCOUNT_STATUS, USER_ROLES } = require("../utils/constants");
+const { ACCOUNT_STATUS, USER_ROLES } = require("../config/constants");
 
 exports.register = async (req, res) => {
   let {

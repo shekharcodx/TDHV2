@@ -3,7 +3,7 @@ const helmet = require("helmet");
 const dotenv = require("dotenv");
 const connectDB = require("./config/db");
 const cors = require("cors");
-const bodyParser = require("body-parser");
+const rateLimit = require("express-rate-limit");
 
 dotenv.config();
 
@@ -11,8 +11,19 @@ const runMigration = require("./migrations/migration");
 const apisMiddleware = require("./middlewares/api.middleware");
 const aclMiddleware = require("./middlewares/acl.middleware");
 const authMiddleware = require("./middlewares/auth.middleware");
+const checkIsApproved = require("./middlewares/checkIsApproved");
 
 const app = express();
+
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // limit each IP to 100 requests per windowMs
+  message: "Too many requests from this IP, please try again later.",
+  standardHeaders: true, // return rate limit info in `RateLimit-*` headers
+  legacyHeaders: false, // disable the `X-RateLimit-*` headers
+});
+
+app.use(limiter);
 
 // Security headers
 app.use(helmet());
@@ -50,6 +61,10 @@ app.use("/api", require("./routes/admin/locations.routes"));
 app.use("/api", require("./routes/admin/emails.routes"));
 
 app.use("/api", require("./routes/admin/car.routes"));
+
+app.use("/api", require("./routes/vendor/location.routes"));
+
+app.use(checkIsApproved);
 
 app.use("/api", require("./routes/vendor/listing.routes"));
 

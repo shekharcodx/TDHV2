@@ -131,4 +131,9 @@ module.exports = {
     error: "AUTH_RESET_TOKEN_REQUIRED",
     message: "Password reset token is required",
   },
+  ACCOUNT_NOT_APPROVED: {
+    code: 9028,
+    error: "ACCOUNT_NOT_APPROVED",
+    message: "Your account has not been approved, please contact support",
+  },
 };

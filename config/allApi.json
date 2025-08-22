@@ -70,5 +70,6 @@
   "carTransmission",
   "addCarDoors",
   "addCarTransmissions",
-  "addCarFuelTypes"
+  "addCarFuelTypes",
+  "getVendorListings"
 ]
