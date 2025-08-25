@@ -8,4 +8,9 @@ const seatingCapacitySchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+seatingCapacitySchema.index(
+  { seats: 1 },
+  { unique: true, collation: { locale: "en", strength: 2 } }
+);
+
 module.exports = mongoose.model("SeatingCapacity", seatingCapacitySchema);

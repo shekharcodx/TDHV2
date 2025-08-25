@@ -8,4 +8,9 @@ const bodyTypeSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+bodyTypeSchema.index(
+  { name: 1 },
+  { unique: true, collation: { locale: "en", strength: 2 } }
+);
+
 module.exports = mongoose.model("BodyType", bodyTypeSchema);

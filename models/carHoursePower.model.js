@@ -8,4 +8,9 @@ const horsePowerSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+horsePowerSchema.index(
+  { power: 1 },
+  { unique: true, collation: { locale: "en", strength: 2 } }
+);
+
 module.exports = mongoose.model("HorsePower", horsePowerSchema);

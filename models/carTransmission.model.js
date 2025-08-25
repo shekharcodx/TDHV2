@@ -8,4 +8,9 @@ const carTransmissionSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+carTransmissionSchema.index(
+  { transmission: 1 },
+  { unique: true, collation: { locale: "en", strength: 2 } }
+);
+
 module.exports = mongoose.model("Transmission", carTransmissionSchema);

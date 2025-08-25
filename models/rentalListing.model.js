@@ -4,108 +4,158 @@ const { LISTING_STATUS } = require("../config/constants");
 
 const rentalListingSchema = new mongoose.Schema({
   vendor: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+
   carBrand: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "CarBrand",
-    required: true,
+    _id: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "CarBrand",
+      required: true,
+    },
+    name: { type: String, required: true },
+    logo: {
+      url: { type: String, required: true },
+      key: { type: String, required: true },
+    },
   },
+
   carModel: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "CarModel",
-    required: true,
+    _id: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "CarModel",
+      required: true,
+    },
+    name: { type: String, required: true },
   },
+
   carTrim: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "Trim",
-    required: true,
+    _id: { type: mongoose.Schema.Types.ObjectId, ref: "Trim" },
+    name: { type: String },
   },
+
   regionalSpecs: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "RegionalSpecs",
-    required: true,
+    _id: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "RegionalSpecs",
+      required: true,
+    },
+    name: { type: String, required: true },
   },
+
   modelYear: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "Years",
-    required: true,
+    _id: { type: mongoose.Schema.Types.ObjectId, ref: "Years", required: true },
+    year: { type: Number, required: true },
   },
-  mileage: {
-    type: Number,
-    required: true,
-  },
+
+  mileage: { type: Number, required: true },
+
   bodyType: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "BodyType",
-    required: true,
+    _id: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "BodyType",
+      required: true,
+    },
+    name: { type: String, required: true },
   },
-  carInsurance: {
-    type: String,
-    required: true,
-  },
+
+  carInsurance: { type: String, required: true },
+
   rentPerDay: { type: Number, required: true },
+  rentPerWeek: { type: Number, required: true },
   rentPerMonth: { type: Number, required: true },
   title: { type: String, required: true },
   description: { type: String },
+
   fuelType: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "FuelType",
-    required: true,
+    _id: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "FuelType",
+      required: true,
+    },
+    name: { type: String, required: true },
   },
+
   interiorColor: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "CarColor",
-    required: true,
+    _id: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "CarColor",
+      required: true,
+    },
+    name: { type: String, required: true },
   },
+
   exteriorColor: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "CarColor",
-    required: true,
+    _id: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "CarColor",
+      required: true,
+    },
+    name: { type: String, required: true },
   },
+
   warranty: { type: String, required: true },
+
   carDoors: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "CarDoor",
-    required: true,
+    _id: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "CarDoor",
+      required: true,
+    },
+    doors: { type: Number, required: true },
   },
+
   transmission: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "Transmission",
-    required: true,
+    _id: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Transmission",
+      required: true,
+    },
+    transmission: { type: String, required: true },
   },
+
   seatingCapacity: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "SeatingCapacity",
-    required: true,
+    _id: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "SeatingCapacity",
+      required: true,
+    },
+    seats: { type: Number, required: true },
   },
+
   horsePower: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "HorsePower",
-    required: true,
+    _id: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "HorsePower",
+      required: true,
+    },
+    power: { type: Number, required: true },
   },
+
   techFeatures: [
     {
       type: mongoose.Schema.Types.ObjectId,
       ref: "TechnicalFeature",
     },
   ],
+
   otherFeatures: [
-    {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "OtherFeature",
-    },
+    { type: mongoose.Schema.Types.ObjectId, ref: "OtherFeature" },
   ],
+
   location: { type: String, required: true },
+
   images: [
     {
       key: { type: String, required: true },
       url: { type: String, required: true },
     },
   ],
+
   status: {
     type: Number,
     enum: Object.values(LISTING_STATUS),
     default: LISTING_STATUS.PENDING,
   },
+
   isActive: { type: Boolean, default: true },
   isFeatured: { type: Boolean, default: false },
   isPremium: { type: Boolean, default: false },

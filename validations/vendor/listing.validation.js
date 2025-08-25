@@ -43,6 +43,12 @@ exports.rentalListingValidator = [
     .isInt({ min: 0 })
     .withMessage("Rent per day cannot be negative"),
 
+  body("rentPerWeek")
+    .isNumeric()
+    .withMessage("Rent per week must be a number")
+    .isInt({ min: 0 })
+    .withMessage("Rent per week cannot be negative"),
+
   body("rentPerMonth")
     .isNumeric()
     .withMessage("Rent per month must be a number")

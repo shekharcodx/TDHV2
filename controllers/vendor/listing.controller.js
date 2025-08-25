@@ -2,11 +2,25 @@ const messages = require("../../messages/messages");
 const countryModel = require("../../models/country.model");
 const stateModel = require("../../models/state.model");
 const cityModel = require("../../models/city.model");
+
 const { default: mongoose } = require("mongoose");
 const RentalListing = require("../../models/rentalListing.model");
 const { uploadFile } = require("../../utils/s3");
 const vendorMessages = require("../../messages/vendor");
 const sharp = require("sharp");
+
+const brandModel = require("../../models/carBrand.model");
+const modelModel = require("../../models/carModel.model");
+const trimModel = require("../../models/carTrims.model");
+const doorModel = require("../../models/carDoors.model");
+const transmissionModel = require("../../models/carTransmission.model");
+const fuelTypeModel = require("../../models/carFuelType.model");
+const yearModel = require("../../models/years.model");
+const regionalSpecsModel = require("../../models/carRegionalSpecs.model");
+const colorModel = require("../../models/carColor.model");
+const seatingModel = require("../../models/carSeatingCapacity.model");
+const horsePowerModel = require("../../models/carHoursePower.model");
+const bodyTypeModel = require("../../models/carBodyType.model");
 
 exports.getCountriesData = async (req, res) => {
   try {
@@ -105,6 +119,58 @@ exports.getCities = async (req, res) => {
 
 exports.createListing = async (req, res) => {
   try {
+    const [
+      brand,
+      model,
+      trim,
+      specs,
+      year,
+      bodyType,
+      fuelType,
+      interiorColor,
+      exteriorColor,
+      transmission,
+      doors,
+      seats,
+      power,
+    ] = await Promise.all([
+      brandModel.findById(req.body.carBrand, "name logo"),
+      modelModel.findById(req.body.carModel, "name"),
+      trimModel.findById(req.body.carTrim, "name"),
+      regionalSpecsModel.findById(req.body.regionalSpecs, "name"),
+      yearModel.findById(req.body.modelYear, "year"),
+      bodyTypeModel.findById(req.body.bodyType, "name"),
+      fuelTypeModel.findById(req.body.fuelType, "name"),
+      colorModel.findById(req.body.interiorColor, "name"),
+      colorModel.findById(req.body.exteriorColor, "name"),
+      transmissionModel.findById(req.body.transmission, "transmission"),
+      doorModel.findById(req.body.carDoors, "doors"),
+      seatingModel.findById(req.body.seatingCapacity, "seats"),
+      horsePowerModel.findById(req.body.horsePower, "power"),
+    ]);
+
+    if (
+      !brand ||
+      !model ||
+      !trim ||
+      !year ||
+      !specs ||
+      !bodyType ||
+      !fuelType ||
+      !interiorColor ||
+      !exteriorColor ||
+      !transmission ||
+      !doors ||
+      !seats ||
+      !power
+    ) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Invalid reference provided" });
+    }
+
+    console.log({ seats, power });
+
     let imagesArr = [];
 
     if (req.files && req.files.length > 0) {
@@ -132,26 +198,40 @@ exports.createListing = async (req, res) => {
 
     const carListing = new RentalListing({
       vendor: req.user.id, // from auth middleware
-      carBrand: req.body.carBrand,
-      carModel: req.body.carModel,
-      carTrim: req.body.carTrim,
-      regionalSpecs: req.body.regionalSpecs,
-      modelYear: req.body.modelYear,
+      carBrand: {
+        _id: req.body.carBrand,
+        name: brand.name,
+        logo: brand.logo,
+      },
+      carModel: { _id: req.body.carModel, name: model.name },
+      carTrim: { _id: req.body.carTrim, name: trim.name },
+      regionalSpecs: { _id: req.body.regionalSpecs, name: specs.name },
+      modelYear: { _id: req.body.modelYear, year: year.year },
       mileage: req.body.mileage,
-      bodyType: req.body.bodyType,
+      bodyType: { _id: req.body.bodyType, name: bodyType.name },
       carInsurance: req.body.carInsurance,
       rentPerDay: req.body.rentPerDay,
+      rentPerWeek: req.body.rentPerWeek,
       rentPerMonth: req.body.rentPerMonth,
       title: req.body.title,
       description: req.body.description,
-      fuelType: req.body.fuelType,
-      interiorColor: req.body.interiorColor,
-      exteriorColor: req.body.exteriorColor,
+      fuelType: { _id: req.body.fuelType, name: fuelType.name },
+      interiorColor: {
+        _id: req.body.interiorColor,
+        name: interiorColor.name,
+      },
+      exteriorColor: {
+        _id: req.body.exteriorColor,
+        name: exteriorColor.name,
+      },
       warranty: req.body.warranty,
-      carDoors: req.body.carDoors,
-      transmission: req.body.transmission,
-      seatingCapacity: req.body.seatingCapacity,
-      horsePower: req.body.horsePower,
+      carDoors: { _id: req.body.carDoors, doors: doors.doors },
+      transmission: {
+        _id: req.body.transmission,
+        transmission: transmission.transmission,
+      },
+      seatingCapacity: { _id: req.body.seatingCapacity, seats: seats.seats },
+      horsePower: { _id: req.body.horsePower, power: power.power },
       techFeatures: req.body.techFeatures,
       otherFeatures: req.body.otherFeatures,
       location: req.body.location,
@@ -168,7 +248,7 @@ exports.createListing = async (req, res) => {
   } catch (err) {
     return res
       .status(500)
-      .json({ success: true, ...messages.INTERNAL_SERVER_ERROR });
+      .json({ success: false, ...messages.INTERNAL_SERVER_ERROR });
   }
 };
 
@@ -190,202 +270,6 @@ exports.getListings = async (req, res) => {
         },
       },
       { $unwind: "$vendor" },
-
-      // brand
-      {
-        $lookup: {
-          from: "carbrands",
-          localField: "carBrand",
-          foreignField: "_id",
-          as: "carBrand",
-          pipeline: [{ $project: { name: 1, logo: 1 } }],
-        },
-      },
-      { $unwind: "$carBrand" },
-
-      // model
-      {
-        $lookup: {
-          from: "carmodels",
-          localField: "carModel",
-          foreignField: "_id",
-          as: "carModel",
-          pipeline: [{ $project: { name: 1 } }],
-        },
-      },
-      { $unwind: "$carModel" },
-
-      // trim
-      {
-        $lookup: {
-          from: "trims",
-          localField: "carTrim",
-          foreignField: "_id",
-          as: "carTrim",
-          pipeline: [{ $project: { name: 1 } }],
-        },
-      },
-      { $unwind: { path: "$carTrim", preserveNullAndEmptyArrays: true } },
-
-      // year
-      {
-        $lookup: {
-          from: "years",
-          localField: "modelYear",
-          foreignField: "_id",
-          as: "modelYear",
-          pipeline: [{ $project: { year: 1 } }],
-        },
-      },
-      { $unwind: "$modelYear" },
-
-      // regional spec
-      {
-        $lookup: {
-          from: "regionalspecs",
-          localField: "regionalSpecs",
-          foreignField: "_id",
-          as: "regionalSpecs",
-          pipeline: [{ $project: { name: 1 } }],
-        },
-      },
-      { $unwind: "$regionalSpecs" },
-
-      {
-        $lookup: {
-          from: "bodytypes",
-          localField: "bodyType",
-          foreignField: "_id",
-          as: "bodyType",
-          pipeline: [
-            {
-              $project: {
-                name: 1,
-              },
-            },
-          ],
-        },
-      },
-      { $unwind: "$bodyType" },
-
-      {
-        $lookup: {
-          from: "fueltypes",
-          localField: "fuelType",
-          foreignField: "_id",
-          as: "fuelType",
-          pipeline: [
-            {
-              $project: {
-                name: 1,
-              },
-            },
-          ],
-        },
-      },
-      { $unwind: "$fuelType" },
-
-      {
-        $lookup: {
-          from: "cardoors",
-          localField: "carDoors",
-          foreignField: "_id",
-          as: "carDoors",
-          pipeline: [
-            {
-              $project: {
-                doors: 1,
-              },
-            },
-          ],
-        },
-      },
-      { $unwind: "$carDoors" },
-
-      {
-        $lookup: {
-          from: "transmissions",
-          localField: "transmission",
-          foreignField: "_id",
-          as: "transmission",
-          pipeline: [
-            {
-              $project: {
-                transmission: 1,
-              },
-            },
-          ],
-        },
-      },
-      { $unwind: "$transmission" },
-
-      {
-        $lookup: {
-          from: "seatingcapacities",
-          localField: "seatingCapacity",
-          foreignField: "_id",
-          as: "seatingCapacity",
-          pipeline: [
-            {
-              $project: {
-                seats: 1,
-              },
-            },
-          ],
-        },
-      },
-      { $unwind: "$seatingCapacity" },
-
-      {
-        $lookup: {
-          from: "horsepowers",
-          localField: "horsePower",
-          foreignField: "_id",
-          as: "horsePower",
-          pipeline: [
-            {
-              $project: {
-                power: 1,
-              },
-            },
-          ],
-        },
-      },
-      { $unwind: "$horsePower" },
-
-      {
-        $lookup: {
-          from: "carcolors",
-          localField: "interiorColor",
-          foreignField: "_id",
-          as: "interiorColor",
-          pipeline: [
-            {
-              $project: {
-                name: 1,
-              },
-            },
-          ],
-        },
-      },
-      { $unwind: "$interiorColor" },
-
-      {
-        $lookup: {
-          from: "carcolors",
-          localField: "exteriorColor",
-          foreignField: "_id",
-          as: "exteriorColor",
-          pipeline: [
-            {
-              $project: {
-                name: 1,
-              },
-            },
-          ],
-        },
-      },
-      { $unwind: "$exteriorColor" },
 
       {
         $lookup: {
@@ -440,8 +324,20 @@ exports.getListings = async (req, res) => {
                   horsePower: "$horsePower.power",
                   interiorColor: "$interiorColor.name",
                   exteriorColor: "$exteriorColor.name",
-                  techFeatures: "$techFeatures.name",
-                  otherFeatures: "$otherFeatures.name",
+                  techFeatures: {
+                    $map: {
+                      input: "$techFeatures",
+                      as: "tf",
+                      in: "$$tf.name",
+                    },
+                  },
+                  otherFeatures: {
+                    $map: {
+                      input: "$otherFeatures",
+                      as: "of",
+                      in: "$$of.name",
+                    },
+                  },
                 },
               },
             },
@@ -452,6 +348,7 @@ exports.getListings = async (req, res) => {
             images: "$images",
           },
           rentPerDay: 1,
+          rentPerWeek: 1,
           rentPerMonth: 1,
           title: 1,
           description: 1,

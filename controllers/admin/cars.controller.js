@@ -12,6 +12,7 @@ const OtherFeature = require("../../models/carOtherFeatures.model");
 const FuelType = require("../../models/carFuelType.model");
 const Transmission = require("../../models/carTransmission.model");
 const CarDoors = require("../../models/carDoors.model");
+const RentalListing = require("../../models/rentalListing.model");
 
 const messages = require("../../messages/messages");
 const adminMessages = require("../../messages/admin");
@@ -19,6 +20,7 @@ const adminMessages = require("../../messages/admin");
 const softDelete = require("../../utils/softDelete");
 
 const { uploadFile } = require("../../utils/s3");
+const { default: mongoose } = require("mongoose");
 
 exports.addCarBrand = async (req, res) => {
   const { name } = req.body;
@@ -53,16 +55,36 @@ exports.addCarModels = async (req, res) => {
           filter: { name, carBrand: brandId },
           update: { $set: { name, isActive: true } },
           upsert: true,
+          collation: { locale: "en", strength: 2 },
         },
       }))
     );
 
-    const carModel = await CarModel.find({ name: { $in: names } });
+    const carModels = await CarModel.find({
+      name: { $in: names },
+      carBrand: brandId,
+    });
+
+    const bulkOps = carModels.map((model) => ({
+      updateMany: {
+        filter: { "carModel._id": model._id },
+        update: {
+          $set: {
+            "carModel.name": model.name,
+            "carModel._id": model._id,
+          },
+        },
+      },
+    }));
+
+    if (bulkOps.length > 0) {
+      await RentalListing.bulkWrite(bulkOps);
+    }
 
     res.status(200).json({
       success: true,
       ...adminMessages.CAR_MODEL_CREATED,
-      data: carModel,
+      data: carModels,
     });
   } catch (err) {
     return res
@@ -80,16 +102,36 @@ exports.addCarTrims = async (req, res) => {
           filter: { name, carModel: modelId },
           update: { $set: { name, isActive: true } },
           upsert: true,
+          collation: { locale: "en", strength: 2 },
         },
       }))
     );
 
-    const carTrim = await CarTrim.find({ name: { $in: names } });
+    const carTrims = await CarTrim.find({
+      name: { $in: names },
+      carModel: modelId,
+    });
+
+    const bulkOps = carTrims.map((trim) => ({
+      updateMany: {
+        filter: { "carTrim._id": trim._id },
+        update: {
+          $set: {
+            "carTrim.name": trim.name,
+            "carTrim._id": trim._id,
+          },
+        },
+      },
+    }));
+
+    if (bulkOps.length > 0) {
+      await RentalListing.bulkWrite(bulkOps);
+    }
 
     res.status(200).json({
       success: true,
       ...adminMessages.CAR_TRIM_CREATED,
-      data: carTrim,
+      data: carTrims,
     });
   } catch (err) {
     return res
@@ -104,21 +146,37 @@ exports.addCarBodyTypes = async (req, res) => {
     await CarBodyType.bulkWrite(
       names.map((name) => ({
         updateOne: {
-          filter: { name: name },
+          filter: { name },
           update: { $set: { name, isActive: true } },
           upsert: true,
+          collation: { locale: "en", strength: 2 },
         },
       }))
     );
 
-    const carBodyType = await CarBodyType.find({
+    const carBodyTypes = await CarBodyType.find({
       name: { $in: names },
     });
+
+    const bulkOps = carBodyTypes.map((type) => ({
+      updateMany: {
+        filter: { "bodyType._id": new mongoose.Types.ObjectId(type._id) },
+        update: {
+          $set: {
+            "bodyType.name": type.name, // update the name
+          },
+        },
+      },
+    }));
+
+    if (bulkOps.length > 0) {
+      const result = await RentalListing.bulkWrite(bulkOps);
+    }
 
     res.status(200).json({
       success: true,
       ...adminMessages.CAR_BODY_TYPE_CREATED,
-      data: carBodyType,
+      data: carBodyTypes,
     });
   } catch (err) {
     return res
@@ -136,15 +194,32 @@ exports.addYears = async (req, res) => {
           filter: { year },
           update: { $set: { year, isActive: true } },
           upsert: true,
+          collation: { locale: "en", strength: 2 },
         },
       }))
     );
 
-    const year = await Year.find({ year: { $in: years } });
+    const years = await Year.find({ year: { $in: years } });
+
+    const bulkOps = years.map((year) => ({
+      updateMany: {
+        filter: { "modelYear._id": year._id },
+        update: {
+          $set: {
+            "modelYear.year": year.year,
+            "modelYear._id": year._id,
+          },
+        },
+      },
+    }));
+
+    if (bulkOps.length > 0) {
+      await RentalListing.bulkWrite(bulkOps);
+    }
 
     res
       .status(200)
-      .json({ success: true, ...adminMessages.YEAR_CREATED, data: year });
+      .json({ success: true, ...adminMessages.YEAR_CREATED, data: years });
   } catch (err) {
     return res
       .status(500)
@@ -161,11 +236,28 @@ exports.addCarRegionalSpecs = async (req, res) => {
           filter: { name: spec },
           update: { $set: { name: spec, isActive: true } },
           upsert: true,
+          collation: { locale: "en", strength: 2 },
         },
       }))
     );
 
     const regionalSpecs = await RegionalSpecs.find({ name: { $in: specs } });
+
+    const bulkOps = regionalSpecs.map((spec) => ({
+      updateMany: {
+        filter: { "regionalSpecs._id": spec._id },
+        update: {
+          $set: {
+            "regionalSpecs.name": spec.name,
+            "regionalSpecs._id": spec._id,
+          },
+        },
+      },
+    }));
+
+    if (bulkOps.length > 0) {
+      await RentalListing.bulkWrite(bulkOps);
+    }
 
     res.status(200).json({
       success: true,
@@ -188,11 +280,28 @@ exports.addCarHorsePowers = async (req, res) => {
           filter: { power },
           update: { $set: { power, isActive: true } },
           upsert: true,
+          collation: { locale: "en", strength: 2 },
         },
       }))
     );
 
     const powers = await HorsePower.find({ power: { $in: horsePowers } });
+
+    const bulkOps = powers.map((power) => ({
+      updateMany: {
+        filter: { "horsePower._id": power._id },
+        update: {
+          $set: {
+            "horsePower.power": power.power,
+            "horsePower._id": power._id,
+          },
+        },
+      },
+    }));
+
+    if (bulkOps.length > 0) {
+      await RentalListing.bulkWrite(bulkOps);
+    }
 
     res.status(200).json({
       success: true,
@@ -215,6 +324,7 @@ exports.addCarSeatingCapacity = async (req, res) => {
           filter: { seats: cap },
           update: { $set: { seats: cap, isActive: true } },
           upsert: true,
+          collation: { locale: "en", strength: 2 },
         },
       }))
     );
@@ -222,6 +332,22 @@ exports.addCarSeatingCapacity = async (req, res) => {
     const capacities = await SeatingCapacity.find({
       seats: { $in: seatingCapacities },
     });
+
+    const bulkOps = capacities.map((capacity) => ({
+      updateMany: {
+        filter: { "seatingCapacity._id": capacity._id },
+        update: {
+          $set: {
+            "seatingCapacity.seats": capacity.seats,
+            "seatingCapacity._id": capacity._id,
+          },
+        },
+      },
+    }));
+
+    if (bulkOps.length > 0) {
+      await RentalListing.bulkWrite(bulkOps);
+    }
 
     res.status(200).json({
       success: true,
@@ -244,11 +370,44 @@ exports.addCarColors = async (req, res) => {
           filter: { name: color },
           update: { $set: { name: color, isActive: true } },
           upsert: true,
+          collation: { locale: "en", strength: 2 },
         },
       }))
     );
 
     const carColors = await CarColor.find({ name: { $in: colors } });
+
+    const bulkOps = [];
+    carColors.forEach((color) => {
+      bulkOps.push(
+        {
+          updateMany: {
+            filter: { "interiorColor._id": color._id },
+            update: {
+              $set: {
+                "interiorColor.name": color.name,
+                "interiorColor._id": color._id,
+              },
+            },
+          },
+        },
+        {
+          updateMany: {
+            filter: { "exteriorColor._id": color._id },
+            update: {
+              $set: {
+                "exteriorColor.name": color.name,
+                "exteriorColor._id": color._id,
+              },
+            },
+          },
+        }
+      );
+    });
+
+    if (bulkOps.length > 0) {
+      await RentalListing.bulkWrite(bulkOps);
+    }
 
     res.status(200).json({
       success: true,
@@ -271,6 +430,7 @@ exports.addCarTechFeatures = async (req, res) => {
           filter: { name: feature },
           update: { $set: { name: feature, isActive: true } },
           upsert: true,
+          collation: { locale: "en", strength: 2 },
         },
       }))
     );
@@ -300,6 +460,7 @@ exports.addCarOtherFeatures = async (req, res) => {
           filter: { name: feature },
           update: { $set: { name: feature, isActive: true } },
           upsert: true,
+          collation: { locale: "en", strength: 2 },
         },
       }))
     );
@@ -329,11 +490,28 @@ exports.addCarFuelTypes = async (req, res) => {
           filter: { name: type },
           update: { $set: { name: type, isActive: true } },
           upsert: true,
+          collation: { locale: "en", strength: 2 },
         },
       }))
     );
 
     const types = await FuelType.find({ name: { $in: fuelTypes } });
+
+    const bulkOps = types.map((type) => ({
+      updateMany: {
+        filter: { "fuelType._id": type._id },
+        update: {
+          $set: {
+            "fuelType.name": type.name,
+            "fuelType._id": type._id,
+          },
+        },
+      },
+    }));
+
+    if (bulkOps.length > 0) {
+      await RentalListing.bulkWrite(bulkOps);
+    }
 
     res.status(200).json({
       success: true,
@@ -356,6 +534,7 @@ exports.addCarTransmissions = async (req, res) => {
           filter: { transmission: type },
           update: { $set: { transmission: type, isActive: true } },
           upsert: true,
+          collation: { locale: "en", strength: 2 },
         },
       }))
     );
@@ -363,6 +542,22 @@ exports.addCarTransmissions = async (req, res) => {
     const types = await Transmission.find({
       transmission: { $in: transmissions },
     });
+
+    const bulkOps = types.map((type) => ({
+      updateMany: {
+        filter: { "transmission._id": type._id },
+        update: {
+          $set: {
+            "transmission.transmission": type.transmission,
+            "transmission._id": type._id,
+          },
+        },
+      },
+    }));
+
+    if (bulkOps.length > 0) {
+      await RentalListing.bulkWrite(bulkOps);
+    }
 
     res.status(200).json({
       success: true,
@@ -385,6 +580,7 @@ exports.addCarDoors = async (req, res) => {
           filter: { doors: door },
           update: { $set: { doors: door, isActive: true } },
           upsert: true,
+          collation: { locale: "en", strength: 2 },
         },
       }))
     );
@@ -392,6 +588,22 @@ exports.addCarDoors = async (req, res) => {
     const types = await CarDoors.find({
       doors: { $in: doors },
     });
+
+    const bulkOps = types.map((type) => ({
+      updateMany: {
+        filter: { "carDoors._id": type._id },
+        update: {
+          $set: {
+            "carDoors.doors": type.doors,
+            "carDoors._id": type._id,
+          },
+        },
+      },
+    }));
+
+    if (bulkOps.length > 0) {
+      await RentalListing.bulkWrite(bulkOps);
+    }
 
     res.status(200).json({
       success: true,

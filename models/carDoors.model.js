@@ -8,4 +8,9 @@ const carDoorsSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+carDoorsSchema.index(
+  { doors: 1 },
+  { unique: true, collation: { locale: "en", strength: 2 } }
+);
+
 module.exports = mongoose.model("CarDoor", carDoorsSchema);

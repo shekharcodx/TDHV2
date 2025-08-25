@@ -47,7 +47,8 @@
       "getCarTransmissions",
       "getCarFuelTypes",
       "getUser",
-      "getAllListings"
+      "getAllListings",
+      "getListing"
     ],
     "put": [
       "updateProfile",
@@ -100,7 +101,8 @@
       "getCarDoors",
       "getCarTransmissions",
       "getCarFuelTypes",
-      "getVendorListings"
+      "getVendorListings",
+      "getListing"
     ],
     "put": [
       "createNewPassword",

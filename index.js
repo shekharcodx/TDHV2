@@ -66,6 +66,8 @@ app.use("/api", require("./routes/admin/listing.routes"));
 
 app.use("/api", require("./routes/vendor/location.routes"));
 
+app.use("/api", require("./routes/common/listing.routes"));
+
 app.use(checkIsApproved);
 
 app.use("/api", require("./routes/vendor/listing.routes"));

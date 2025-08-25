@@ -1,8 +1,16 @@
+const messages = require("../../messages/messages");
+const adminMessages = require("../../messages/admin");
 const RentalListing = require("../../models/rentalListing.model");
+const { default: mongoose } = require("mongoose");
 
-exports.getAllListings = async (req, res) => {
+exports.getListing = async (req, res) => {
+  const { listingId } = req.params;
+  const { role, email } = req.user;
+
   try {
     let pipeline = [
+      { $match: { _id: new mongoose.Types.ObjectId(listingId) } },
+
       // vendor
       {
         $lookup: {
@@ -94,6 +102,7 @@ exports.getAllListings = async (req, res) => {
             images: "$images",
           },
           rentPerDay: 1,
+          rentPerWeek: 1,
           rentPerMonth: 1,
           title: 1,
           description: 1,
@@ -106,9 +115,20 @@ exports.getAllListings = async (req, res) => {
       },
     ];
 
-    const listings = await RentalListing.aggregate(pipeline);
+    const listing = await RentalListing.aggregate(pipeline);
+    if (!listing) {
+      return res
+        .status(404)
+        .json({ success: false, ...adminMessages.RESOURCE_NOT_FOUND });
+    }
 
-    res.status(200).json({ success: true, listings });
+    if (role !== 1 && email !== listing.vendor.email) {
+      return res
+        .status(403)
+        .json({ success: false, ...messages.NOT_AUTHORIZED });
+    }
+
+    res.status(200).json({ success: true, listing });
   } catch (err) {
     return res
       .status(500)
