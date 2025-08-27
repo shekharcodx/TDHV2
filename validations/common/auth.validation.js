@@ -1,5 +1,5 @@
 const { body, param } = require("express-validator");
-const { USER_ROLES } = require("../config/constants");
+const { USER_ROLES } = require("../../config/constants");
 
 exports.registerValidation = [
   // Name

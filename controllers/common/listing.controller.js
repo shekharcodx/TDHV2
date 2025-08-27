@@ -115,7 +115,8 @@ exports.getListing = async (req, res) => {
       },
     ];
 
-    const listing = await RentalListing.aggregate(pipeline);
+    const [listing] = await RentalListing.aggregate(pipeline);
+
     if (!listing) {
       return res
         .status(404)

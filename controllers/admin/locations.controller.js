@@ -1,6 +1,6 @@
-const Country = require("../../models/country.model");
-const State = require("../../models/state.model");
-const City = require("../../models/city.model");
+const Country = require("../../models/locationModels/country.model");
+const State = require("../../models/locationModels/state.model");
+const City = require("../../models/locationModels/city.model");
 const adminMessages = require("../../messages/admin");
 const messages = require("../../messages/messages");
 

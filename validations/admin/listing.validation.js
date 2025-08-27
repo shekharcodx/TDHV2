@@ -15,3 +15,16 @@ exports.listingStatusValidation = [
     .isIn([1, 2, 3])
     .withMessage("status can only be 1, 2, or 3"),
 ];
+
+exports.listingIsActiveValidation = [
+  param("listingId")
+    .exists()
+    .withMessage("listingId is required")
+    .isMongoId()
+    .withMessage("Invalid listingId"),
+  body("isActive")
+    .exists()
+    .withMessage("isActive is required")
+    .isBoolean()
+    .withMessage("isActive must be boolean"),
+];

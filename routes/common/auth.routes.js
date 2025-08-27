@@ -1,9 +1,9 @@
 const express = require("express");
 const router = express.Router();
-const validate = require("../middlewares/validate.middleware");
-const protect = require("../middlewares/auth.middleware");
-const upload = require("../middlewares/upload.middleware");
-const cpUpload = require("../middlewares/registerFiles.middleware");
+const validate = require("../../middlewares/validate.middleware");
+const protect = require("../../middlewares/auth.middleware");
+const upload = require("../../middlewares/upload.middleware");
+const cpUpload = require("../../middlewares/registerFiles.middleware");
 const {
   register,
   login,
@@ -12,7 +12,7 @@ const {
   getCurrentLoggedInUser,
   forgetPassword,
   resetPassword,
-} = require("../controllers/auth.controller");
+} = require("../../controllers/common/auth.controller");
 const {
   registerValidation,
   loginValidation,
@@ -20,7 +20,7 @@ const {
   changePasswordValidation,
   forgetPasswordValidation,
   resetPasswordValidation,
-} = require("../validations/auth.validation");
+} = require("../../validations/common/auth.validation");
 
 router.post("/register", cpUpload, registerValidation, validate, register);
 

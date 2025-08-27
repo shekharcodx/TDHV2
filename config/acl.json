@@ -59,6 +59,7 @@
       "adminProfile",
       "listingStatus"
     ],
+    "patch": ["listing"],
     "delete": [
       "country",
       "state",
@@ -105,18 +106,15 @@
       "vendorListings",
       "listing"
     ],
-    "put": [
-      "createNewPassword",
-      "profile",
-      "editVendorProfile",
-      "vendorProfile"
-    ],
+    "put": ["createNewPassword", "profile", "vendorProfile", "vendorListing"],
+    "patch": ["vendorListing"],
     "delete": []
   },
   "3": {
     "post": ["login", "register", "updateProfile"],
     "get": ["getCurrentUser"],
     "put": ["updateProfile"],
+    "patch": [],
     "delete": []
   }
 }

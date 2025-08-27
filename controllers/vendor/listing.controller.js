@@ -1,7 +1,8 @@
 const messages = require("../../messages/messages");
-const countryModel = require("../../models/country.model");
-const stateModel = require("../../models/state.model");
-const cityModel = require("../../models/city.model");
+const adminMessages = require("../../messages/admin");
+const countryModel = require("../../models/locationModels/country.model");
+const stateModel = require("../../models/locationModels/state.model");
+const cityModel = require("../../models/locationModels/city.model");
 
 const { default: mongoose } = require("mongoose");
 const RentalListing = require("../../models/rentalListing.model");
@@ -9,18 +10,18 @@ const { uploadFile } = require("../../utils/s3");
 const vendorMessages = require("../../messages/vendor");
 const sharp = require("sharp");
 
-const brandModel = require("../../models/carBrand.model");
-const modelModel = require("../../models/carModel.model");
-const trimModel = require("../../models/carTrims.model");
-const doorModel = require("../../models/carDoors.model");
-const transmissionModel = require("../../models/carTransmission.model");
-const fuelTypeModel = require("../../models/carFuelType.model");
-const yearModel = require("../../models/years.model");
-const regionalSpecsModel = require("../../models/carRegionalSpecs.model");
-const colorModel = require("../../models/carColor.model");
-const seatingModel = require("../../models/carSeatingCapacity.model");
-const horsePowerModel = require("../../models/carHoursePower.model");
-const bodyTypeModel = require("../../models/carBodyType.model");
+const brandModel = require("../../models/carModels/carBrand.model");
+const modelModel = require("../../models/carModels/carModel.model");
+const trimModel = require("../../models/carModels/carTrims.model");
+const doorModel = require("../../models/carModels/carDoors.model");
+const transmissionModel = require("../../models/carModels/carTransmission.model");
+const fuelTypeModel = require("../../models/carModels/carFuelType.model");
+const yearModel = require("../../models/carModels/years.model");
+const regionalSpecsModel = require("../../models/carModels/carRegionalSpecs.model");
+const colorModel = require("../../models/carModels/carColor.model");
+const seatingModel = require("../../models/carModels/carSeatingCapacity.model");
+const horsePowerModel = require("../../models/carModels/carHoursePower.model");
+const bodyTypeModel = require("../../models/carModels/carBodyType.model");
 
 exports.getCountriesData = async (req, res) => {
   try {
@@ -135,8 +136,8 @@ exports.createListing = async (req, res) => {
       power,
     ] = await Promise.all([
       brandModel.findById(req.body.carBrand, "name logo"),
-      modelModel.findById(req.body.carModel, "name"),
-      trimModel.findById(req.body.carTrim, "name"),
+      modelModel.findById(req.body.carModel, "carBrand name"),
+      trimModel.findById(req.body.carTrim, "carModel name"),
       regionalSpecsModel.findById(req.body.regionalSpecs, "name"),
       yearModel.findById(req.body.modelYear, "year"),
       bodyTypeModel.findById(req.body.bodyType, "name"),
@@ -169,7 +170,14 @@ exports.createListing = async (req, res) => {
         .json({ success: false, message: "Invalid reference provided" });
     }
 
-    console.log({ seats, power });
+    if (
+      brand._id.toString() !== model.carBrand.toString() ||
+      trim.carModel.toString() !== model._id.toString()
+    ) {
+      return res
+        .status(403)
+        .json({ success: false, ...vendorMessages.UNRELATED_CAR_DATA });
+    }
 
     let imagesArr = [];
 
@@ -368,5 +376,226 @@ exports.getListings = async (req, res) => {
     return res
       .status(500)
       .json({ success: false, ...messages.INTERNAL_SERVER_ERROR });
+  }
+};
+
+exports.listingIsActive = async (req, res) => {
+  const { listingId } = req.params;
+  const { isActive } = req.body;
+  try {
+    const listing = await RentalListing.findById(listingId);
+
+    if (!listing) {
+      return res
+        .status(404)
+        .json({ success: false, ...adminMessages.LISTING_NOT_FOUND });
+    }
+
+    if (listing?.vendor.toString() !== req.user.id) {
+      return res
+        .status(403)
+        .json({ success: false, ...messages.NOT_AUTHORIZED });
+    }
+
+    listing.isActive = isActive;
+    await listing.save();
+
+    res.status(200).json({
+      success: true,
+      ...adminMessages.LISTING_STATUS_UPDATED,
+      data: listing,
+    });
+  } catch (err) {
+    return res
+      .status(500)
+      .json({ success: false, ...messages.INTERNAL_SERVER_ERROR });
+  }
+};
+
+exports.updateListing = async (req, res) => {
+  const { listingId } = req.params;
+  const body = req.body || {};
+
+  try {
+    const listing = await RentalListing.findById(listingId);
+
+    if (!listing) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Listing not found" });
+    }
+
+    if (listing.vendor.toString() !== req.user.id) {
+      return res
+        .status(403)
+        .json({ success: false, message: "Not authorized" });
+    }
+
+    // Fetch reference data
+    const [
+      brand,
+      model,
+      trim,
+      specs,
+      year,
+      bodyType,
+      fuelType,
+      interiorColor,
+      exteriorColor,
+      transmission,
+      doors,
+      seats,
+      power,
+    ] = await Promise.all([
+      body.carBrand ? brandModel.findById(body.carBrand, "name logo") : null,
+      body.carModel
+        ? modelModel.findById(body.carModel, "name carBrand")
+        : null,
+      body.carTrim ? trimModel.findById(body.carTrim, "name carModel") : null,
+      body.regionalSpecs
+        ? regionalSpecsModel.findById(body.regionalSpecs, "name")
+        : null,
+      body.modelYear ? yearModel.findById(body.modelYear, "year") : null,
+      body.bodyType ? bodyTypeModel.findById(body.bodyType, "name") : null,
+      body.fuelType ? fuelTypeModel.findById(body.fuelType, "name") : null,
+      body.interiorColor
+        ? colorModel.findById(body.interiorColor, "name")
+        : null,
+      body.exteriorColor
+        ? colorModel.findById(body.exteriorColor, "name")
+        : null,
+      body.transmission
+        ? transmissionModel.findById(body.transmission, "transmission")
+        : null,
+      body.carDoors ? doorModel.findById(body.carDoors, "doors") : null,
+      body.seatingCapacity
+        ? seatingModel.findById(body.seatingCapacity, "seats")
+        : null,
+      body.horsePower
+        ? horsePowerModel.findById(body.horsePower, "power")
+        : null,
+    ]);
+
+    // Validate references if provided
+    const invalidRefs = [];
+    if (body.carBrand && !brand) invalidRefs.push("carBrand");
+    if (body.carModel && !model) invalidRefs.push("carModel");
+    if (body.carTrim && !trim) invalidRefs.push("carTrim");
+    if (body.modelYear && !year) invalidRefs.push("modelYear");
+    if (body.regionalSpecs && !specs) invalidRefs.push("regionalSpecs");
+    if (body.bodyType && !bodyType) invalidRefs.push("bodyType");
+    if (body.fuelType && !fuelType) invalidRefs.push("fuelType");
+    if (body.interiorColor && !interiorColor) invalidRefs.push("interiorColor");
+    if (body.exteriorColor && !exteriorColor) invalidRefs.push("exteriorColor");
+    if (body.transmission && !transmission) invalidRefs.push("transmission");
+    if (body.carDoors && !doors) invalidRefs.push("carDoors");
+    if (body.seatingCapacity && !seats) invalidRefs.push("seatingCapacity");
+    if (body.horsePower && !power) invalidRefs.push("horsePower");
+
+    if (invalidRefs.length > 0) {
+      return res.status(400).json({
+        success: false,
+        code: 2070,
+        error: "INVALID_REFS",
+        message: `Invalid references: ${invalidRefs.join(", ")}`,
+      });
+    }
+
+    if (
+      brand._id.toString() !== model.carBrand.toString() ||
+      trim.carModel.toString() !== model._id.toString()
+    ) {
+      return res
+        .status(403)
+        .json({ success: false, ...vendorMessages.UNRELATED_CAR_DATA });
+    }
+
+    // Handle images
+    let imagesArr = listing.images || [];
+    if (req.files && req.files.length > 0) {
+      const uploadedImages = await Promise.all(
+        req.files.map(async (file, i) => {
+          const optimizedImage = await sharp(file.buffer)
+            .resize(1280, 720, { fit: "cover" })
+            .toFormat("webp")
+            .webp({ quality: 80 })
+            .toBuffer();
+
+          const result = await uploadFile(
+            optimizedImage,
+            "listing_images",
+            file.originalname,
+            listing.images[i]?.key || null,
+            { contentType: "image/webp", extension: ".webp" }
+          );
+          return { url: result.url, key: result.key };
+        })
+      );
+      imagesArr = uploadedImages;
+    }
+
+    // Update fields if provided
+    if (brand)
+      listing.carBrand = {
+        _id: body.carBrand,
+        name: brand.name,
+        logo: brand.logo,
+      };
+    if (model) listing.carModel = { _id: body.carModel, name: model.name };
+    if (trim) listing.carTrim = { _id: body.carTrim, name: trim.name };
+    if (specs)
+      listing.regionalSpecs = { _id: body.regionalSpecs, name: specs.name };
+    if (year) listing.modelYear = { _id: body.modelYear, year: year.year };
+    if (body.mileage !== undefined) listing.mileage = body.mileage;
+    if (bodyType)
+      listing.bodyType = { _id: body.bodyType, name: bodyType.name };
+    if (body.carInsurance) listing.carInsurance = body.carInsurance;
+    if (body.rentPerDay !== undefined) listing.rentPerDay = body.rentPerDay;
+    if (body.rentPerWeek !== undefined) listing.rentPerWeek = body.rentPerWeek;
+    if (body.rentPerMonth !== undefined)
+      listing.rentPerMonth = body.rentPerMonth;
+    if (body.title) listing.title = body.title;
+    if (body.description) listing.description = body.description;
+    if (fuelType)
+      listing.fuelType = { _id: body.fuelType, name: fuelType.name };
+    if (interiorColor)
+      listing.interiorColor = {
+        _id: body.interiorColor,
+        name: interiorColor.name,
+      };
+    if (exteriorColor)
+      listing.exteriorColor = {
+        _id: body.exteriorColor,
+        name: exteriorColor.name,
+      };
+    if (body.warranty) listing.warranty = body.warranty;
+    if (doors) listing.carDoors = { _id: body.carDoors, doors: doors.doors };
+    if (transmission)
+      listing.transmission = {
+        _id: body.transmission,
+        transmission: transmission.transmission,
+      };
+    if (seats)
+      listing.seatingCapacity = {
+        _id: body.seatingCapacity,
+        seats: seats.seats,
+      };
+    if (power)
+      listing.horsePower = { _id: body.horsePower, power: power.power };
+    if (body.techFeatures) listing.techFeatures = body.techFeatures;
+    if (body.otherFeatures) listing.otherFeatures = body.otherFeatures;
+    if (body.location) listing.location = body.location;
+    listing.images = imagesArr;
+
+    await listing.save();
+
+    res.status(200).json({
+      success: true,
+      ...vendorMessages.LISTING_UPDATED,
+      data: listing,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, ...messages.INTERNAL_SERVER_ERROR });
   }
 };

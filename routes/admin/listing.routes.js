@@ -4,10 +4,12 @@ const router = express.Router();
 const {
   getAllListings,
   listingStatus,
+  listingIsActive,
 } = require("../../controllers/admin/listing.controller");
 
 const {
   listingStatusValidation,
+  listingIsActiveValidation,
 } = require("../../validations/admin/listing.validation");
 
 const validate = require("../../middlewares/validate.middleware");
@@ -19,6 +21,13 @@ router.put(
   listingStatusValidation,
   validate,
   listingStatus
+);
+
+router.patch(
+  "/listing/:listingId",
+  listingIsActiveValidation,
+  validate,
+  listingIsActive
 );
 
 module.exports = router;

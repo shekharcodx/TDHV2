@@ -142,3 +142,33 @@ exports.listingStatus = async (req, res) => {
       .json({ success: false, ...messages.INTERNAL_SERVER_ERROR });
   }
 };
+
+exports.listingIsActive = async (req, res) => {
+  const { listingId } = req.params;
+  const { isActive } = req.body;
+  try {
+    const listing = await RentalListing.findByIdAndUpdate(
+      listingId,
+      { isActive },
+      { new: true }
+    );
+
+    if (!listing) {
+      return res
+        .status(404)
+        .json({ success: false, ...adminMessages.LISTING_NOT_FOUND });
+    }
+
+    res
+      .status(200)
+      .json({
+        success: true,
+        ...adminMessages.LISTING_STATUS_UPDATED,
+        data: listing,
+      });
+  } catch (err) {
+    return res
+      .status(500)
+      .json({ success: false, ...messages.INTERNAL_SERVER_ERROR });
+  }
+};

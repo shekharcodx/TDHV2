@@ -1,15 +1,15 @@
 const bcrypt = require("bcrypt");
-const User = require("../models/user.model");
-const generateToken = require("../utils/generateToken");
+const User = require("../../models/user.model");
+const generateToken = require("../../utils/generateToken");
 const jwt = require("jsonwebtoken");
-const messages = require("../messages/messages");
-const uploadBufferToCloudinary = require("../utils/uploadToClaudinary");
-const deleteImage = require("../utils/deleteImage");
-const generateRandomPassword = require("../utils/generatePassword");
-const { sendEmailFromTemplate } = require("../utils/sendEmail");
-const { uploadFile } = require("../utils/s3");
-const { validateJWT } = require("../utils/verifyToken");
-const { ACCOUNT_STATUS, USER_ROLES } = require("../config/constants");
+const messages = require("../../messages/messages");
+const uploadBufferToCloudinary = require("../../utils/uploadToClaudinary");
+const deleteImage = require("../../utils/deleteImage");
+const generateRandomPassword = require("../../utils/generatePassword");
+const { sendEmailFromTemplate } = require("../../utils/sendEmail");
+const { uploadFile } = require("../../utils/s3");
+const { validateJWT } = require("../../utils/verifyToken");
+const { ACCOUNT_STATUS, USER_ROLES } = require("../../config/constants");
 
 exports.register = async (req, res) => {
   let {

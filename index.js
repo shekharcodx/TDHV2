@@ -49,7 +49,7 @@ app.get("/", (req, res) => {
 app.use(apisMiddleware);
 
 // Routes
-app.use("/api", require("./routes/auth.routes"));
+app.use("/api", require("./routes/common/auth.routes"));
 
 app.use(authMiddleware);
 app.use(aclMiddleware);

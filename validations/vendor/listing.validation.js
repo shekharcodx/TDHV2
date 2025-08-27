@@ -144,3 +144,141 @@ exports.rentalListingValidator = [
     .isBoolean()
     .withMessage("isPremium must be true or false"),
 ];
+
+exports.listingIsActiveValidation = [
+  param("listingId")
+    .exists()
+    .withMessage("listingId is required")
+    .isMongoId()
+    .withMessage("Invalid listingId"),
+  body("isActive")
+    .exists()
+    .withMessage("isActive is required")
+    .isBoolean()
+    .withMessage("isActive must be boolean"),
+];
+
+exports.updateListingValidation = [
+  // Validate listingId param
+  param("listingId")
+    .exists()
+    .withMessage("listingId is required")
+    .isMongoId()
+    .withMessage("Invalid listingId"),
+
+  // Validate reference fields (optional, but must be valid Mongo IDs if provided)
+  body("carBrand")
+    .optional()
+    .isMongoId()
+    .withMessage("Invalid carBrand ID")
+    .bail()
+    .custom((carBrand, { req }) => {
+      if (carBrand && !req.body.carModel) {
+        throw new Error("carModel is required when carBrand is provided");
+      }
+      return true;
+    }),
+
+  body("carModel")
+    .optional()
+    .isMongoId()
+    .withMessage("Invalid carModel ID")
+    .bail()
+    .custom((carModel, { req }) => {
+      if (carModel && !req.body.carTrim) {
+        throw new Error("carTrim is required when carModel is provided");
+      }
+      if (!carModel && req.body.carTrim) {
+        throw new Error("carModel is required when carTrim is provided");
+      }
+      return true;
+    }),
+
+  body("carTrim")
+    .optional()
+    .isMongoId()
+    .withMessage("Invalid carTrim ID")
+    .bail()
+    .custom((carTrim, { req }) => {
+      if (carTrim && !req.body.carModel) {
+        throw new Error("carModel is required when carTrim is provided");
+      }
+      if (carTrim && !req.body.carBrand) {
+        throw new Error("carBrand is required when carTrim is provided");
+      }
+      return true;
+    }),
+
+  body("regionalSpecs")
+    .optional()
+    .isMongoId()
+    .withMessage("Invalid regionalSpecs ID"),
+  body("modelYear").optional().isMongoId().withMessage("Invalid modelYear ID"),
+  body("bodyType").optional().isMongoId().withMessage("Invalid bodyType ID"),
+  body("fuelType").optional().isMongoId().withMessage("Invalid fuelType ID"),
+  body("interiorColor")
+    .optional()
+    .isMongoId()
+    .withMessage("Invalid interiorColor ID"),
+  body("exteriorColor")
+    .optional()
+    .isMongoId()
+    .withMessage("Invalid exteriorColor ID"),
+  body("transmission")
+    .optional()
+    .isMongoId()
+    .withMessage("Invalid transmission ID"),
+  body("carDoors").optional().isMongoId().withMessage("Invalid carDoors ID"),
+  body("seatingCapacity")
+    .optional()
+    .isMongoId()
+    .withMessage("Invalid seatingCapacity ID"),
+  body("horsePower")
+    .optional()
+    .isMongoId()
+    .withMessage("Invalid horsePower ID"),
+
+  // Simple fields
+  body("mileage")
+    .optional()
+    .isNumeric()
+    .withMessage("mileage must be a number"),
+  body("carInsurance")
+    .optional()
+    .isBoolean()
+    .withMessage("carInsurance must be true or false")
+    .toBoolean(),
+  body("rentPerDay")
+    .optional()
+    .isNumeric()
+    .withMessage("rentPerDay must be a number"),
+  body("rentPerWeek")
+    .optional()
+    .isNumeric()
+    .withMessage("rentPerWeek must be a number"),
+  body("rentPerMonth")
+    .optional()
+    .isNumeric()
+    .withMessage("rentPerMonth must be a number"),
+  body("title").optional().isString().withMessage("title must be a string"),
+  body("description")
+    .optional()
+    .isString()
+    .withMessage("description must be a string"),
+  body("warranty")
+    .optional()
+    .isString()
+    .withMessage("warranty must be a string"),
+  body("techFeatures")
+    .optional()
+    .isArray()
+    .withMessage("techFeatures must be an array"),
+  body("otherFeatures")
+    .optional()
+    .isArray()
+    .withMessage("otherFeatures must be an array"),
+  body("location")
+    .optional()
+    .isString()
+    .withMessage("location must be a string"),
+];
