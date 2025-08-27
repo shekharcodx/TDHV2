@@ -8,11 +8,6 @@ const {
 
 const validate = require("../../middlewares/validate.middleware");
 
-router.get(
-  "/getListing/:listingId",
-  getListingValidation,
-  validate,
-  getListing
-);
+router.get("/listing/:listingId", getListingValidation, validate, getListing);
 
 module.exports = router;

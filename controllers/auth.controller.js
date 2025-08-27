@@ -179,7 +179,7 @@ exports.login = async (req, res) => {
 
     if (user.temporaryPassword) {
       return res
-        .status(403)
+        .status(430)
         .json({ success: false, ...messages.AUTH_VENDOR_CREATE_NEW_PASSWORD });
     }
 
@@ -226,7 +226,7 @@ exports.createNewPassword = async (req, res) => {
 
     res.json({ success: true, ...messages.AUTH_PASSWORD_CHANGED });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    res.status(500).json({ success: false, ...messages.INTERNAL_SERVER_ERROR });
   }
 };
 

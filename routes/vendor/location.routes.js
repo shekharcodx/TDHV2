@@ -14,12 +14,12 @@ const {
 
 const validate = require("../../middlewares/validate.middleware");
 
-router.get("/getCountriesData", getCountriesData);
+router.get("/countriesData", getCountriesData);
 
-router.get("/getCountries", getCountries);
+router.get("/countries", getCountries);
 
-router.get("/getStates/:countryId", getStatesValidation, validate, getStates);
+router.get("/states/:countryId", getStatesValidation, validate, getStates);
 
-router.get("/getCities/:stateId", getCitiesValidation, validate, getCities);
+router.get("/cities/:stateId", getCitiesValidation, validate, getCities);
 
 module.exports = router;

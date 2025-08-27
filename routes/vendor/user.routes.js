@@ -14,7 +14,7 @@ const validate = require("../../middlewares/validate.middleware");
 const cUpload = require("../../middlewares/registerFiles.middleware");
 
 router.put(
-  "/updateCurrentVendorProfile",
+  "/vendorProfile",
   cUpload,
   editVendorProfileValidation,
   validate,

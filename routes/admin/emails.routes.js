@@ -9,10 +9,10 @@ const {
 } = require("../../validations/admin/email.validation");
 const validate = require("../../middlewares/validate.middleware");
 
-router.get("/getEmailTempates", getEmailTempates);
+router.get("/emailTempates", getEmailTempates);
 
 router.put(
-  "/editEmailTemplate/:templateId",
+  "/emailTemplate/:templateId",
   editEmailValidation,
   validate,
   editEmailTemplate

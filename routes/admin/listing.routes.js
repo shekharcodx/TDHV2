@@ -5,6 +5,6 @@ const {
   getAllListings,
 } = require("../../controllers/admin/listing.controller");
 
-router.get("/getAllListings", getAllListings);
+router.get("/allListings", getAllListings);
 
 module.exports = router;

@@ -21,31 +21,21 @@ const {
 
 const validate = require("../../middlewares/validate.middleware");
 
-router.post("/addCountry", addCountryValidation, validate, addCountry);
+router.post("/country", addCountryValidation, validate, addCountry);
 
-router.post("/addStates", addStatesValidation, validate, addStates);
+router.post("/states", addStatesValidation, validate, addStates);
 
-router.post("/addCities", addCitiesValidation, validate, addCities);
+router.post("/cities", addCitiesValidation, validate, addCities);
 
 router.delete(
-  "/deleteCountry/:countryId",
+  "/country/:countryId",
   deleteCountryValidation,
   validate,
   deleteCountry
 );
 
-router.delete(
-  "/deleteState/:stateId",
-  deleteStateValidation,
-  validate,
-  deleteState
-);
+router.delete("/state/:stateId", deleteStateValidation, validate, deleteState);
 
-router.delete(
-  "/deleteCity/:cityId",
-  deleteCityValidation,
-  validate,
-  deleteCity
-);
+router.delete("/city/:cityId", deleteCityValidation, validate, deleteCity);
 
 module.exports = router;

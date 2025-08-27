@@ -29,32 +29,32 @@ const validate = require("../../middlewares/validate.middleware");
 const upload = require("../../middlewares/upload.middleware");
 
 router.put(
-  "/updateAccountStatus",
+  "/accountStatus",
   accountStatusValidate,
   validate,
   updateAccountStatus
 );
 
-router.post("/createAdmin", createAdminValidation, validate, createAdmin);
+router.post("/admin", createAdminValidation, validate, createAdmin);
 
-router.get("/getAllAdmins", getAllAdmins);
+router.get("/admins", getAllAdmins);
 
 router.put(
-  "/updateIsUserActive",
+  "/profileActiveStatus",
   updateIsActiveValidation,
   validate,
   updateIsUserActive
 );
 
-router.get("/getAllVendors", getAllVendors);
+router.get("/vendors", getAllVendors);
 
-router.get("/getPendingVendors", getPendingVendors);
+router.get("/pendingVendors", getPendingVendors);
 
-router.get("/getAllCustomers", getAllCustomers);
+router.get("/customers", getAllCustomers);
 
-router.get("/getDocument", getDocumentsValidate, validate, getDocuments);
+router.get("/document", getDocumentsValidate, validate, getDocuments);
 
-router.get("/getUser/:userId", getUserValidation, validate, getUser);
+router.get("/user/:userId", getUserValidation, validate, getUser);
 
 router.put(
   "/editVendorProfile",
@@ -65,7 +65,7 @@ router.put(
 );
 
 router.put(
-  "/editCurrentAdminProfile",
+  "/adminProfile",
   upload.single("profilePicture"),
   editCurrentAdminProfileValidate,
   validate,

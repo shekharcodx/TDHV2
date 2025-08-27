@@ -83,116 +83,116 @@ const upload = require("../../middlewares/upload.middleware");
 const validate = require("../../middlewares/validate.middleware");
 
 router.post(
-  "/addCarBrand",
+  "/carBrand",
   upload.single("logo"),
   addCarBrandValidation,
   validate,
   addCarBrand
 );
 
-router.post("/addCarModels", addCarModelsValidation, validate, addCarModels);
+router.post("/carModels", addCarModelsValidation, validate, addCarModels);
 
-router.post("/addCarTrims", addCarTrimsValidation, validate, addCarTrims);
+router.post("/carTrims", addCarTrimsValidation, validate, addCarTrims);
 
 router.post(
-  "/addCarBodyTypes",
+  "/carBodyTypes",
   addCarBodyTypesValidation,
   validate,
   addCarBodyTypes
 );
 
-router.post("/addYears", addYearsValidation, validate, addYears);
+router.post("/years", addYearsValidation, validate, addYears);
 
 router.post(
-  "/addCarRegionalSpecs",
+  "/carRegionalSpecs",
   addCarRegionalSpecsValidation,
   validate,
   addCarRegionalSpecs
 );
 
 router.post(
-  "/addCarHorsePowers",
+  "/carHorsePowers",
   addCarHorsePowersValidate,
   validate,
   addCarHorsePowers
 );
 
 router.post(
-  "/addCarSeatingCapacities",
+  "/carSeatingCapacities",
   addCarSeatingCapacityValidate,
   validate,
   addCarSeatingCapacity
 );
 
-router.post("/addCarColors", addCarColorsValidate, validate, addCarColors);
+router.post("/carColors", addCarColorsValidate, validate, addCarColors);
 
 router.post(
-  "/addCarTechFeatures",
+  "/carTechFeatures",
   addCarTechFeaturesValidate,
   validate,
   addCarTechFeatures
 );
 
 router.post(
-  "/addCarOtherFeatures",
+  "/carOtherFeatures",
   addCarTechFeaturesValidate,
   validate,
   addCarOtherFeatures
 );
 
 router.post(
-  "/addCarFuelTypes",
+  "/carFuelTypes",
   addCarFuelTypesValidation,
   validate,
   addCarFuelTypes
 );
 
 router.post(
-  "/addCarTransmissions",
+  "/carTransmissions",
   addCarTransmissionValidation,
   validate,
   addCarTransmissions
 );
 
-router.post("/addCarDoors", addCarDoorsValidation, validate, addCarDoors);
+router.post("/carDoors", addCarDoorsValidation, validate, addCarDoors);
 
-router.get("/getCarBrands", getCarBrands);
+router.get("/carBrands", getCarBrands);
 
 router.get(
-  "/getCarModels/:carBrandId",
+  "/carModels/:carBrandId",
   getCarModelsValidation,
   validate,
   getCarModels
 );
 
 router.get(
-  "/getCarTrims/:carModelId",
+  "/carTrims/:carModelId",
   getCarTrimsValidation,
   validate,
   getCarTrims
 );
 
-router.get("/getYears", getYears);
+router.get("/years", getYears);
 
-router.get("/getBodyTypes", getBodyTypes);
+router.get("/bodyTypes", getBodyTypes);
 
-router.get("/getCarRegionalSpecs", getCarRegionalSpecs);
+router.get("/carRegionalSpecs", getCarRegionalSpecs);
 
-router.get("/getCarHorsePowers", getCarHorsePowers);
+router.get("/carHorsePowers", getCarHorsePowers);
 
-router.get("/getCarSeatingCapacities", getCarSeatingCapacities);
+router.get("/carSeatingCapacities", getCarSeatingCapacities);
 
-router.get("/getCarColors", getCarColors);
+router.get("/carColors", getCarColors);
 
-router.get("/getCarTechFeatures", getCarTechFeatures);
+router.get("/carTechFeatures", getCarTechFeatures);
 
-router.get("/getCarOtherFeatures", getCarOtherFeatures);
+router.get("/carOtherFeatures", getCarOtherFeatures);
 
-router.get("/getCarFuelTypes", getCarFuelType);
+router.get("/carFuelTypes", getCarFuelType);
 
-router.get("/getCarTransmissions", getCarTransmission);
+router.get("/carTransmissions", getCarTransmission);
 
-router.get("/getCarDoors", getCarDoors);
+router.get("/carDoors", getCarDoors);
 
 router.delete(
   "/carBrand/:brandId",

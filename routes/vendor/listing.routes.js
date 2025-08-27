@@ -12,13 +12,13 @@ const upload = require("../../middlewares/upload.middleware");
 const validate = require("../../middlewares/validate.middleware");
 
 router.post(
-  "/createListing",
+  "/listing",
   upload.array("images"),
   rentalListingValidator,
   validate,
   createListing
 );
 
-router.get("/getVendorListings", getListings);
+router.get("/vendorListings", getListings);
 
 module.exports = router;
