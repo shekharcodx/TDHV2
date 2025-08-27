@@ -59,5 +59,6 @@
   "vendorProfile",
   "adminProfile",
   "allListings",
-  "getListing"
+  "getListing",
+  "listingStatus"
 ]

@@ -1,3 +1,5 @@
+const messages = require("../../messages/messages");
+const adminMessages = require("../../messages/admin");
 const RentalListing = require("../../models/rentalListing.model");
 
 exports.getAllListings = async (req, res) => {
@@ -109,6 +111,31 @@ exports.getAllListings = async (req, res) => {
     const listings = await RentalListing.aggregate(pipeline);
 
     res.status(200).json({ success: true, listings });
+  } catch (err) {
+    return res
+      .status(500)
+      .json({ success: false, ...messages.INTERNAL_SERVER_ERROR });
+  }
+};
+
+exports.listingStatus = async (req, res) => {
+  const { listingId } = req.params;
+  const { status } = req.body;
+  try {
+    const listing = await RentalListing.findById(listingId);
+
+    if (!listing) {
+      return res
+        .status(404)
+        .json({ success: false, ...adminMessages.LISTING_NOT_FOUND });
+    }
+
+    listing.status = status;
+    await listing.save();
+
+    res
+      .status(200)
+      .json({ success: true, ...adminMessages.LISTING_STATUS_UPDATED });
   } catch (err) {
     return res
       .status(500)

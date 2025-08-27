@@ -56,7 +56,8 @@
       "profileActiveStatus",
       "emailTemplate",
       "editVendorProfile",
-      "adminProfile"
+      "adminProfile",
+      "listingStatus"
     ],
     "delete": [
       "country",

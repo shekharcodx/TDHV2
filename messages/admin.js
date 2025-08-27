@@ -164,4 +164,13 @@ module.exports = {
     code: 1720,
     message: "Resource deleted successfully",
   },
+  LISTING_NOT_FOUND: {
+    code: 1721,
+    error: "LISTING_NOT_FOUND",
+    message: "Listing not found",
+  },
+  LISTING_STATUS_UPDATED: {
+    code: 1722,
+    message: "Listing status updated successfully",
+  },
 };
