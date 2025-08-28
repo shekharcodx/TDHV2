@@ -5,7 +5,10 @@ const connectDB = require("./config/db");
 const cors = require("cors");
 const rateLimit = require("express-rate-limit");
 
+const { startBookingExpiryJob } = require("./utils/jobs/bookingExpiry");
+
 dotenv.config();
+startBookingExpiryJob();
 
 const runMigration = require("./migrations/migration");
 const apisMiddleware = require("./middlewares/api.middleware");
@@ -67,6 +70,8 @@ app.use("/api", require("./routes/admin/listing.routes"));
 app.use("/api", require("./routes/vendor/location.routes"));
 
 app.use("/api", require("./routes/common/listing.routes"));
+
+app.use("/api", require("./routes/customer/booking.routes"));
 
 app.use(checkIsApproved);
 

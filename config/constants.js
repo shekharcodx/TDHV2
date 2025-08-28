@@ -23,3 +23,16 @@ exports.LISTING_STATUS = {
   APPROVED: 2,
   ON_HOLD: 3,
 };
+
+exports.PAYMENT_STATUS = {
+  PENDING: 1,
+  PAYED: 2,
+  REFUNDED: 3,
+};
+
+exports.BOOKING_STATUS = {
+  PENDING: 1,
+  CONFIRMED: 2,
+  CANCELED: 3,
+  EXPIRED: 4,
+};

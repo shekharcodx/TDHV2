@@ -136,4 +136,18 @@ module.exports = {
     error: "ACCOUNT_NOT_APPROVED",
     message: "Your account has not been approved, please contact support",
   },
+  CAR_ALREADY_BOOKED: {
+    code: 3000,
+    error: "CAR_ALREADY_BOOKED",
+    message: "Car already booked for selected dates",
+  },
+  BOOKING_CREATED: {
+    code: 3001,
+    message: `Booking created successfully, please complete payment within ${process.env.UNPAID_EXPIRY_MINUTES} minutes`,
+  },
+  CAR_NOT_FOUND: {
+    code: 3002,
+    error: "CAR_NOT_FOUND",
+    message: "Car not found, please try again",
+  },
 };

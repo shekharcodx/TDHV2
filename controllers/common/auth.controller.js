@@ -10,6 +10,7 @@ const { sendEmailFromTemplate } = require("../../utils/sendEmail");
 const { uploadFile } = require("../../utils/s3");
 const { validateJWT } = require("../../utils/verifyToken");
 const { ACCOUNT_STATUS, USER_ROLES } = require("../../config/constants");
+const crypto = require("crypto");
 
 exports.register = async (req, res) => {
   let {
@@ -121,10 +122,12 @@ exports.register = async (req, res) => {
 
     const user = await User.create(userData);
 
-    await sendEmailFromTemplate("temporary_password", user.email, {
-      name: user.name,
-      tempPassword: password,
-    });
+    if (role === USER_ROLES.VENDOR) {
+      await sendEmailFromTemplate("temporary_password", user.email, {
+        name: user.name,
+        tempPassword: password,
+      });
+    }
 
     let messageObj =
       role === USER_ROLES.VENDOR
@@ -241,13 +244,25 @@ exports.forgetPassword = async (req, res) => {
         .json({ success: false, ...messages.AUTH_USER_NOT_FOUND });
     }
 
-    const resetToken = jwt.sign(
-      {
-        id: user._id,
-      },
-      process.env.JWT_RESET_SECRET,
-      { expiresIn: "15m" }
-    );
+    const resetToken = crypto.randomBytes(32).toString("hex");
+    const resetTokenHash = crypto
+      .createHash("sha256")
+      .update(resetToken)
+      .digest("hex");
+    const passwordResetExpires = Date.now() + 15 * 60 * 1000;
+
+    // const resetToken = jwt.sign(
+    //   {
+    //     id: user._id,
+    //   },
+    //   process.env.JWT_RESET_SECRET,
+    //   { expiresIn: "15m" }
+    // );
+
+    user.passwordResetToken = resetTokenHash;
+    user.passwordResetExpires = passwordResetExpires;
+
+    await user.save();
 
     const resetLink = `${process.env.RESET_LINK}${resetToken}`;
     await sendEmailFromTemplate("password_reset", user.email, {
@@ -271,25 +286,28 @@ exports.resetPassword = async (req, res) => {
         .json({ success: false, ...messages.AUTH_RESET_TOKEN_REQUIRED });
     }
 
-    const result = validateJWT(token, process.env.JWT_RESET_SECRET);
+    // const result = validateJWT(token, process.env.JWT_RESET_SECRET);
+    const incomingHash = crypto
+      .createHash("sha256")
+      .update(token)
+      .digest("hex");
 
-    if (!result?.valid || result?.expired) {
+    const user = await User.findOne({
+      passwordResetToken: incomingHash,
+      passwordResetExpires: { $gt: Date.now() },
+    });
+
+    if (!user) {
       return res
         .status(400)
         .json({ success: false, ...messages.AUTH_INVALID_RESET_TOKEN });
     }
 
-    const user = await User.findById(result?.decoded?.id);
-    if (!user) {
-      return res
-        .status(404)
-        .json({ success: false, ...messages.AUTH_USER_NOT_FOUND });
-    }
-
     const hashedPassword = await bcrypt.hash(newPassword, 10);
 
     user.password = hashedPassword;
-    user.resetPasswordToken = null;
+    user.passwordResetToken = null;
+    user.passwordResetExpires = null;
     await user.save();
 
     await sendEmailFromTemplate("password_changed", user.email, {
