@@ -3,6 +3,10 @@ const adminMessages = require("../../messages/admin");
 const RentalListing = require("../../models/rentalListing.model");
 
 exports.getAllListings = async (req, res) => {
+  const options = {
+    page: req.query.page || 1,
+    limit: req.query.limit || 10,
+  };
   try {
     let pipeline = [
       // vendor
@@ -108,7 +112,9 @@ exports.getAllListings = async (req, res) => {
       },
     ];
 
-    const listings = await RentalListing.aggregate(pipeline);
+    // const aggregate = await RentalListing.aggregate(pipeline);
+
+    const listings = await RentalListing.aggregatePaginate(pipeline, options);
 
     res.status(200).json({ success: true, listings });
   } catch (err) {
@@ -159,13 +165,11 @@ exports.listingIsActive = async (req, res) => {
         .json({ success: false, ...adminMessages.LISTING_NOT_FOUND });
     }
 
-    res
-      .status(200)
-      .json({
-        success: true,
-        ...adminMessages.LISTING_STATUS_UPDATED,
-        data: listing,
-      });
+    res.status(200).json({
+      success: true,
+      ...adminMessages.LISTING_STATUS_UPDATED,
+      data: listing,
+    });
   } catch (err) {
     return res
       .status(500)

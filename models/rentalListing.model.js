@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 const mongoosePaginate = require("mongoose-paginate-v2");
 const { LISTING_STATUS } = require("../config/constants");
+const aggregatePaginate = require("mongoose-aggregate-paginate-v2");
 
 const rentalListingSchema = new mongoose.Schema({
   vendor: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
@@ -162,5 +163,6 @@ const rentalListingSchema = new mongoose.Schema({
 });
 
 rentalListingSchema.plugin(mongoosePaginate);
+rentalListingSchema.plugin(aggregatePaginate);
 
 module.exports = mongoose.model("RentalListing", rentalListingSchema);

@@ -261,6 +261,10 @@ exports.createListing = async (req, res) => {
 };
 
 exports.getListings = async (req, res) => {
+  const options = {
+    page: req.query.page || 1,
+    limit: req.query.limit || 10,
+  };
   try {
     let pipeline = [
       { $match: { vendor: new mongoose.Types.ObjectId(req.user.id) } },
@@ -369,7 +373,9 @@ exports.getListings = async (req, res) => {
       },
     ];
 
-    const listings = await RentalListing.aggregate(pipeline);
+    // const listings = await RentalListing.aggregate(pipeline);
+
+    const listings = await RentalListing.aggregatePaginate(pipeline, options);
 
     res.status(200).json({ success: true, listings });
   } catch (err) {

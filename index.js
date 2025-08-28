@@ -8,7 +8,6 @@ const rateLimit = require("express-rate-limit");
 const { startBookingExpiryJob } = require("./utils/jobs/bookingExpiry");
 
 dotenv.config();
-startBookingExpiryJob();
 
 const runMigration = require("./migrations/migration");
 const apisMiddleware = require("./middlewares/api.middleware");
@@ -81,6 +80,8 @@ app.use("/api", require("./routes/vendor/user.routes"));
 
 // Connect DB and run migrations
 connectDB().then(() => runMigration());
+
+startBookingExpiryJob();
 
 // Start server
 const PORT = process.env.PORT || 5000;
