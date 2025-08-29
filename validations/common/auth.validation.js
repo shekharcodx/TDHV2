@@ -5,74 +5,74 @@ exports.registerValidation = [
   // Name
   body("name")
     .notEmpty()
-    .withMessage("Name is required")
+    .withMessage("name is required")
     .isLength({ min: 2 })
-    .withMessage("Name must be at least 2 characters long"),
+    .withMessage("name must be at least 2 characters long"),
 
   // Email
   body("email")
     .notEmpty()
-    .withMessage("Email is required")
+    .withMessage("email is required")
     .isEmail()
     .withMessage("Invalid email format")
     .isLowercase()
-    .withMessage("Email ID must be in lowercase letters"),
+    .withMessage("email ID must be in lowercase letters"),
 
   // Role
   body("role")
     .notEmpty()
-    .withMessage("Role is required")
+    .withMessage("role is required")
     .isIn([USER_ROLES.VENDOR, USER_ROLES.CUSTOMER])
-    .withMessage("Role must be vendor (2) or customer (3)"),
+    .withMessage("role must be vendor (2) or customer (3)"),
 
   // Password
   body("password")
     .if(body("role").equals(USER_ROLES.CUSTOMER.toString()))
     .notEmpty()
-    .withMessage("Password is required")
+    .withMessage("password is required")
     .isLength({ min: 6 })
-    .withMessage("Password must be at least 6 characters"),
+    .withMessage("password must be at least 6 characters"),
 
   // Vendor-specific fields
   body("businessName")
     .if(body("role").equals(USER_ROLES.VENDOR.toString()))
     .notEmpty()
-    .withMessage("Business name is required for vendors"),
+    .withMessage("businessName is required for vendors"),
 
   body("address.street")
     .if(body("role").equals(USER_ROLES.VENDOR.toString()))
     .notEmpty()
-    .withMessage("Street address is required for vendors"),
+    .withMessage("street address is required for vendors"),
 
   body("address.country")
     .if(body("role").equals(USER_ROLES.VENDOR.toString()))
     .notEmpty()
-    .withMessage("Country is required for vendors"),
+    .withMessage("country is required for vendors"),
 
   body("address.city")
     .if(body("role").equals(USER_ROLES.VENDOR.toString()))
     .notEmpty()
-    .withMessage("City is required for vendors"),
+    .withMessage("city is required for vendors"),
 
   body("contact.mobileNum")
     .if(body("role").equals(USER_ROLES.VENDOR.toString()))
     .notEmpty()
-    .withMessage("Mobile number is required for vendors"),
+    .withMessage("mobileNumber is required for vendors"),
 
   body("contact.whatsappNum")
     .if(body("role").equals(USER_ROLES.VENDOR.toString()))
     .notEmpty()
-    .withMessage("WhatsApp number is required for vendors"),
+    .withMessage("whatsAppNum is required for vendors"),
 
   body("contact.landlineNum")
     .if(body("role").equals(USER_ROLES.VENDOR.toString()))
     .notEmpty()
-    .withMessage("LandLine number is required for vendors"),
+    .withMessage("landLineNum is required for vendors"),
 
   body("vendorInformation.fleetSize")
     .if(body("role").equals(USER_ROLES.VENDOR.toString()))
     .isInt({ min: 1 })
-    .withMessage("Fleet size must be a positive number"),
+    .withMessage("fleetSize must be a positive number"),
 
   body("ijariCertificate")
     .if(body("role").equals(USER_ROLES.VENDOR.toString()))
@@ -151,13 +151,13 @@ exports.updateProfileValidation = [
     .optional()
     .trim()
     .notEmpty()
-    .withMessage("Name is required")
+    .withMessage("name is required")
     .isLength({ min: 2 })
-    .withMessage("Name must be at least 2 characters"),
+    .withMessage("name must be at least 2 characters"),
 
   body("email").custom((value) => {
     if (value) {
-      throw new Error("Email cannot be updated");
+      throw new Error("email cannot be updated");
     }
     return true;
   }),
@@ -165,56 +165,56 @@ exports.updateProfileValidation = [
   body("password")
     .optional()
     .notEmpty()
-    .withMessage("Password is required")
+    .withMessage("password is required")
     .isLength({ min: 6 })
-    .withMessage("Password must be at least 6 characters"),
+    .withMessage("password must be at least 6 characters"),
 
-  body("role").optional().notEmpty().withMessage("Role is required"),
+  body("role").optional().notEmpty().withMessage("role is required"),
 ];
 
 exports.loginValidation = [
   body("email")
     .trim()
     .notEmpty()
-    .withMessage("Email is required")
+    .withMessage("email is required")
     .isEmail()
-    .withMessage("Email must be valid"),
+    .withMessage("email must be valid"),
 
-  body("password").notEmpty().withMessage("Password is required"),
+  body("password").notEmpty().withMessage("password is required"),
 ];
 
 exports.changePasswordValidation = [
   body("email")
     .trim()
     .notEmpty()
-    .withMessage("Email is required")
+    .withMessage("email is required")
     .isEmail()
-    .withMessage("Email must be valid"),
-  body("oldPassword").notEmpty().withMessage("Old password is required"),
+    .withMessage("email must be valid"),
+  body("oldPassword").notEmpty().withMessage("oldPassword is required"),
   body("newPassword")
     .notEmpty()
-    .withMessage("New password is required")
+    .withMessage("newPassword is required")
     .isLength({ min: 6 })
-    .withMessage("New password must be at least 6 characters"),
+    .withMessage("newPassword must be at least 6 characters"),
 ];
 
 exports.forgetPasswordValidation = [
   body("email")
     .exists()
-    .withMessage("Email is required")
+    .withMessage("email is required")
     .isEmail()
-    .withMessage("Email must be valid"),
+    .withMessage("email must be valid"),
 ];
 
 exports.resetPasswordValidation = [
   body("token")
     .exists()
-    .withMessage("Token is required")
+    .withMessage("token is required")
     .isString()
-    .withMessage("Token must be a string"),
+    .withMessage("token must be a string"),
   body("newPassword")
     .exists()
-    .withMessage("New password is required")
+    .withMessage("newPassword is required")
     .isLength({ min: 6 })
-    .withMessage("New password must be at least 6 characters"),
+    .withMessage("newPassword must be at least 6 characters"),
 ];

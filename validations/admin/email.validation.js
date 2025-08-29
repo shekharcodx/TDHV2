@@ -3,24 +3,24 @@ const { body, param } = require("express-validator");
 exports.editEmailValidation = [
   body("name")
     .exists()
-    .withMessage("Name is required")
+    .withMessage("name is required")
     .isString()
-    .withMessage("Name must be a string"),
+    .withMessage("name must be a string"),
   body("subject")
     .exists()
-    .withMessage("Subject is required")
+    .withMessage("subject is required")
     .isString()
-    .withMessage("Subject must be a string"),
+    .withMessage("subject must be a string"),
   body("body")
     .exists()
-    .withMessage("Body is required")
+    .withMessage("body is required")
     .isString()
-    .withMessage("Body must be a string"),
+    .withMessage("body must be a string"),
   body("description")
     .exists()
-    .withMessage("Description is required")
+    .withMessage("description is required")
     .isString()
-    .withMessage("Description must be a string"),
+    .withMessage("description must be a string"),
   body("isActive")
     .exists()
     .withMessage("isActive is required")

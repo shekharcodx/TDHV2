@@ -53,6 +53,8 @@ app.use(apisMiddleware);
 // Routes
 app.use("/api", require("./routes/common/auth.routes"));
 
+app.use("/api", require("./routes/vendor/location.routes"));
+
 app.use(authMiddleware);
 app.use(aclMiddleware);
 
@@ -65,8 +67,6 @@ app.use("/api", require("./routes/admin/emails.routes"));
 app.use("/api", require("./routes/admin/car.routes"));
 
 app.use("/api", require("./routes/admin/listing.routes"));
-
-app.use("/api", require("./routes/vendor/location.routes"));
 
 app.use("/api", require("./routes/common/listing.routes"));
 

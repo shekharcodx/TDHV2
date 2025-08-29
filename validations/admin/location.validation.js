@@ -1,15 +1,15 @@
 const { body, param } = require("express-validator");
 
 exports.addCountryValidation = [
-  body("countryName").trim().notEmpty().withMessage("Country Name is required"),
+  body("countryName").trim().notEmpty().withMessage("countryName is required"),
 
-  body("countryCode").trim().notEmpty().withMessage("Country Code is required"),
+  body("countryCode").trim().notEmpty().withMessage("countryCode is required"),
 ];
 
 exports.addStatesValidation = [
   body("stateNames")
     .isArray({ min: 1 })
-    .withMessage("State Names must be a non-empty array"),
+    .withMessage("stateNames must be a non-empty array"),
 
   body("stateNames.*")
     .isString()
@@ -18,17 +18,17 @@ exports.addStatesValidation = [
 
   body("countryId")
     .notEmpty()
-    .withMessage("Country ID is required")
+    .withMessage("countryId is required")
     .isMongoId()
-    .withMessage("Invalid Country ID"),
+    .withMessage("Invalid countryId"),
 ];
 
 exports.addCitiesValidation = [
   body("cityNames")
     .exists()
-    .withMessage("City Names are required")
+    .withMessage("cityNames are required")
     .isArray({ min: 1 })
-    .withMessage("City Names must be a non-empty array"),
+    .withMessage("cityNames must be a non-empty array"),
 
   body("cityNames.*")
     .optional()
@@ -39,10 +39,10 @@ exports.addCitiesValidation = [
 
   body("stateId")
     .exists()
-    .withMessage("State ID is required")
+    .withMessage("stateId is required")
     .bail()
     .isMongoId()
-    .withMessage("Invalid State ID"),
+    .withMessage("Invalid stateId"),
 ];
 
 exports.deleteCountryValidation = [
@@ -56,15 +56,15 @@ exports.deleteCountryValidation = [
 exports.deleteStateValidation = [
   param("stateId")
     .exists()
-    .withMessage("State ID is required")
+    .withMessage("stateId is required")
     .isMongoId()
-    .withMessage("Invalid State ID"),
+    .withMessage("Invalid stateId"),
 ];
 
 exports.deleteCityValidation = [
   param("cityId")
     .exists()
-    .withMessage("City ID is required")
+    .withMessage("cityId is required")
     .isMongoId()
-    .withMessage("Invalid City ID"),
+    .withMessage("Invalid cityId"),
 ];

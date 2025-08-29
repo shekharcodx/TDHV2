@@ -1,41 +1,41 @@
 const { body, query, param } = require("express-validator");
 
 exports.createAdminValidation = [
-  body("name").exists().withMessage("Name is required"),
+  body("name").exists().withMessage("name is required"),
   body("email")
     .exists()
-    .withMessage("Email is required")
+    .withMessage("email is required")
     .isEmail()
     .withMessage("Invalid email"),
-  body("password").exists().withMessage("Password is required"),
+  body("password").exists().withMessage("password is required"),
 ];
 
 exports.updateIsActiveValidation = [
   body("userId")
     .exists()
-    .withMessage("User ID is required")
+    .withMessage("userId is required")
     .isMongoId()
-    .withMessage("Invalid user ID"),
+    .withMessage("Invalid userId"),
   body("isActive")
     .exists()
-    .withMessage("Is Active is required")
+    .withMessage("isActive is required")
     .isBoolean()
-    .withMessage("Invalid Is Active"),
+    .withMessage("Invalid isActive"),
 ];
 
 exports.updateAccountStatusValidation = [
   body("id")
     .notEmpty()
-    .withMessage("ID is required")
+    .withMessage("id is required")
     .isMongoId()
-    .withMessage("Invalid user ID format"),
+    .withMessage("Invalid user id format"),
 
   body("status")
     .notEmpty()
-    .withMessage("Status is required")
+    .withMessage("status is required")
     .toInt()
     .isIn([2, 3, 4])
-    .withMessage("Status must be either 2, 3 or 4"),
+    .withMessage("status must be either 2, 3 or 4"),
 ];
 
 exports.getDocumentsValidate = [
@@ -60,16 +60,16 @@ exports.editVendorProfileValidation = [
 
   body("email")
     .notEmpty()
-    .withMessage("Email is required")
+    .withMessage("email is required")
     .isEmail()
     .withMessage("Invalid email format")
     .isLowercase()
-    .withMessage("Email ID must be in lowercase letters"),
+    .withMessage("email ID must be in lowercase letters"),
 
   body("password")
     .optional()
     .isLength({ min: 6 })
-    .withMessage("Password must be at least 6 characters"),
+    .withMessage("password must be at least 6 characters"),
 
   body("businessName")
     .notEmpty()
@@ -87,20 +87,20 @@ exports.editVendorProfileValidation = [
 
   body("contact.mobileNum")
     .notEmpty()
-    .withMessage("Mobile number is required for vendors"),
+    .withMessage("mobileNumber is required for vendors"),
 
   body("contact.whatsappNum")
     .notEmpty()
-    .withMessage("WhatsApp number is required for vendors"),
+    .withMessage("whatsappNumber is required for vendors"),
 
   body("contact.landlineNum")
     .notEmpty()
-    .withMessage("LandLine number is required for vendors"),
+    .withMessage("landLineNumber is required for vendors"),
 
   body("vendorInformation.fleetSize")
     .optional()
     .isInt({ min: 1 })
-    .withMessage("Fleet size must be a positive number"),
+    .withMessage("fleetSize must be a positive number"),
 ];
 
 exports.getUserValidation = [
@@ -120,5 +120,5 @@ exports.editCurrentAdminProfileValidate = [
   body("password")
     .optional()
     .isLength({ min: 6 })
-    .withMessage("Password must be at least 6 characters"),
+    .withMessage("password must be at least 6 characters"),
 ];

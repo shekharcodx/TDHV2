@@ -3,68 +3,68 @@ const { body, param } = require("express-validator");
 exports.getStatesValidation = [
   param("countryId")
     .exists()
-    .withMessage("Country ID is required")
+    .withMessage("countryId is required")
     .isMongoId()
-    .withMessage("Invalid Country ID"),
+    .withMessage("Invalid countryId"),
 ];
 
 exports.getCitiesValidation = [
   param("stateId")
     .exists()
-    .withMessage("State ID is required")
+    .withMessage("stateId is required")
     .isMongoId()
-    .withMessage("Invalid State ID"),
+    .withMessage("Invalid stateId"),
 ];
 
 exports.rentalListingValidator = [
-  body("carBrand").isMongoId().withMessage("Invalid car brand ID"),
+  body("carBrand").isMongoId().withMessage("Invalid carBrand ID"),
 
-  body("carModel").isMongoId().withMessage("Invalid car model ID"),
+  body("carModel").isMongoId().withMessage("Invalid carModel ID"),
 
-  body("carTrim").isMongoId().withMessage("Invalid car trim ID"),
+  body("carTrim").isMongoId().withMessage("Invalid carTrim ID"),
 
-  body("regionalSpecs").isMongoId().withMessage("Invalid regional specs ID"),
+  body("regionalSpecs").isMongoId().withMessage("Invalid regionalSpecs ID"),
 
-  body("modelYear").isMongoId().withMessage("Invalid model year ID"),
+  body("modelYear").isMongoId().withMessage("Invalid modelYear ID"),
 
   body("mileage")
     .isNumeric()
-    .withMessage("Mileage must be a number")
+    .withMessage("mileage must be a number")
     .isInt({ min: 0 })
-    .withMessage("Mileage cannot be negative"),
+    .withMessage("mileage cannot be negative"),
 
-  body("bodyType").isMongoId().withMessage("Invalid body type ID"),
+  body("bodyType").isMongoId().withMessage("Invalid bodyType ID"),
 
-  body("carInsurance").notEmpty().withMessage("Car insurance is required"),
+  body("carInsurance").notEmpty().withMessage("carInsurance is required"),
 
   body("rentPerDay")
     .isNumeric()
-    .withMessage("Rent per day must be a number")
+    .withMessage("rentPerDay must be a number")
     .isInt({ min: 0 })
-    .withMessage("Rent per day cannot be negative"),
+    .withMessage("rentPerDay cannot be negative"),
 
   body("rentPerWeek")
     .isNumeric()
-    .withMessage("Rent per week must be a number")
+    .withMessage("rentPerWeek must be a number")
     .isInt({ min: 0 })
-    .withMessage("Rent per week cannot be negative"),
+    .withMessage("rentPerWeek cannot be negative"),
 
   body("rentPerMonth")
     .isNumeric()
-    .withMessage("Rent per month must be a number")
+    .withMessage("rentPerMonth must be a number")
     .isInt({ min: 0 })
-    .withMessage("Rent per month cannot be negative"),
+    .withMessage("rentPerMonth cannot be negative"),
 
   body("title")
     .notEmpty()
-    .withMessage("Title is required")
+    .withMessage("title is required")
     .isLength({ min: 3 })
-    .withMessage("Title must be at least 3 characters long"),
+    .withMessage("title must be at least 3 characters long"),
 
   body("description")
     .optional()
     .isString()
-    .withMessage("Description must be a string"),
+    .withMessage("description must be a string"),
 
   body("fuelType")
     .exists()
@@ -73,11 +73,11 @@ exports.rentalListingValidator = [
     .withMessage("Invalid interior fuelType"),
 
   ,
-  body("interiorColor").isMongoId().withMessage("Invalid interior color ID"),
+  body("interiorColor").isMongoId().withMessage("Invalid interiorColor ID"),
 
-  body("exteriorColor").isMongoId().withMessage("Invalid exterior color ID"),
+  body("exteriorColor").isMongoId().withMessage("Invalid exteriorColor ID"),
 
-  body("warranty").notEmpty().withMessage("Warranty is required"),
+  body("warranty").notEmpty().withMessage("warranty is required"),
 
   body("carDoors")
     .exists()
@@ -89,13 +89,11 @@ exports.rentalListingValidator = [
     .exists()
     .withMessage("transmission is required")
     .isMongoId()
-    .withMessage("Invalid interior transmission"),
+    .withMessage("Invalid transmission"),
 
-  body("seatingCapacity")
-    .isMongoId()
-    .withMessage("Invalid seating capacity ID"),
+  body("seatingCapacity").isMongoId().withMessage("Invalid seatingCapacity ID"),
 
-  body("horsePower").isMongoId().withMessage("Invalid horsepower ID"),
+  body("horsePower").isMongoId().withMessage("Invalid horsePower ID"),
 
   body("techFeatures")
     .optional()
@@ -105,7 +103,7 @@ exports.rentalListingValidator = [
   body("techFeatures.*")
     .optional()
     .isMongoId()
-    .withMessage("Each technical feature must be a valid ID"),
+    .withMessage("Each technicalFeature must be a valid ID"),
 
   body("otherFeatures")
     .optional()
@@ -115,9 +113,9 @@ exports.rentalListingValidator = [
   body("otherFeatures.*")
     .optional()
     .isMongoId()
-    .withMessage("Each other feature must be a valid ID"),
+    .withMessage("Each otherFeature must be a valid ID"),
 
-  body("location").notEmpty().withMessage("Location is required"),
+  body("location").notEmpty().withMessage("location is required"),
 
   body("images").custom((value, { req }) => {
     console.log("images", req.files.length);

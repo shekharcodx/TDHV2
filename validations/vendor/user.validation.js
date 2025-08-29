@@ -9,16 +9,16 @@ exports.editVendorProfileValidation = [
 
   body("email")
     .notEmpty()
-    .withMessage("Email is required")
+    .withMessage("email is required")
     .isEmail()
     .withMessage("Invalid email format")
     .isLowercase()
-    .withMessage("Email ID must be in lowercase letters"),
+    .withMessage("email ID must be in lowercase letters"),
 
   body("password")
     .optional()
     .isLength({ min: 6 })
-    .withMessage("Password must be at least 6 characters"),
+    .withMessage("password must be at least 6 characters"),
 
   body("businessName")
     .notEmpty()
@@ -36,18 +36,18 @@ exports.editVendorProfileValidation = [
 
   body("contact.mobileNum")
     .notEmpty()
-    .withMessage("Mobile number is required for vendors"),
+    .withMessage("mobileNum is required for vendors"),
 
   body("contact.whatsappNum")
     .notEmpty()
-    .withMessage("WhatsApp number is required for vendors"),
+    .withMessage("whatsappNum is required for vendors"),
 
   body("contact.landlineNum")
     .notEmpty()
-    .withMessage("LandLine number is required for vendors"),
+    .withMessage("landlineNum is required for vendors"),
 
   body("vendorInformation.fleetSize")
     .optional()
     .isInt({ min: 1 })
-    .withMessage("Fleet size must be a positive number"),
+    .withMessage("fleetSize must be a positive number"),
 ];

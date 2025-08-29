@@ -3,7 +3,7 @@ const { body, param } = require("express-validator");
 exports.addCarBrandValidation = [
   body("name").exists().withMessage("Name is required"),
   body("logo").custom((value, { req }) => {
-    if (!req.file) throw new Error("File is required");
+    if (!req.file) throw new Error("logo is required");
     return true;
   }),
 ];
@@ -11,94 +11,94 @@ exports.addCarBrandValidation = [
 exports.addCarModelsValidation = [
   body("brandId")
     .exists()
-    .withMessage("Brand id is required")
+    .withMessage("brandId is required")
     .isMongoId()
-    .withMessage("Invalid brand id"),
+    .withMessage("Invalid brandId"),
   body("names")
     .exists()
-    .withMessage("Name is required")
+    .withMessage("name is required")
     .isArray()
-    .withMessage("Name must be an array"),
+    .withMessage("name must be an array"),
 
   body("names.*")
     .isString()
     .withMessage("Each name must be a string")
     .notEmpty()
-    .withMessage("Name cannot be empty"),
+    .withMessage("name cannot be empty"),
 ];
 
 exports.addCarTrimsValidation = [
   body("modelId")
     .exists()
-    .withMessage("Model id is required")
+    .withMessage("modelId is required")
     .isMongoId()
-    .withMessage("Invalid model id"),
+    .withMessage("Invalid modelId"),
   body("names")
     .exists()
-    .withMessage("Name is required")
+    .withMessage("name is required")
     .isArray()
-    .withMessage("Name must be an array"),
+    .withMessage("name must be an array"),
 
   body("names.*")
     .isString()
     .withMessage("Each name must be a string")
     .notEmpty()
-    .withMessage("Name cannot be empty"),
+    .withMessage("name cannot be empty"),
 ];
 
 exports.addCarBodyTypesValidation = [
   body("names")
     .exists()
-    .withMessage("Name is required")
+    .withMessage("name is required")
     .isArray()
-    .withMessage("Name must be an array"),
+    .withMessage("name must be an array"),
 
   body("names.*")
     .isString()
     .withMessage("Each name must be a string")
     .notEmpty()
-    .withMessage("Name cannot be empty"),
+    .withMessage("name cannot be empty"),
 ];
 
 exports.addYearsValidation = [
   body("years")
     .exists()
-    .withMessage("Year is required")
+    .withMessage("years is required")
     .isArray()
-    .withMessage("Year must be an array"),
+    .withMessage("years must be an array"),
   body("years.*")
     .isString()
-    .withMessage("Each name must be a string")
+    .withMessage("Each year must be a string")
     .notEmpty()
-    .withMessage("Name cannot be empty"),
+    .withMessage("year cannot be empty"),
 ];
 
 exports.addCarRegionalSpecsValidation = [
   body("specs")
     .exists()
-    .withMessage("Specs is required")
+    .withMessage("specs is required")
     .isArray()
-    .withMessage("Specs must be an array"),
+    .withMessage("specs must be an array"),
 
   body("specs.*")
     .isString()
     .withMessage("Each spec must be a string")
     .notEmpty()
-    .withMessage("Spec cannot be empty"),
+    .withMessage("spec cannot be empty"),
 ];
 
 exports.addCarHorsePowersValidate = [
   body("horsePowers")
     .exists()
-    .withMessage("Horse Powers is required")
+    .withMessage("horsePowers is required")
     .isArray()
-    .withMessage("Horse Powers must be an array"),
+    .withMessage("horsePowers must be an array"),
 
   body("horsePowers.*")
     .exists()
-    .withMessage("Horse Power array cannot be empty")
+    .withMessage("horsePower array cannot be empty")
     .isInt({ min: 10, max: 2000 })
-    .withMessage("Horse Power must be a number between 10 and 2000")
+    .withMessage("horsePower must be a number between 10 and 2000")
     .toInt(),
 ];
 
@@ -191,49 +191,49 @@ exports.addCarTransmissionValidation = [
 exports.getCarModelsValidation = [
   param("carBrandId")
     .exists()
-    .withMessage("Car brand id is required")
+    .withMessage("carBrandId is required")
     .isMongoId()
-    .withMessage("Invalid car brand id"),
+    .withMessage("Invalid carBrandId"),
 ];
 
 exports.getCarTrimsValidation = [
   param("carModelId")
     .exists()
-    .withMessage("Car model id is required")
+    .withMessage("carModelId is required")
     .isMongoId()
-    .withMessage("Invalid car model id"),
+    .withMessage("Invalid carModelId"),
 ];
 
 exports.deleteCarBrandValidation = [
   param("brandId")
     .exists()
-    .withMessage("Car brand id is required")
+    .withMessage("brandId is required")
     .isMongoId()
-    .withMessage("Invalid car brand id"),
+    .withMessage("Invalid brandId"),
 ];
 
 exports.deleteCarModelValidation = [
   param("modelId")
     .exists()
-    .withMessage("Car model id is required")
+    .withMessage("modelId is required")
     .isMongoId()
-    .withMessage("Invalid car model id"),
+    .withMessage("Invalid modelId"),
 ];
 
 exports.deleteCarTrimValidation = [
   param("trimId")
     .exists()
-    .withMessage("Car trim id is required")
+    .withMessage("trimId is required")
     .isMongoId()
-    .withMessage("Invalid car trim id"),
+    .withMessage("Invalid trimId"),
 ];
 
 exports.deleteYearValidation = [
   param("yearId")
     .exists()
-    .withMessage("Year id is required")
+    .withMessage("yearId is required")
     .isMongoId()
-    .withMessage("Invalid year id"),
+    .withMessage("Invalid yearId"),
 ];
 
 exports.deleteBodyTypeValidate = [
