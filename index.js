@@ -27,16 +27,15 @@ const limiter = rateLimit({
 
 app.use(limiter);
 
-// Security headers
-app.use(helmet());
-
 // CORS
 const corsOptions = {
   origin: "*",
-  credentials: false,
   methods: ["GET", "POST", "DELETE", "UPDATE", "PUT", "PATCH"],
 };
+
 app.use(cors(corsOptions));
+app.options("*", cors(corsOptions));
+app.use(helmet());
 
 // Body parser
 app.use(express.json());
