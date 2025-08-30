@@ -14,6 +14,19 @@ exports.getEmailTempates = async (req, res) => {
   }
 };
 
+exports.getEmailTempatesById = async (req, res) => {
+  const { templateId } = req.params;
+  try {
+    const emailTemplate = await EmailTemplate.findById(templateId).select(
+      "name subject body description isActive"
+    );
+    res.status(200).json({ success: true, data: emailTemplate });
+  } catch (err) {
+    console.log("emailTempatesByIdError", err);
+    res.status(500).json({ success: false, ...messages.INTERNAL_SERVER_ERROR });
+  }
+};
+
 exports.editEmailTemplate = async (req, res) => {
   const { name, subject, body, description, isActive } = req.body;
   const { templateId } = req.params;

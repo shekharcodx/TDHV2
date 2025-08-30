@@ -135,12 +135,25 @@ exports.editCurrentAdminProfile = async (req, res) => {
 };
 
 exports.getAllAdmins = async (req, res) => {
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 10;
+
+  const options = {
+    page,
+    limit,
+    sort: { createdAt: -1 },
+    select: "_id name email role isActive",
+  };
+
   try {
-    const admins = await User.find({
-      role: USER_ROLES.ADMIN,
-      _id: { $ne: req.user._id },
-      email: { $ne: process.env.ADMIN_EMAIL },
-    }).select("_id name email role isActive");
+    const admins = await User.paginate(
+      {
+        role: USER_ROLES.ADMIN,
+        _id: { $ne: req.user._id },
+        email: { $ne: process.env.ADMIN_EMAIL },
+      },
+      options
+    );
 
     res.status(200).json({ success: true, data: admins });
   } catch (err) {
@@ -334,9 +347,15 @@ exports.editVendorProfile = async (req, res) => {
       email,
       password,
       businessName,
-      address,
-      contact,
-      vendorInformation,
+      street,
+      country,
+      city,
+      state,
+      mobileNum,
+      whatsappNum,
+      landlineNum,
+      fleetSize,
+      mapUrl,
       status,
     } = req.body;
 
@@ -426,10 +445,15 @@ exports.editVendorProfile = async (req, res) => {
     if (password) userObj.password = await bcrypt.hash(password, 10);
     if (status !== undefined) userObj.status = status;
     if (businessName) userObj.businessName = businessName;
-    if (address) userObj.address = address;
-    if (contact) userObj.contact = contact;
-    if (vendorInformation?.fleetSize)
-      userObj.vendorInformation.fleetSize = vendorInformation.fleetSize;
+    if (country) userObj.address["country"] = country;
+    if (state) userObj.address["state"] = state;
+    if (city) userObj.address["city"] = city;
+    if (street) userObj.address["street"] = street;
+    if (mapUrl) userObj.address["mapUrl"] = mapUrl;
+    if (landlineNum) userObj.contact["landlineNum"] = landlineNum;
+    if (whatsappNum) userObj.contact["whatsappNum"] = whatsappNum;
+    if (mobileNum) userObj.contact["mobileNum"] = mobileNum;
+    if (fleetSize) userObj.vendorInformation.fleetSize = fleetSize;
 
     // Save the user
     await userObj.save();

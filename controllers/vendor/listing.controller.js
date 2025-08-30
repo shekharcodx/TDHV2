@@ -261,13 +261,20 @@ exports.createListing = async (req, res) => {
 };
 
 exports.getListings = async (req, res) => {
+  const { status, isActive } = req.query;
   const options = {
     page: req.query.page || 1,
     limit: req.query.limit || 10,
   };
   try {
     let pipeline = [
-      { $match: { vendor: new mongoose.Types.ObjectId(req.user.id) } },
+      {
+        $match: {
+          vendor: new mongoose.Types.ObjectId(req.user.id),
+          ...(status ? { status: Number(status) } : {}),
+          ...(isActive !== undefined ? { isActive: isActive === "true" } : {}),
+        },
+      },
 
       // vendor
       {

@@ -48,7 +48,8 @@
       "carFuelTypes",
       "user",
       "allListings",
-      "listing"
+      "listing",
+      "emailTemplate"
     ],
     "put": [
       "profile",

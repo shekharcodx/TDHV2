@@ -12,4 +12,9 @@ const carBrandSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+carBrandSchema.index(
+  { name: 1 },
+  { unique: true, collation: { locale: "en", strength: 2 } }
+);
+
 module.exports = mongoose.model("CarBrand", carBrandSchema);

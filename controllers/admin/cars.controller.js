@@ -25,21 +25,51 @@ const { default: mongoose } = require("mongoose");
 exports.addCarBrand = async (req, res) => {
   const { name } = req.body;
   try {
+    const currentCarBrand = await CarBrand.findOne({ name });
+
     let logoLinks = null;
     if (req.file) {
       const file = req.file;
       const fileBuffer = file.buffer;
       const fileName = file.originalname;
 
-      const result = await uploadFile(fileBuffer, "car_logos", fileName);
+      const result = await uploadFile(
+        fileBuffer,
+        "car_logos",
+        fileName,
+        currentCarBrand?.logo?.key
+      );
       logoLinks = {
         url: result.url,
         key: result.key,
       };
+      console.log("logoLinks", { ...logoLinks, filename: result.filename });
     }
-    const carBrand = await CarBrand.create({ name, logo: logoLinks });
-    res.status(200).json({ success: true, ...adminMessages.CAR_BRAND_CREATED });
+
+    // Build update object conditionally
+    const updateData = { name, isActive: true };
+    if (logoLinks) {
+      updateData.logo = logoLinks;
+    }
+
+    await CarBrand.updateOne(
+      { name },
+      { $set: updateData },
+      {
+        upsert: true,
+        collation: { locale: "en", strength: 2 },
+      }
+    );
+
+    const carBrand = await CarBrand.findOne({ name });
+
+    res.status(200).json({
+      success: true,
+      ...adminMessages.CAR_BRAND_CREATED,
+      data: carBrand,
+    });
   } catch (err) {
+    console.error(err);
     return res
       .status(500)
       .json({ success: false, ...messages.INTERNAL_SERVER_ERROR });

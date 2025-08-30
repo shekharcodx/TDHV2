@@ -1,14 +1,22 @@
 const messages = require("../../messages/messages");
 const adminMessages = require("../../messages/admin");
 const RentalListing = require("../../models/rentalListing.model");
+const { LISTING_STATUS } = require("../../config/constants");
 
 exports.getAllListings = async (req, res) => {
+  const { status, isActive } = req.query;
   const options = {
     page: req.query.page || 1,
     limit: req.query.limit || 10,
   };
   try {
     let pipeline = [
+      {
+        $match: {
+          ...(status ? { status: parseInt(status) } : {}),
+          ...(isActive ? { isActive: isActive === "true" } : {}),
+        },
+      },
       // vendor
       {
         $lookup: {
@@ -134,6 +142,17 @@ exports.listingStatus = async (req, res) => {
       return res
         .status(404)
         .json({ success: false, ...adminMessages.LISTING_NOT_FOUND });
+    }
+
+    if (
+      (listing.status === LISTING_STATUS.APPROVED ||
+        listing.status === LISTING_STATUS.ON_HOLD) &&
+      status === LISTING_STATUS.PENDING
+    ) {
+      return res.status(400).json({
+        success: false,
+        ...adminMessages.LISTING_CANNOT_BE_REVERTED_TO_PENDING,
+      });
     }
 
     listing.status = status;

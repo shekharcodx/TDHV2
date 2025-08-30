@@ -10,9 +10,15 @@ exports.editVendorProfile = async (req, res) => {
       email,
       password,
       businessName,
-      address,
-      contact,
-      vendorInformation,
+      street,
+      country,
+      city,
+      state,
+      mobileNum,
+      whatsappNum,
+      landlineNum,
+      fleetSize,
+      mapUrl,
       status,
     } = req.body;
 
@@ -102,10 +108,15 @@ exports.editVendorProfile = async (req, res) => {
     if (password) userObj.password = await bcrypt.hash(password, 10);
     if (status !== undefined) userObj.status = status;
     if (businessName) userObj.businessName = businessName;
-    if (address) userObj.address = address;
-    if (contact) userObj.contact = contact;
-    if (vendorInformation?.fleetSize)
-      userObj.vendorInformation.fleetSize = vendorInformation.fleetSize;
+    if (country) userObj.address["country"] = country;
+    if (city) userObj.address["city"] = city;
+    if (state) userObj.address["state"] = state;
+    if (street) userObj.address["street"] = street;
+    if (mapUrl) userObj.address["mapUrl"] = mapUrl;
+    if (whatsappNum) userObj.contact["whatsappNum"] = whatsappNum;
+    if (landlineNum) userObj.contact["landlineNum"] = landlineNum;
+    if (mobileNum) userObj.contact["mobileNum"] = mobileNum;
+    if (fleetSize) userObj.vendorInformation.fleetSize = fleetSize;
 
     // Save the user
     await userObj.save();

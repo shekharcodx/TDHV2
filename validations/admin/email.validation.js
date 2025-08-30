@@ -32,3 +32,11 @@ exports.editEmailValidation = [
     .isMongoId()
     .withMessage("templateId must be a valid mongo id"),
 ];
+
+exports.getEmailTempatesByIdValidate = [
+  param("templateId")
+    .exists()
+    .withMessage("templateId is required")
+    .isMongoId()
+    .withMessage("Invalid templateId"),
+];

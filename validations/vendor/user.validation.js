@@ -24,29 +24,27 @@ exports.editVendorProfileValidation = [
     .notEmpty()
     .withMessage("businessName is required for vendors"),
 
-  body("address.street")
-    .notEmpty()
-    .withMessage("street is required for vendors"),
+  body("street").notEmpty().withMessage("street is required for vendors"),
 
-  body("address.country")
-    .notEmpty()
-    .withMessage("country is required for vendors"),
+  body("country").notEmpty().withMessage("country is required for vendors"),
 
-  body("address.city").notEmpty().withMessage("city is required for vendors"),
+  body("city").notEmpty().withMessage("city is required for vendors"),
 
-  body("contact.mobileNum")
-    .notEmpty()
-    .withMessage("mobileNum is required for vendors"),
+  body("state").notEmpty().withMessage("state is required for vendors"),
 
-  body("contact.whatsappNum")
+  body("mapUrl").notEmpty().withMessage("mapUrl is required for vendors"),
+
+  body("mobileNum").notEmpty().withMessage("mobileNum is required for vendors"),
+
+  body("whatsappNum")
     .notEmpty()
     .withMessage("whatsappNum is required for vendors"),
 
-  body("contact.landlineNum")
+  body("landlineNum")
     .notEmpty()
     .withMessage("landlineNum is required for vendors"),
 
-  body("vendorInformation.fleetSize")
+  body("fleetSize")
     .optional()
     .isInt({ min: 1 })
     .withMessage("fleetSize must be a positive number"),

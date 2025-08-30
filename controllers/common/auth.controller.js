@@ -19,9 +19,15 @@ exports.register = async (req, res) => {
     role,
     password,
     businessName,
-    address,
-    contact,
-    vendorInformation,
+    street,
+    country,
+    city,
+    state,
+    mobileNum,
+    whatsappNum,
+    landlineNum,
+    fleetSize,
+    mapUrl,
   } = req.body;
 
   role = parseInt(role);
@@ -107,11 +113,11 @@ exports.register = async (req, res) => {
 
     if (role === USER_ROLES.VENDOR) {
       userData.businessName = businessName;
-      userData.address = address;
-      userData.contact = contact;
+      userData.address = { street, country, city, state, mapUrl };
+      userData.contact = { whatsappNum, landlineNum, mobileNum };
       userData.temporaryPassword = true;
       userData.vendorInformation = {
-        fleetSize: vendorInformation?.fleetSize,
+        fleetSize: fleetSize,
         documents,
       };
     }

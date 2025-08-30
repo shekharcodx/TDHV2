@@ -173,4 +173,9 @@ module.exports = {
     code: 1722,
     message: "Listing status updated successfully",
   },
+  LISTING_CANNOT_BE_REVERTED_TO_PENDING: {
+    code: 1723,
+    error: "LISTING_CANNOT_BE_REVERTED_TO_PENDING",
+    message: "Listing cannot be reverted to pending once approved or on-hold",
+  },
 };

@@ -39,37 +39,47 @@ exports.registerValidation = [
     .notEmpty()
     .withMessage("businessName is required for vendors"),
 
-  body("address.street")
+  body("street")
     .if(body("role").equals(USER_ROLES.VENDOR.toString()))
     .notEmpty()
     .withMessage("street address is required for vendors"),
 
-  body("address.country")
+  body("country")
     .if(body("role").equals(USER_ROLES.VENDOR.toString()))
     .notEmpty()
     .withMessage("country is required for vendors"),
 
-  body("address.city")
+  body("city")
     .if(body("role").equals(USER_ROLES.VENDOR.toString()))
     .notEmpty()
     .withMessage("city is required for vendors"),
 
-  body("contact.mobileNum")
+  body("state")
+    .if(body("role").equals(USER_ROLES.VENDOR.toString()))
+    .notEmpty()
+    .withMessage("state is required for vendors"),
+
+  body("mapUrl")
+    .if(body("role").equals(USER_ROLES.VENDOR.toString()))
+    .notEmpty()
+    .withMessage("mapUrl is required for vendors"),
+
+  body("mobileNum")
     .if(body("role").equals(USER_ROLES.VENDOR.toString()))
     .notEmpty()
     .withMessage("mobileNumber is required for vendors"),
 
-  body("contact.whatsappNum")
+  body("whatsappNum")
     .if(body("role").equals(USER_ROLES.VENDOR.toString()))
     .notEmpty()
     .withMessage("whatsAppNum is required for vendors"),
 
-  body("contact.landlineNum")
+  body("landlineNum")
     .if(body("role").equals(USER_ROLES.VENDOR.toString()))
     .notEmpty()
     .withMessage("landLineNum is required for vendors"),
 
-  body("vendorInformation.fleetSize")
+  body("fleetSize")
     .if(body("role").equals(USER_ROLES.VENDOR.toString()))
     .isInt({ min: 1 })
     .withMessage("fleetSize must be a positive number"),
