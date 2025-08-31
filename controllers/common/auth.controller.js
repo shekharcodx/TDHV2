@@ -10,6 +10,9 @@ const { sendEmailFromTemplate } = require("../../utils/sendEmail");
 const { uploadFile } = require("../../utils/s3");
 const { validateJWT } = require("../../utils/verifyToken");
 const { ACCOUNT_STATUS, USER_ROLES } = require("../../config/constants");
+const Country = require("../../models/locationModels/city.model");
+const State = require("../../models/locationModels/state.model");
+const City = require("../../models/locationModels/city.model");
 const crypto = require("crypto");
 
 exports.register = async (req, res) => {
@@ -20,9 +23,6 @@ exports.register = async (req, res) => {
     password,
     businessName,
     street,
-    country,
-    city,
-    state,
     mobileNum,
     whatsappNum,
     landlineNum,
@@ -47,6 +47,19 @@ exports.register = async (req, res) => {
 
     let status = ACCOUNT_STATUS.APPROVED;
     let documents = {};
+
+    const [country, state, city] = Promise.all([
+      await Country.findById(req.body.country).select("name"),
+      await State.findById(req.body.state).select("name"),
+      await City.findById(req.body.city).select("name"),
+    ]);
+
+    if (!country || !state || !city) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid location reference provided",
+      });
+    }
 
     if (role === USER_ROLES.VENDOR) {
       status = ACCOUNT_STATUS.PENDING;
@@ -113,7 +126,13 @@ exports.register = async (req, res) => {
 
     if (role === USER_ROLES.VENDOR) {
       userData.businessName = businessName;
-      userData.address = { street, country, city, state, mapUrl };
+      userData.address = {
+        street,
+        country: country?.name,
+        city: city?.name,
+        state: state?.name,
+        mapUrl,
+      };
       userData.contact = { whatsappNum, landlineNum, mobileNum };
       userData.temporaryPassword = true;
       userData.vendorInformation = {
