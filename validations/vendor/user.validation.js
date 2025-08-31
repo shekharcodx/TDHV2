@@ -26,11 +26,11 @@ exports.editVendorProfileValidation = [
 
   body("street").notEmpty().withMessage("street is required for vendors"),
 
-  body("country").notEmpty().withMessage("country is required for vendors"),
+  body("country").optional(),
 
-  body("city").notEmpty().withMessage("city is required for vendors"),
+  body("city").optional(),
 
-  body("state").notEmpty().withMessage("state is required for vendors"),
+  body("state").optional(),
 
   body("mapUrl").notEmpty().withMessage("mapUrl is required for vendors"),
 
