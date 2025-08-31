@@ -2,6 +2,9 @@ const messages = require("../../messages/messages");
 const User = require("../../models/user.model");
 const { uploadFile } = require("../../utils/s3");
 const bcrypt = require("bcrypt");
+const Country = require("../../models/locationModels/country.model");
+const State = require("../../models/locationModels/state.model");
+const City = require("../../models/locationModels/city.model");
 
 exports.editVendorProfile = async (req, res) => {
   try {
@@ -27,10 +30,10 @@ exports.editVendorProfile = async (req, res) => {
         .json({ success: false, ...messages.AUTH_USER_NOT_FOUND });
     }
 
-    const [country, state, city] = Promise.all([
-      await Country.findById(req.body.country).select("name"),
-      await State.findById(req.body.state).select("name"),
-      await City.findById(req.body.city).select("name"),
+    const [country, state, city] = await Promise.all([
+      Country.findById(req.body.country).select("name"),
+      State.findById(req.body.state).select("name"),
+      City.findById(req.body.city).select("name"),
     ]);
 
     if (!country || !state || !city) {

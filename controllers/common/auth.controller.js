@@ -10,7 +10,7 @@ const { sendEmailFromTemplate } = require("../../utils/sendEmail");
 const { uploadFile } = require("../../utils/s3");
 const { validateJWT } = require("../../utils/verifyToken");
 const { ACCOUNT_STATUS, USER_ROLES } = require("../../config/constants");
-const Country = require("../../models/locationModels/city.model");
+const Country = require("../../models/locationModels/country.model");
 const State = require("../../models/locationModels/state.model");
 const City = require("../../models/locationModels/city.model");
 const crypto = require("crypto");
@@ -48,10 +48,10 @@ exports.register = async (req, res) => {
     let status = ACCOUNT_STATUS.APPROVED;
     let documents = {};
 
-    const [country, state, city] = Promise.all([
-      await Country.findById(req.body.country).select("name"),
-      await State.findById(req.body.state).select("name"),
-      await City.findById(req.body.city).select("name"),
+    const [country, state, city] = await Promise.all([
+      Country.findById(req.body.country).select("name"),
+      State.findById(req.body.state).select("name"),
+      City.findById(req.body.city).select("name"),
     ]);
 
     if (!country || !state || !city) {
