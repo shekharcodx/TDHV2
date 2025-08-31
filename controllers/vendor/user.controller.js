@@ -30,18 +30,18 @@ exports.editVendorProfile = async (req, res) => {
         .json({ success: false, ...messages.AUTH_USER_NOT_FOUND });
     }
 
-    const [country, state, city] = await Promise.all([
-      Country.findById(req.body.country).select("name"),
-      State.findById(req.body.state).select("name"),
-      City.findById(req.body.city).select("name"),
-    ]);
+    // const [country, state, city] = await Promise.all([
+    //   Country.findById(req.body.country).select("name"),
+    //   State.findById(req.body.state).select("name"),
+    //   City.findById(req.body.city).select("name"),
+    // ]);
 
-    if (!country || !state || !city) {
-      return res.status(400).json({
-        success: false,
-        message: "Invalid location reference provided",
-      });
-    }
+    // if (!country || !state || !city) {
+    //   return res.status(400).json({
+    //     success: false,
+    //     message: "Invalid location reference provided",
+    //   });
+    // }
 
     // Prevent editing super admin if needed
     if (userObj.role === 1) {
@@ -121,9 +121,9 @@ exports.editVendorProfile = async (req, res) => {
     if (password) userObj.password = await bcrypt.hash(password, 10);
     if (status !== undefined) userObj.status = status;
     if (businessName) userObj.businessName = businessName;
-    if (country) userObj.address["country"] = country?.name;
-    if (city) userObj.address["city"] = city?.name;
-    if (state) userObj.address["state"] = state?.name;
+    // if (country) userObj.address["country"] = country?.name;
+    // if (city) userObj.address["city"] = city?.name;
+    // if (state) userObj.address["state"] = state?.name;
     if (street) userObj.address["street"] = street;
     if (mapUrl) userObj.address["mapUrl"] = mapUrl;
     if (whatsappNum) userObj.contact["whatsappNum"] = whatsappNum;
