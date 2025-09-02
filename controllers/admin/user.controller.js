@@ -206,14 +206,18 @@ exports.getAllVendors = async (req, res) => {
     const limit = parseInt(req.query.limit) || 10;
     const { status, isActive, search } = req.query;
 
+    console.log("searchString", search);
+
     let filter = { role: USER_ROLES.VENDOR };
 
     if (search) {
+      const safeSearch = escapeRegex(search.trim());
+
       filter = {
         role: USER_ROLES.VENDOR,
         $or: [
-          { name: { $regex: search, $options: "i" } },
-          { email: { $regex: search, $options: "i" } },
+          { name: { $regex: safeSearch, $options: "i" } },
+          { email: { $regex: safeSearch, $options: "i" } },
         ],
       };
     } else {
@@ -496,3 +500,7 @@ exports.editVendorProfile = async (req, res) => {
     res.status(500).json({ success: false, ...messages.INTERNAL_SERVER_ERROR });
   }
 };
+
+function escapeRegex(string) {
+  return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
