@@ -204,6 +204,18 @@ exports.getAllVendors = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
+    const { status, isActive } = req.query;
+
+    // Build filter dynamically
+    const filter = { role: USER_ROLES.VENDOR };
+
+    if (status) {
+      filter.status = parseInt(status); // convert string to number
+    }
+
+    if (isActive) {
+      filter.isActive = isActive === "true"; // convert string to boolean
+    }
 
     const options = {
       page,
@@ -212,7 +224,8 @@ exports.getAllVendors = async (req, res) => {
       select: "-password",
     };
 
-    const vendors = await User.paginate({ role: USER_ROLES.VENDOR }, options);
+    const vendors = await User.paginate(filter, options);
+
     res.status(200).json({ success: true, vendors });
   } catch (err) {
     console.error(err);
