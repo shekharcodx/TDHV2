@@ -204,7 +204,7 @@ exports.getAllVendors = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
-    const { status, isActive } = req.query;
+    const { status, isActive, search } = req.query;
 
     // Build filter dynamically
     const filter = { role: USER_ROLES.VENDOR };
@@ -215,6 +215,13 @@ exports.getAllVendors = async (req, res) => {
 
     if (isActive) {
       filter.isActive = isActive === "true"; // convert string to boolean
+    }
+
+    if (search) {
+      filter.$or = [
+        { name: { $regex: search, $options: "i" } },
+        { email: { $regex: search, $options: "i" } },
+      ];
     }
 
     const options = {
