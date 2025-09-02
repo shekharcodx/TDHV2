@@ -77,11 +77,20 @@ exports.editVendorProfileValidation = [
 
   body("street").notEmpty().withMessage("street is required for vendors"),
 
-  body("country").notEmpty().withMessage("country is required for vendors"),
+  body("country")
+    .optional()
+    .notEmpty()
+    .withMessage("country is required for vendors"),
 
-  body("city").notEmpty().withMessage("city is required for vendors"),
+  body("city")
+    .optional()
+    .notEmpty()
+    .withMessage("city is required for vendors"),
 
-  body("state").notEmpty().withMessage("state is required for vendors"),
+  body("state")
+    .optional()
+    .notEmpty()
+    .withMessage("state is required for vendors"),
 
   body("mapUrl").notEmpty().withMessage("mapUrl is required for vendors"),
 
