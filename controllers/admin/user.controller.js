@@ -206,22 +206,23 @@ exports.getAllVendors = async (req, res) => {
     const limit = parseInt(req.query.limit) || 10;
     const { status, isActive, search } = req.query;
 
-    // Build filter dynamically
-    const filter = { role: USER_ROLES.VENDOR };
-
-    if (status) {
-      filter.status = parseInt(status); // convert string to number
-    }
-
-    if (isActive) {
-      filter.isActive = isActive === "true"; // convert string to boolean
-    }
+    let filter = { role: USER_ROLES.VENDOR };
 
     if (search) {
-      filter.$or = [
-        { name: { $regex: search, $options: "i" } },
-        { email: { $regex: search, $options: "i" } },
-      ];
+      filter = {
+        role: USER_ROLES.VENDOR,
+        $or: [
+          { name: { $regex: search, $options: "i" } },
+          { email: { $regex: search, $options: "i" } },
+        ],
+      };
+    } else {
+      if (status) {
+        filter.status = parseInt(status);
+      }
+      if (isActive) {
+        filter.isActive = isActive === "true";
+      }
     }
 
     const options = {
