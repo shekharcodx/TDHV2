@@ -89,7 +89,7 @@ exports.createAdmin = async (req, res) => {
 };
 
 exports.editCurrentAdminProfile = async (req, res) => {
-  const { name, password } = req.body;
+  const { name, password, mobileNum, whatsappNum, landlineNum } = req.body;
   try {
     const admin = await User.findById(req.user.id);
     if (!admin) {
@@ -99,6 +99,9 @@ exports.editCurrentAdminProfile = async (req, res) => {
     }
 
     if (name) admin.name = name;
+    if (mobileNum) admin.contact.mobileNum = mobileNum;
+    if (whatsappNum) admin.contact.whatsappNum = whatsappNum;
+    if (landlineNum) admin.contact.landlineNum = landlineNum;
     if (password) admin.password = await bcrypt.hash(password, 10);
 
     if (req.file && req.file.mimetype.startsWith("image/")) {
@@ -123,6 +126,7 @@ exports.editCurrentAdminProfile = async (req, res) => {
       data: {
         id: admin._id,
         name: admin.name,
+        contact: admin.contact,
         profilePicture: admin.profilePicture,
       },
     });
