@@ -139,25 +139,43 @@ exports.editCurrentAdminProfile = async (req, res) => {
 };
 
 exports.getAllAdmins = async (req, res) => {
-  const page = parseInt(req.query.page) || 1;
-  const limit = parseInt(req.query.limit) || 10;
-
-  const options = {
-    page,
-    limit,
-    sort: { createdAt: -1 },
-    select: "_id name email role isActive",
-  };
-
   try {
-    const admins = await User.paginate(
-      {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const { isActive, search } = req.query;
+
+    let filter = {
+      role: USER_ROLES.ADMIN,
+      _id: { $ne: req.user._id },
+      email: { $ne: process.env.ADMIN_EMAIL },
+    };
+
+    const options = {
+      page,
+      limit,
+      sort: { createdAt: -1 },
+      select: "_id name email role isActive contact",
+    };
+
+    if (search) {
+      const safeSearch = escapeRegex(search.trim());
+
+      filter = {
         role: USER_ROLES.ADMIN,
         _id: { $ne: req.user._id },
         email: { $ne: process.env.ADMIN_EMAIL },
-      },
-      options
-    );
+        $or: [
+          { name: { $regex: safeSearch, $options: "i" } },
+          { email: { $regex: safeSearch, $options: "i" } },
+        ],
+      };
+    } else {
+      if (isActive) {
+        filter.isActive = isActive === "true";
+      }
+    }
+
+    const admins = await User.paginate(filter, options);
 
     res.status(200).json({ success: true, data: admins });
   } catch (err) {
