@@ -10,7 +10,7 @@ module.exports = async function runMigration() {
     const user = await User.findOneAndUpdate(
       { email: process.env.ADMIN_EMAIL },
       {
-        $set: {
+        $setOnInsert: {
           name: "Admin",
           email: process.env.ADMIN_EMAIL,
           password: hashedPassword,
@@ -21,7 +21,7 @@ module.exports = async function runMigration() {
       },
       { upsert: true, new: true }
     );
-    console.log("SuperAdmin Inserted Successfully:", user);
+    console.log("SuperAdmin Inserted/updated Successfully:", user);
 
     for (let tpl of templates) {
       const exists = await EmailTemplate.findOne({ name: tpl.name });
