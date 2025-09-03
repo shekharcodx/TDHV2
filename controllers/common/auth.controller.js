@@ -370,6 +370,7 @@ exports.getCurrentLoggedInUser = async (req, res) => {
             email: user.email,
             role: user.role,
             status: user.status,
+            contact: user.contact,
             isActive: user.isActive,
             token: generateToken(user._id, user.role, user.email),
             profilePicture: user.profilePicture.url || null,
