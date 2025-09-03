@@ -1,6 +1,8 @@
 const express = require("express");
 const router = express.Router();
 const validate = require("../../middlewares/validate.middleware");
+const authMiddleware = require("../../middlewares/auth.middleware");
+const aclMiddleware = require("../../middlewares/acl.middleware");
 const protect = require("../../middlewares/auth.middleware");
 const upload = require("../../middlewares/upload.middleware");
 const cpUpload = require("../../middlewares/registerFiles.middleware");
@@ -12,6 +14,7 @@ const {
   getCurrentLoggedInUser,
   forgetPassword,
   resetPassword,
+  updatePassword,
 } = require("../../controllers/common/auth.controller");
 const {
   registerValidation,
@@ -20,6 +23,7 @@ const {
   changePasswordValidation,
   forgetPasswordValidation,
   resetPasswordValidation,
+  updatePasswordValidation,
 } = require("../../validations/common/auth.validation");
 
 router.post("/register", cpUpload, registerValidation, validate, register);
@@ -52,5 +56,14 @@ router.post(
 );
 
 router.put("/resetPassword", resetPasswordValidation, validate, resetPassword);
+
+router.patch(
+  "/updatePassword",
+  authMiddleware,
+  aclMiddleware,
+  updatePasswordValidation,
+  validate,
+  updatePassword
+);
 
 module.exports = router;

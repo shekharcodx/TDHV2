@@ -444,6 +444,42 @@ exports.updateProfile = async (req, res) => {
       },
     });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    return res
+      .status(500)
+      .json({ success: false, ...messages.INTERNAL_SERVER_ERROR });
+  }
+};
+
+exports.updatePassword = async (req, res) => {
+  try {
+    const { newPassword, currentPassword } = req.body;
+    const user = await User.findById(req.user.id).select("email name password");
+    if (!user) {
+      return res
+        .status(404)
+        .json({ success: false, ...messages.AUTH_USER_NOT_FOUND });
+    }
+
+    const isMatch = await bcrypt.compare(currentPassword, user.password);
+
+    if (!isMatch) {
+      return res
+        .status(400)
+        .json({ success: false, ...messages.AUTH_INVALID_PASSWORD });
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    user.password = hashedPassword;
+    await user.save();
+
+    await sendEmailFromTemplate("password_changed", user.email, {
+      name: user.name,
+    });
+
+    res.json({ success: true, ...messages.AUTH_PASSWORD_UPDATED });
+  } catch (err) {
+    return res
+      .status(500)
+      .json({ success: false, ...messages.INTERNAL_SERVER_ERROR });
   }
 };

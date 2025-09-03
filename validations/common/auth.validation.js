@@ -228,3 +228,18 @@ exports.resetPasswordValidation = [
     .isLength({ min: 6 })
     .withMessage("newPassword must be at least 6 characters"),
 ];
+
+exports.updatePasswordValidation = [
+  body("newPassword")
+    .exists()
+    .withMessage("newPassword is required")
+    .isLength({ min: 6 })
+    .withMessage("password must be at least 6 characters"),
+  ,
+  body("currentPassword")
+    .exists()
+    .withMessage("currentPassword is required")
+    .isLength({ min: 6 })
+    .withMessage("password must be at least 6 characters"),
+  ,
+];

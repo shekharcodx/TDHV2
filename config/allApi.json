@@ -60,6 +60,7 @@
   "editVendorProfile",
   "vendorProfile",
   "adminProfile",
+  "updatePassword",
   "allListings",
   "getListing",
   "listingStatus",

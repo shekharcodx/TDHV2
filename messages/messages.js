@@ -136,6 +136,10 @@ module.exports = {
     error: "ACCOUNT_NOT_APPROVED",
     message: "Your account has not been approved, please contact support",
   },
+  AUTH_PASSWORD_UPDATED: {
+    code: 9029,
+    message: "Password updated successfully",
+  },
   CAR_ALREADY_BOOKED: {
     code: 3000,
     error: "CAR_ALREADY_BOOKED",
