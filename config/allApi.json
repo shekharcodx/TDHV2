@@ -59,6 +59,7 @@
   "user",
   "editVendorProfile",
   "vendorProfile",
+  "currentAdminProfile",
   "adminProfile",
   "updatePassword",
   "allListings",

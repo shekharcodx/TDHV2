@@ -152,3 +152,41 @@ exports.editCurrentAdminProfileValidate = [
     .notEmpty()
     .withMessage("landlineNum is required for vendors"),
 ];
+
+exports.editAdminProfileValidate = [
+  body("adminId")
+    .exists()
+    .withMessage("adminId is required")
+    .isMongoId()
+    .withMessage("Invalid adminId"),
+  body("name")
+    .notEmpty()
+    .withMessage("name is required")
+    .isString()
+    .withMessage("name must be a string"),
+  body("email")
+    .notEmpty()
+    .withMessage("email is required")
+    .isEmail()
+    .withMessage("Invalid email format")
+    .isLowercase()
+    .withMessage("email ID must be in lowercase letters"),
+  body("password")
+    .optional()
+    .isLength({ min: 6 })
+    .withMessage("password must be at least 6 characters"),
+  body("mobileNum")
+    .optional()
+    .notEmpty()
+    .withMessage("mobileNum is required for vendors"),
+
+  body("whatsappNum")
+    .optional()
+    .notEmpty()
+    .withMessage("whatsappNum is required for vendors"),
+
+  body("landlineNum")
+    .optional()
+    .notEmpty()
+    .withMessage("landlineNum is required for vendors"),
+];

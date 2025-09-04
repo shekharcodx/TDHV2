@@ -12,6 +12,7 @@ const {
   editVendorProfile,
   getUser,
   editCurrentAdminProfile,
+  editAdminProfile,
 } = require("../../controllers/admin/user.controller");
 const {
   createAdminValidation,
@@ -21,6 +22,7 @@ const {
   editVendorProfileValidation,
   getUserValidation,
   editCurrentAdminProfileValidate,
+  editAdminProfileValidate,
 } = require("../../validations/admin/user.validation");
 
 const cpUpload = require("../../middlewares/registerFiles.middleware");
@@ -65,11 +67,19 @@ router.put(
 );
 
 router.put(
-  "/adminProfile",
+  "/currentAdminProfile",
   upload.single("profilePicture"),
   editCurrentAdminProfileValidate,
   validate,
   editCurrentAdminProfile
+);
+
+router.put(
+  "/adminProfile",
+  upload.single("profilePicture"),
+  editAdminProfileValidate,
+  validate,
+  editAdminProfile
 );
 
 module.exports = router;

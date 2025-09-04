@@ -58,6 +58,7 @@
       "emailTemplate",
       "editVendorProfile",
       "adminProfile",
+      "currentAdminProfile",
       "listingStatus"
     ],
     "patch": ["listing", "updatePassword"],
