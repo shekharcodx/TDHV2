@@ -154,7 +154,7 @@ exports.getAllAdmins = async (req, res) => {
       page,
       limit,
       sort: { createdAt: -1 },
-      select: "_id name email role isActive contact",
+      select: "_id name email role isActive contact profilePicture",
     };
 
     if (search) {
