@@ -59,7 +59,8 @@
       "editVendorProfile",
       "adminProfile",
       "currentAdminProfile",
-      "listingStatus"
+      "listingStatus",
+      "vendorListing"
     ],
     "patch": ["listing", "updatePassword"],
     "delete": [

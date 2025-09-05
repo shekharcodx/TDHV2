@@ -22,6 +22,7 @@ const colorModel = require("../../models/carModels/carColor.model");
 const seatingModel = require("../../models/carModels/carSeatingCapacity.model");
 const horsePowerModel = require("../../models/carModels/carHoursePower.model");
 const bodyTypeModel = require("../../models/carModels/carBodyType.model");
+const { USER_ROLES } = require("../../config/constants");
 
 exports.getCountriesData = async (req, res) => {
   try {
@@ -438,10 +439,13 @@ exports.updateListing = async (req, res) => {
         .json({ success: false, message: "Listing not found" });
     }
 
-    if (listing.vendor.toString() !== req.user.id) {
+    if (
+      req.user.role === USER_ROLES.VENDOR &&
+      listing.vendor.toString() !== req.user.id
+    ) {
       return res
         .status(403)
-        .json({ success: false, message: "Not authorized" });
+        .json({ success: false, ...messages.NOT_AUTHORIZED });
     }
 
     // Fetch reference data
