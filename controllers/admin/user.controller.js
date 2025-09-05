@@ -6,6 +6,7 @@ const { ACCOUNT_STATUS, USER_ROLES } = require("../../config/constants");
 const generateToken = require("../../utils/generateToken");
 const { getFile, uploadFile } = require("../../utils/s3");
 const mime = require("mime-types");
+const escapeRegex = require("../../utils/escapeRegex");
 
 exports.updateAccountStatus = async (req, res) => {
   const { id, status } = req.body;
@@ -573,7 +574,3 @@ exports.editVendorProfile = async (req, res) => {
     res.status(500).json({ success: false, ...messages.INTERNAL_SERVER_ERROR });
   }
 };
-
-function escapeRegex(string) {
-  return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-}

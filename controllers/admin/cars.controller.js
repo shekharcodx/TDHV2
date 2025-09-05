@@ -1,7 +1,7 @@
 const CarBrand = require("../../models/carModels/carBrand.model");
 const CarModel = require("../../models/carModels/carModel.model");
 const CarBodyType = require("../../models/carModels/carBodyType.model");
-const CarTrim = require("../../models/carModels/carTrims.model");
+const Trim = require("../../models/carModels/carTrims.model");
 const Year = require("../../models/carModels/years.model");
 const RegionalSpecs = require("../../models/carModels/carRegionalSpecs.model");
 const HorsePower = require("../../models/carModels/carHoursePower.model");
@@ -126,7 +126,7 @@ exports.addCarModels = async (req, res) => {
 exports.addCarTrims = async (req, res) => {
   const { names, modelId } = req.body;
   try {
-    await CarTrim.bulkWrite(
+    await Trim.bulkWrite(
       names.map((name) => ({
         updateOne: {
           filter: { name, carModel: modelId },
@@ -137,7 +137,9 @@ exports.addCarTrims = async (req, res) => {
       }))
     );
 
-    const carTrims = await CarTrim.find({
+    console.log({ names, modelId });
+
+    const carTrims = await Trim.find({
       name: { $in: names },
       carModel: modelId,
     });
@@ -164,6 +166,7 @@ exports.addCarTrims = async (req, res) => {
       data: carTrims,
     });
   } catch (err) {
+    console.log("Add Trim Error", err);
     return res
       .status(500)
       .json({ success: false, ...messages.INTERNAL_SERVER_ERROR });
@@ -682,7 +685,7 @@ exports.getCarModels = async (req, res) => {
 exports.getCarTrims = async (req, res) => {
   const { carModelId } = req.params;
   try {
-    const carTrims = await CarTrim.find({
+    const carTrims = await Trim.find({
       isActive: true,
       carModel: carModelId,
     })
@@ -866,7 +869,7 @@ exports.deleteCarModel = async (req, res) => {
 exports.deleteCarTrim = async (req, res) => {
   const { trimId } = req.params;
   try {
-    const trimDeleted = await softDelete(CarTrim, trimId);
+    const trimDeleted = await softDelete(Trim, trimId);
 
     if (!trimDeleted) {
       return res

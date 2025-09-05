@@ -4,11 +4,13 @@ const RentalListing = require("../../models/rentalListing.model");
 const { LISTING_STATUS } = require("../../config/constants");
 
 exports.getAllListings = async (req, res) => {
-  const { status, isActive } = req.query;
+  const { status, isActive, search } = req.query;
+
   const options = {
     page: req.query.page || 1,
     limit: req.query.limit || 10,
   };
+
   try {
     let pipeline = [
       {
@@ -37,90 +39,82 @@ exports.getAllListings = async (req, res) => {
           localField: "techFeatures",
           foreignField: "_id",
           as: "techFeatures",
-          pipeline: [
-            {
-              $project: {
-                name: 1,
-              },
-            },
-          ],
+          pipeline: [{ $project: { name: 1 } }],
         },
       },
-
       {
         $lookup: {
           from: "otherfeatures",
           localField: "otherFeatures",
           foreignField: "_id",
           as: "otherFeatures",
-          pipeline: [
-            {
-              $project: {
-                name: 1,
-              },
-            },
-          ],
-        },
-      },
-
-      // final shape
-      {
-        $project: {
-          vendor: 1,
-          car: {
-            carBrand: {
-              name: "$carBrand.name",
-              logo: "$carBrand.logo",
-              carModel: {
-                name: "$carModel.name",
-                details: {
-                  carTrim: "$carTrim.name",
-                  modelYear: "$modelYear.year",
-                  bodyType: "$bodyType.name",
-                  fuelType: "$fuelType.name",
-                  doors: "$carDoors.doors",
-                  transmission: "$transmission.transmission",
-                  seatingCapacity: "$seatingCapacity.seats",
-                  horsePower: "$horsePower.power",
-                  interiorColor: "$interiorColor.name",
-                  exteriorColor: "$exteriorColor.name",
-                  techFeatures: {
-                    $map: {
-                      input: "$techFeatures",
-                      as: "tf",
-                      in: "$$tf.name",
-                    },
-                  },
-                  otherFeatures: {
-                    $map: {
-                      input: "$otherFeatures",
-                      as: "of",
-                      in: "$$of.name",
-                    },
-                  },
-                },
-              },
-            },
-            regionalSpecs: "$regionalSpecs.name",
-            carInsurance: "$carInsurance",
-            warranty: "$warranty",
-            mileage: "$mileage",
-            images: "$images",
-          },
-          rentPerDay: 1,
-          rentPerMonth: 1,
-          title: 1,
-          description: 1,
-          location: 1,
-          isActive: 1,
-          status: 1,
-          isFeatured: 1,
-          isPremium: 1,
+          pipeline: [{ $project: { name: 1 } }],
         },
       },
     ];
 
-    // const aggregate = await RentalListing.aggregate(pipeline);
+    // 🔍 Apply search filter
+    if (search && search.trim() !== "") {
+      const regex = new RegExp(search, "i"); // case-insensitive search
+      pipeline.push({
+        $match: {
+          $or: [
+            { title: regex },
+            { "vendor.name": regex },
+            { "carBrand.name": regex },
+            { "carModel.name": regex },
+          ],
+        },
+      });
+    }
+
+    // final shape
+    pipeline.push({
+      $project: {
+        vendor: 1,
+        car: {
+          carBrand: {
+            name: "$carBrand.name",
+            logo: "$carBrand.logo",
+            carModel: {
+              name: "$carModel.name",
+              details: {
+                carTrim: "$carTrim.name",
+                modelYear: "$modelYear.year",
+                bodyType: "$bodyType.name",
+                fuelType: "$fuelType.name",
+                doors: "$carDoors.doors",
+                transmission: "$transmission.transmission",
+                seatingCapacity: "$seatingCapacity.seats",
+                horsePower: "$horsePower.power",
+                interiorColor: "$interiorColor.name",
+                exteriorColor: "$exteriorColor.name",
+                techFeatures: {
+                  $map: { input: "$techFeatures", as: "tf", in: "$$tf.name" },
+                },
+                otherFeatures: {
+                  $map: { input: "$otherFeatures", as: "of", in: "$$of.name" },
+                },
+              },
+            },
+          },
+          regionalSpecs: "$regionalSpecs.name",
+          carInsurance: "$carInsurance",
+          warranty: "$warranty",
+          mileage: "$mileage",
+          images: "$images",
+        },
+        rentPerDay: 1,
+        rentPerMonth: 1,
+        title: 1,
+        description: 1,
+        location: 1,
+        isActive: 1,
+        status: 1,
+        isFeatured: 1,
+        isPremium: 1,
+      },
+    });
 
     const listings = await RentalListing.aggregatePaginate(pipeline, options);
 

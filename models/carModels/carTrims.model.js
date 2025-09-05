@@ -14,7 +14,7 @@ const TrimSchema = new mongoose.Schema(
 );
 
 TrimSchema.index(
-  { name: 1 },
+  { name: 1, carModel: 1 },
   { unique: true, collation: { locale: "en", strength: 2 } }
 );
 

@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 
 const carModelSchema = new mongoose.Schema(
   {
-    name: { type: String, require: true },
+    name: { type: String, required: true },
     carBrand: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "CarBrand",
@@ -14,7 +14,7 @@ const carModelSchema = new mongoose.Schema(
 );
 
 carModelSchema.index(
-  { name: 1 },
+  { name: 1, carBrand: 1 },
   { unique: true, collation: { locale: "en", strength: 2 } }
 );
 
