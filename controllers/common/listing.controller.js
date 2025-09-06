@@ -35,6 +35,7 @@ exports.getListing = async (req, res) => {
             {
               $project: {
                 name: 1,
+                _id: 1,
               },
             },
           ],
@@ -51,6 +52,7 @@ exports.getListing = async (req, res) => {
             {
               $project: {
                 name: 1,
+                _id: 1,
               },
             },
           ],
@@ -63,38 +65,54 @@ exports.getListing = async (req, res) => {
           vendor: 1,
           car: {
             carBrand: {
+              _id: "$carBrand._id",
               name: "$carBrand.name",
               logo: "$carBrand.logo",
               carModel: {
+                _id: "$carModel._id",
                 name: "$carModel.name",
                 details: {
+                  trimId: "$carTrim._id",
                   carTrim: "$carTrim.name",
+                  yearId: "$modelYear._id",
                   modelYear: "$modelYear.year",
+                  bodyTypeId: "$bodyType._id",
                   bodyType: "$bodyType.name",
+                  fuelTypeId: "$fuelType._id",
                   fuelType: "$fuelType.name",
+                  doorsId: "$carDoors._id",
                   doors: "$carDoors.doors",
+                  transmissionId: "$transmission._id",
                   transmission: "$transmission.transmission",
+                  seatingCapacityId: "$seatingCapacity._id",
                   seatingCapacity: "$seatingCapacity.seats",
+                  horsePowerId: "$horsePower._id",
                   horsePower: "$horsePower.power",
+                  interiorColorId: "$interiorColor._id",
                   interiorColor: "$interiorColor.name",
+                  exteriorColorId: "$exteriorColor._id",
                   exteriorColor: "$exteriorColor.name",
                   techFeatures: {
                     $map: {
                       input: "$techFeatures",
                       as: "tf",
-                      in: "$$tf.name",
+                      in: {
+                        _id: "$$tf._id",
+                        name: "$$tf.name",
+                      },
                     },
                   },
                   otherFeatures: {
                     $map: {
                       input: "$otherFeatures",
                       as: "of",
-                      in: "$$of.name",
+                      in: { _id: "$$of._id", name: "$$of.name" },
                     },
                   },
                 },
               },
             },
+            regionalSpecsId: "$regionalSpecs._id",
             regionalSpecs: "$regionalSpecs.name",
             carInsurance: "$carInsurance",
             warranty: "$warranty",

@@ -243,9 +243,8 @@ exports.updateListingValidation = [
     .withMessage("mileage must be a number"),
   body("carInsurance")
     .optional()
-    .isBoolean()
-    .withMessage("carInsurance must be true or false")
-    .toBoolean(),
+    .notEmpty()
+    .withMessage("carInsurance is required"),
   body("rentPerDay")
     .optional()
     .isNumeric()
