@@ -28,3 +28,23 @@ exports.listingIsActiveValidation = [
     .isBoolean()
     .withMessage("isActive must be boolean"),
 ];
+
+exports.listingCategoryValidate = [
+  param("listingId")
+    .notEmpty()
+    .withMessage("listingId is required")
+    .isMongoId()
+    .withMessage("Invalid listingId"),
+
+  body("isFeatured")
+    .optional()
+    .isBoolean()
+    .withMessage("isFeatured must be a boolean")
+    .toBoolean(),
+
+  body("isPremium")
+    .optional()
+    .isBoolean()
+    .withMessage("isPremium must be a boolean")
+    .toBoolean(),
+];

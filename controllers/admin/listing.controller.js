@@ -105,6 +105,7 @@ exports.getAllListings = async (req, res) => {
           images: "$images",
         },
         rentPerDay: 1,
+        rentPerWeek: 1,
         rentPerMonth: 1,
         title: 1,
         description: 1,
@@ -184,6 +185,42 @@ exports.listingIsActive = async (req, res) => {
       data: listing,
     });
   } catch (err) {
+    return res
+      .status(500)
+      .json({ success: false, ...messages.INTERNAL_SERVER_ERROR });
+  }
+};
+
+exports.listingCategory = async (req, res) => {
+  try {
+    const { listingId } = req.params;
+    const { isFeatured, isPremium } = req.body;
+
+    let data = {};
+    if (typeof isFeatured !== "undefined") {
+      data.isFeatured = isFeatured;
+    }
+    if (typeof isPremium !== "undefined") {
+      data.isPremium = isPremium;
+    }
+
+    const rentalListing = await RentalListing.findOneAndUpdate(
+      { _id: listingId },
+      { $set: data },
+      {
+        new: true,
+      }
+    );
+
+    if (!rentalListing) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Listing not found" });
+    }
+
+    res.status(200).json({ success: true, data: rentalListing });
+  } catch (err) {
+    console.log("Listing Category Error", err);
     return res
       .status(500)
       .json({ success: false, ...messages.INTERNAL_SERVER_ERROR });
