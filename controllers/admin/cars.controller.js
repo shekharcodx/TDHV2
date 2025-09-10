@@ -21,6 +21,7 @@ const softDelete = require("../../utils/softDelete");
 
 const { uploadFile } = require("../../utils/s3");
 const { default: mongoose } = require("mongoose");
+const { USER_ROLES } = require("../../config/constants");
 
 exports.addCarBrand = async (req, res) => {
   const { name } = req.body;
@@ -652,9 +653,23 @@ exports.addCarDoors = async (req, res) => {
 
 exports.getAllCarModels = async (req, res) => {
   try {
-    const models = await CarModel.find()
-      .select("_id name isActive")
-      .populate({ path: "carBrand", select: "_id logo name isActive" });
+    const { allModels } = req.query;
+    let models = {};
+    if (
+      allModels &&
+      allModels == "true" &&
+      req.user.role === USER_ROLES.ADMIN
+    ) {
+      models = await CarModel.find()
+        .select("_id name isActive")
+        .populate({ path: "carBrand", select: "_id logo name isActive" })
+        .sort({ createdAt: -1 });
+    } else {
+      models = await CarModel.find({ isActive: true })
+        .select("_id name isActive")
+        .populate({ path: "carBrand", select: "_id logo name isActive" })
+        .sort({ createdAt: -1 });
+    }
 
     if (!models) {
       return res
@@ -673,9 +688,20 @@ exports.getAllCarModels = async (req, res) => {
 
 exports.getAllCarTrims = async (req, res) => {
   try {
-    const carTrims = await Trim.find()
-      .select("name isActive")
-      .populate({ path: "carModel", select: "name" });
+    const { allTrims } = req.query;
+    let carTrims = {};
+
+    if (allTrims && allTrims == "true" && req.user.role === USER_ROLES.ADMIN) {
+      carTrims = await Trim.find()
+        .select("name isActive")
+        .populate({ path: "carModel", select: "name" })
+        .sort({ createdAt: -1 });
+    } else {
+      carTrims = await Trim.find({ isActive: true })
+        .select("name isActive")
+        .populate({ path: "carModel", select: "name" })
+        .sort({ createdAt: -1 });
+    }
 
     res.status(200).json({ success: true, carTrims });
   } catch (err) {

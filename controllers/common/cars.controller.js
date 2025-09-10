@@ -18,14 +18,19 @@ const { USER_ROLES } = require("../../config/constants");
 
 exports.getCarBrands = async (req, res) => {
   try {
-    let carBrands;
+    const { allBrands } = req.query;
+    let carBrands = {};
 
-    if (req.user.role !== USER_ROLES.ADMIN) {
-      carBrands = await CarBrand.find({ isActive: true })
+    if (
+      allBrands &&
+      allBrands == "true" &&
+      req.user.role === USER_ROLES.ADMIN
+    ) {
+      carBrands = await CarBrand.find()
         .select("name logo isActive")
         .sort({ createdAt: -1 });
     } else {
-      carBrands = await CarBrand.find()
+      carBrands = await CarBrand.find({ isActive: true })
         .select("name logo isActive")
         .sort({ createdAt: -1 });
     }
@@ -46,7 +51,8 @@ exports.getCarModels = async (req, res) => {
       carBrand: carBrandId,
     })
       .select("_id name isActive")
-      .populate({ path: "carBrand", select: "_id logo name isActive" });
+      .populate({ path: "carBrand", select: "_id logo name isActive" })
+      .sort({ createdAt: -1 });
 
     res.status(200).json({ success: true, carModels });
   } catch (err) {
@@ -64,7 +70,8 @@ exports.getCarTrims = async (req, res) => {
       carModel: carModelId,
     })
       .select("name")
-      .populate({ path: "carModel", select: "name" });
+      .populate({ path: "carModel", select: "name" })
+      .sort({ createdAt: -1 });
 
     res.status(200).json({ success: true, carTrims });
   } catch (err) {
@@ -76,7 +83,17 @@ exports.getCarTrims = async (req, res) => {
 
 exports.getYears = async (req, res) => {
   try {
-    const years = await Year.find({ isActive: true }).select("year");
+    const { all } = req.query;
+    let years = {};
+
+    if (all && all == "true" && req.user.role === USER_ROLES.ADMIN) {
+      years = await Year.find().select("year isActive").sort({ createdAt: -1 });
+    } else {
+      years = await Year.find({ isActive: true })
+        .select("year")
+        .sort({ createdAt: -1 });
+    }
+
     res.status(200).json({ success: true, years });
   } catch (err) {
     return res
@@ -87,7 +104,20 @@ exports.getYears = async (req, res) => {
 
 exports.getBodyTypes = async (req, res) => {
   try {
-    const bodyTypes = await CarBodyType.find({ isActive: true });
+    const { all } = req.query;
+    let bodyTypes = {};
+
+    if (all && all == "true" && req.user.role === USER_ROLES.ADMIN) {
+      bodyTypes = await CarBodyType.find()
+        .select("name isActive")
+        .sort({ createdAt: -1 });
+    } else {
+      bodyTypes = await CarBodyType.find({ isActive: true })
+        .select("name")
+        .sort({
+          createdAt: -1,
+        });
+    }
 
     res.status(200).json({ success: true, bodyTypes });
   } catch (err) {
@@ -99,7 +129,18 @@ exports.getBodyTypes = async (req, res) => {
 
 exports.getCarRegionalSpecs = async (req, res) => {
   try {
-    const specs = await RegionalSpecs.find({ isActive: true }).select("name");
+    const { all } = req.query;
+    let specs = {};
+    if (all && all == "true" && req.user.role === USER_ROLES.ADMIN) {
+      specs = await RegionalSpecs.find()
+        .select("name isActive")
+        .sort({ createdAt: -1 });
+    } else {
+      specs = await RegionalSpecs.find({ isActive: true })
+        .select("name")
+        .sort({ createdAt: -1 });
+    }
+
     res.status(200).json({ success: true, specs });
   } catch (err) {
     return res
@@ -110,7 +151,19 @@ exports.getCarRegionalSpecs = async (req, res) => {
 
 exports.getCarHorsePowers = async (req, res) => {
   try {
-    const powers = await HorsePower.find({ isActive: true });
+    const { all } = req.query;
+    let powers = {};
+
+    if (all && all == "true" && req.user.role === USER_ROLES.ADMIN) {
+      powers = await HorsePower.find().select("power isActive").sort({
+        createdAt: -1,
+      });
+    } else {
+      powers = await HorsePower.find({ isActive: true }).select("power").sort({
+        createdAt: -1,
+      });
+    }
+
     res.status(200).json({ success: true, horsePowers: powers });
   } catch (err) {
     return res
@@ -121,7 +174,21 @@ exports.getCarHorsePowers = async (req, res) => {
 
 exports.getCarSeatingCapacities = async (req, res) => {
   try {
-    const capacities = await SeatingCapacity.find({ isActive: true });
+    const { all } = req.query;
+    let capacities = {};
+
+    if (all && all == "true" && req.user.role === USER_ROLES.ADMIN) {
+      capacities = await SeatingCapacity.find()
+        .select("seats isActive")
+        .sort({ createdAt: -1 });
+    } else {
+      capacities = await SeatingCapacity.find({ isActive: true })
+        .select("seats")
+        .sort({
+          createdAt: -1,
+        });
+    }
+
     res.status(200).json({ success: true, seatingCapacities: capacities });
   } catch (err) {
     return res
@@ -132,7 +199,19 @@ exports.getCarSeatingCapacities = async (req, res) => {
 
 exports.getCarColors = async (req, res) => {
   try {
-    const colors = await CarColor.find({ isActive: true });
+    const { all } = req.query;
+    let colors = {};
+
+    if (all && all == "true" && req.user.role === USER_ROLES.ADMIN) {
+      colors = await CarColor.find()
+        .select("name isActive")
+        .sort({ createdAt: -1 });
+    } else {
+      colors = await CarColor.find({ isActive: true })
+        .select("name")
+        .sort({ createdAt: -1 });
+    }
+
     res.status(200).json({ success: true, colors });
   } catch (err) {
     return res
@@ -165,9 +244,19 @@ exports.getCarOtherFeatures = async (req, res) => {
 
 exports.getCarFuelType = async (req, res) => {
   try {
-    const fuelTypes = await FuelType.find({ isActive: true }).select(
-      "name isActive"
-    );
+    const { all } = req.query;
+    let fuelTypes = {};
+
+    if (all && all == "true" && req.user.role === USER_ROLES.ADMIN) {
+      fuelTypes = await FuelType.find()
+        .select("name isActive")
+        .sort({ createdAt: -1 });
+    } else {
+      fuelTypes = await FuelType.find({ isActive: true })
+        .select("name")
+        .sort({ createdAt: -1 });
+    }
+
     res.status(200).json({ success: true, fuelTypes });
   } catch (err) {
     return res
@@ -178,9 +267,19 @@ exports.getCarFuelType = async (req, res) => {
 
 exports.getCarTransmission = async (req, res) => {
   try {
-    const transmissions = await Transmission.find({ isActive: true }).select(
-      "transmission isActive"
-    );
+    const { all } = req.query;
+    let transmissions = {};
+
+    if (all && all == "true" && req.user.role === USER_ROLES.ADMIN) {
+      transmissions = await Transmission.find()
+        .select("transmission isActive")
+        .sort({ createdAt: -1 });
+    } else {
+      transmissions = await Transmission.find({ isActive: true })
+        .select("transmission")
+        .sort({ createdAt: -1 });
+    }
+
     res.status(200).json({ success: true, transmissions });
   } catch (err) {
     return res
@@ -191,9 +290,19 @@ exports.getCarTransmission = async (req, res) => {
 
 exports.getCarDoors = async (req, res) => {
   try {
-    const doors = await CarDoors.find({ isActive: true }).select(
-      "doors isActive"
-    );
+    const { all } = req.query;
+    let doors = {};
+
+    if (all && all == "true" && req.user.role === USER_ROLES.ADMIN) {
+      doors = await CarDoors.find()
+        .select("doors isActive")
+        .sort({ createdAt: -1 });
+    } else {
+      doors = await CarDoors.find({ isActive: true })
+        .select("doors isActive")
+        .sort({ createdAt: -1 });
+    }
+
     res.status(200).json({ success: true, doors });
   } catch (err) {
     return res
