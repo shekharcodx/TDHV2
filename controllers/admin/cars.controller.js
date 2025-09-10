@@ -650,177 +650,34 @@ exports.addCarDoors = async (req, res) => {
   }
 };
 
-exports.getCarBrands = async (req, res) => {
+exports.getAllCarModels = async (req, res) => {
   try {
-    const carBrands = await CarBrand.find({ isActive: true }).select(
-      "name logo"
-    );
-
-    res.status(200).json({ success: true, carBrands });
-  } catch (err) {
-    return res
-      .status(500)
-      .json({ success: false, ...messages.INTERNAL_SERVER_ERROR });
-  }
-};
-
-exports.getCarModels = async (req, res) => {
-  const { carBrandId } = req.params;
-  try {
-    const carModels = await CarModel.find({
-      isActive: true,
-      carBrand: carBrandId,
-    })
+    const models = await CarModel.find()
       .select("_id name isActive")
-      .populate({ path: "carBrand", select: "_id logo name" });
+      .populate({ path: "carBrand", select: "_id logo name isActive" });
 
-    res.status(200).json({ success: true, carModels });
+    if (!models) {
+      return res
+        .status(404)
+        .json({ success: false, ...adminMessages.RESOURCE_NOT_FOUND });
+    }
+
+    res.status(200).json({ success: true, models });
   } catch (err) {
+    console.log("allCarModelsErr", err);
     return res
       .status(500)
       .json({ success: false, ...messages.INTERNAL_SERVER_ERROR });
   }
 };
 
-exports.getCarTrims = async (req, res) => {
-  const { carModelId } = req.params;
+exports.getAllCarTrims = async (req, res) => {
   try {
-    const carTrims = await Trim.find({
-      isActive: true,
-      carModel: carModelId,
-    })
-      .select("name")
+    const carTrims = await Trim.find()
+      .select("name isActive")
       .populate({ path: "carModel", select: "name" });
 
     res.status(200).json({ success: true, carTrims });
-  } catch (err) {
-    return res
-      .status(500)
-      .json({ success: false, ...messages.INTERNAL_SERVER_ERROR });
-  }
-};
-
-exports.getYears = async (req, res) => {
-  try {
-    const years = await Year.find({ isActive: true }).select("year");
-    res.status(200).json({ success: true, years });
-  } catch (err) {
-    return res
-      .status(500)
-      .json({ success: false, ...messages.INTERNAL_SERVER_ERROR });
-  }
-};
-
-exports.getBodyTypes = async (req, res) => {
-  try {
-    const bodyTypes = await CarBodyType.find({ isActive: true });
-
-    res.status(200).json({ success: true, bodyTypes });
-  } catch (err) {
-    return res
-      .status(500)
-      .json({ success: false, ...messages.INTERNAL_SERVER_ERROR });
-  }
-};
-
-exports.getCarRegionalSpecs = async (req, res) => {
-  try {
-    const specs = await RegionalSpecs.find({ isActive: true }).select("name");
-    res.status(200).json({ success: true, specs });
-  } catch (err) {
-    return res
-      .status(500)
-      .json({ success: false, ...messages.INTERNAL_SERVER_ERROR });
-  }
-};
-
-exports.getCarHorsePowers = async (req, res) => {
-  try {
-    const powers = await HorsePower.find({ isActive: true });
-    res.status(200).json({ success: true, horsePowers: powers });
-  } catch (err) {
-    return res
-      .status(500)
-      .json({ success: false, ...messages.INTERNAL_SERVER_ERROR });
-  }
-};
-
-exports.getCarSeatingCapacities = async (req, res) => {
-  try {
-    const capacities = await SeatingCapacity.find({ isActive: true });
-    res.status(200).json({ success: true, seatingCapacities: capacities });
-  } catch (err) {
-    return res
-      .status(500)
-      .json({ success: false, ...messages.INTERNAL_SERVER_ERROR });
-  }
-};
-
-exports.getCarColors = async (req, res) => {
-  try {
-    const colors = await CarColor.find({ isActive: true });
-    res.status(200).json({ success: true, colors });
-  } catch (err) {
-    return res
-      .status(500)
-      .json({ success: false, ...messages.INTERNAL_SERVER_ERROR });
-  }
-};
-
-exports.getCarTechFeatures = async (req, res) => {
-  try {
-    const features = await TechnicalFeature.find();
-    res.status(200).json({ success: true, features });
-  } catch (err) {
-    return res
-      .status(500)
-      .json({ success: false, ...messages.INTERNAL_SERVER_ERROR });
-  }
-};
-
-exports.getCarOtherFeatures = async (req, res) => {
-  try {
-    const features = await OtherFeature.find();
-    res.status(200).json({ success: true, features });
-  } catch (err) {
-    return res
-      .status(500)
-      .json({ success: false, ...messages.INTERNAL_SERVER_ERROR });
-  }
-};
-
-exports.getCarFuelType = async (req, res) => {
-  try {
-    const fuelTypes = await FuelType.find({ isActive: true }).select(
-      "name isActive"
-    );
-    res.status(200).json({ success: true, fuelTypes });
-  } catch (err) {
-    return res
-      .status(500)
-      .json({ success: false, ...messages.INTERNAL_SERVER_ERROR });
-  }
-};
-
-exports.getCarTransmission = async (req, res) => {
-  try {
-    const transmissions = await Transmission.find({ isActive: true }).select(
-      "transmission isActive"
-    );
-    res.status(200).json({ success: true, transmissions });
-  } catch (err) {
-    return res
-      .status(500)
-      .json({ success: false, ...messages.INTERNAL_SERVER_ERROR });
-  }
-};
-
-exports.getCarDoors = async (req, res) => {
-  try {
-    const doors = await CarDoors.find({ isActive: true }).select(
-      "doors isActive"
-    );
-    res.status(200).json({ success: true, doors });
   } catch (err) {
     return res
       .status(500)
@@ -834,13 +691,19 @@ exports.deleteCarBrand = async (req, res) => {
     const brandDeleted = await softDelete(CarBrand, brandId);
 
     if (!brandDeleted) {
-      return res
-        .status(404)
-        .json({ success: false, ...adminMessages.RESOURCE_NOT_FOUND });
+      return res.status(404).json({
+        success: false,
+        ...adminMessages.RESOURCE_NOT_FOUND,
+      });
     }
 
-    res.status(200).json({ success: true, ...adminMessages.BRAND_DELETED });
+    res.status(200).json({
+      success: true,
+      ...adminMessages.ACTIVE_STATUS_UPDATED,
+      data: brandDeleted,
+    });
   } catch (err) {
+    console.log("deletBrandError", err);
     return res
       .status(500)
       .json({ success: false, ...messages.INTERNAL_SERVER_ERROR });
@@ -858,8 +721,13 @@ exports.deleteCarModel = async (req, res) => {
         .json({ success: false, ...adminMessages.RESOURCE_NOT_FOUND });
     }
 
-    res.status(200).json({ success: true, ...adminMessages.MODEL_DELETED });
+    res.status(200).json({
+      success: true,
+      ...adminMessages.ACTIVE_STATUS_UPDATED,
+      data: modelDeleted,
+    });
   } catch (err) {
+    console.log("update model active err", err);
     return res
       .status(500)
       .json({ success: false, ...messages.INTERNAL_SERVER_ERROR });
@@ -877,7 +745,11 @@ exports.deleteCarTrim = async (req, res) => {
         .json({ success: false, ...adminMessages.RESOURCE_NOT_FOUND });
     }
 
-    res.status(200).json({ success: true, ...adminMessages.TRIM_DELETED });
+    res.status(200).json({
+      success: true,
+      ...adminMessages.ACTIVE_STATUS_UPDATED,
+      data: trimDeleted,
+    });
   } catch (err) {
     return res
       .status(500)
@@ -896,7 +768,11 @@ exports.deleteYear = async (req, res) => {
         .json({ success: false, ...adminMessages.RESOURCE_NOT_FOUND });
     }
 
-    res.status(200).json({ success: true, ...adminMessages.YEAR_DELETED });
+    res.status(200).json({
+      success: true,
+      ...adminMessages.ACTIVE_STATUS_UPDATED,
+      data: brandDeleted,
+    });
   } catch (err) {
     return res
       .status(500)
@@ -915,16 +791,18 @@ exports.deleteBodyType = async (req, res) => {
         .json({ success: false, ...adminMessages.RESOURCE_NOT_FOUND });
     }
 
-    res
-      .status(200)
-      .json({ success: true, ...adminMessages.CAR_BODY_TYPE_DELETED });
+    res.status(200).json({
+      success: true,
+      ...adminMessages.ACTIVE_STATUS_UPDATED,
+      data: brandDeleted,
+    });
   } catch (err) {
     return res
       .status(500)
       .json({ success: false, ...messages.INTERNAL_SERVER_ERROR });
   }
 };
-//new
+
 exports.deleteCarRegionalSpecs = async (req, res) => {
   const { specsId } = req.params;
   try {
@@ -936,9 +814,11 @@ exports.deleteCarRegionalSpecs = async (req, res) => {
         .json({ success: false, ...adminMessages.RESOURCE_NOT_FOUND });
     }
 
-    res
-      .status(200)
-      .json({ success: true, ...adminMessages.REGIONAL_SPECS_DELETED });
+    res.status(200).json({
+      success: true,
+      ...adminMessages.ACTIVE_STATUS_UPDATED,
+      data: brandDeleted,
+    });
   } catch (err) {
     return res
       .status(500)
@@ -957,9 +837,11 @@ exports.deleteCarHorsePower = async (req, res) => {
         .json({ success: false, ...adminMessages.RESOURCE_NOT_FOUND });
     }
 
-    res
-      .status(200)
-      .json({ success: true, ...adminMessages.HORSE_POWER_DELETED });
+    res.status(200).json({
+      success: true,
+      ...adminMessages.ACTIVE_STATUS_UPDATED,
+      data: brandDeleted,
+    });
   } catch (err) {
     return res
       .status(500)
@@ -978,9 +860,11 @@ exports.deleteCarSeatingCapacity = async (req, res) => {
         .json({ success: false, ...adminMessages.RESOURCE_NOT_FOUND });
     }
 
-    res
-      .status(200)
-      .json({ success: true, ...adminMessages.SEATING_CAPACITY_DELETED });
+    res.status(200).json({
+      success: true,
+      ...adminMessages.ACTIVE_STATUS_UPDATED,
+      data: brandDeleted,
+    });
   } catch (err) {
     return res
       .status(500)
@@ -999,7 +883,11 @@ exports.deleteCarColors = async (req, res) => {
         .json({ success: false, ...adminMessages.RESOURCE_NOT_FOUND });
     }
 
-    res.status(200).json({ success: true, ...adminMessages.CAR_COLOR_DELETED });
+    res.status(200).json({
+      success: true,
+      ...adminMessages.ACTIVE_STATUS_UPDATED,
+      data: brandDeleted,
+    });
   } catch (err) {
     return res
       .status(500)
@@ -1021,7 +909,11 @@ exports.deleteCarTechFeatures = async (req, res) => {
       });
     }
 
-    res.status(200).json({ success: true, ...adminMessages.FEATURE_DELETED });
+    res.status(200).json({
+      success: true,
+      ...adminMessages.ACTIVE_STATUS_UPDATED,
+      data: brandDeleted,
+    });
   } catch (err) {
     return res
       .status(500)
@@ -1043,7 +935,11 @@ exports.deleteCarOtherFeatures = async (req, res) => {
       });
     }
 
-    res.status(200).json({ success: true, ...adminMessages.FEATURE_DELETED });
+    res.status(200).json({
+      success: true,
+      ...adminMessages.ACTIVE_STATUS_UPDATED,
+      data: brandDeleted,
+    });
   } catch (err) {
     return res
       .status(500)
@@ -1060,9 +956,11 @@ exports.deleteCarFuelType = async (req, res) => {
         .status(404)
         .json({ success: false, ...adminMessages.RESOURCE_NOT_FOUND });
     }
-    res
-      .status(200)
-      .json({ success: true, ...adminMessages.DELETED_SUCCESSFULLY });
+    res.status(200).json({
+      success: true,
+      ...adminMessages.ACTIVE_STATUS_UPDATED,
+      data: brandDeleted,
+    });
   } catch (err) {
     return res
       .status(500)
@@ -1079,9 +977,11 @@ exports.deleteCarTransmission = async (req, res) => {
         .status(404)
         .json({ success: false, ...adminMessages.RESOURCE_NOT_FOUND });
     }
-    res
-      .status(200)
-      .json({ success: true, ...adminMessages.DELETED_SUCCESSFULLY });
+    res.status(200).json({
+      success: true,
+      ...adminMessages.ACTIVE_STATUS_UPDATED,
+      data: brandDeleted,
+    });
   } catch (err) {
     return res
       .status(500)
@@ -1098,9 +998,11 @@ exports.deleteCarDoors = async (req, res) => {
         .status(404)
         .json({ success: false, ...adminMessages.RESOURCE_NOT_FOUND });
     }
-    res
-      .status(200)
-      .json({ success: true, ...adminMessages.DELETED_SUCCESSFULLY });
+    res.status(200).json({
+      success: true,
+      ...adminMessages.ACTIVE_STATUS_UPDATED,
+      data: brandDeleted,
+    });
   } catch (err) {
     return res
       .status(500)

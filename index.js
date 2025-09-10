@@ -68,6 +68,8 @@ app.use("/api", require("./routes/admin/listing.routes"));
 
 app.use("/api", require("./routes/common/listing.routes"));
 
+app.use("/api", require("./routes/common/car.routes"));
+
 app.use("/api", require("./routes/customer/booking.routes"));
 
 app.use(checkIsApproved);

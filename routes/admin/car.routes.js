@@ -14,19 +14,19 @@ const {
   addCarTechFeatures,
   addCarOtherFeatures,
   getCarBrands,
-  getCarModels,
-  getCarTrims,
-  getYears,
-  getBodyTypes,
-  getCarRegionalSpecs,
-  getCarHorsePowers,
-  getCarSeatingCapacities,
-  getCarColors,
-  getCarTechFeatures,
-  getCarOtherFeatures,
-  getCarFuelType,
-  getCarDoors,
-  getCarTransmission,
+  // getCarModels,
+  // getCarTrims,
+  // getYears,
+  // getBodyTypes,
+  // getCarRegionalSpecs,
+  // getCarHorsePowers,
+  // getCarSeatingCapacities,
+  // getCarColors,
+  // getCarTechFeatures,
+  // getCarOtherFeatures,
+  // getCarFuelType,
+  // getCarDoors,
+  // getCarTransmission,
   deleteCarBrand,
   deleteCarModel,
   deleteCarTrim,
@@ -44,6 +44,8 @@ const {
   addCarTransmissions,
   addCarFuelTypes,
   addCarDoors,
+  getAllCarModels,
+  getAllCarTrims,
 } = require("../../controllers/admin/cars.controller");
 
 const {
@@ -57,8 +59,8 @@ const {
   addCarSeatingCapacityValidate,
   addCarColorsValidate,
   addCarTechFeaturesValidate,
-  getCarModelsValidation,
-  getCarTrimsValidation,
+  // getCarModelsValidation,
+  // getCarTrimsValidation,
   deleteCarBrandValidation,
   deleteCarModelValidation,
   deleteCarTrimValidation,
@@ -156,43 +158,9 @@ router.post(
 
 router.post("/carDoors", addCarDoorsValidation, validate, addCarDoors);
 
-router.get("/carBrands", getCarBrands);
+router.get("/carModels", getAllCarModels);
 
-router.get(
-  "/carModels/:carBrandId",
-  getCarModelsValidation,
-  validate,
-  getCarModels
-);
-
-router.get(
-  "/carTrims/:carModelId",
-  getCarTrimsValidation,
-  validate,
-  getCarTrims
-);
-
-router.get("/years", getYears);
-
-router.get("/bodyTypes", getBodyTypes);
-
-router.get("/carRegionalSpecs", getCarRegionalSpecs);
-
-router.get("/carHorsePowers", getCarHorsePowers);
-
-router.get("/carSeatingCapacities", getCarSeatingCapacities);
-
-router.get("/carColors", getCarColors);
-
-router.get("/carTechFeatures", getCarTechFeatures);
-
-router.get("/carOtherFeatures", getCarOtherFeatures);
-
-router.get("/carFuelTypes", getCarFuelType);
-
-router.get("/carTransmissions", getCarTransmission);
-
-router.get("/carDoors", getCarDoors);
+router.get("/carTrims", getAllCarTrims);
 
 router.delete(
   "/carBrand/:brandId",

@@ -178,4 +178,8 @@ module.exports = {
     error: "LISTING_CANNOT_BE_REVERTED_TO_PENDING",
     message: "Listing cannot be reverted to pending once approved or on-hold",
   },
+  ACTIVE_STATUS_UPDATED: {
+    code: 1724,
+    message: "Active status updated successfully",
+  },
 };
