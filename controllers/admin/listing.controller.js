@@ -9,6 +9,7 @@ exports.getAllListings = async (req, res) => {
   const options = {
     page: req.query.page || 1,
     limit: req.query.limit || 10,
+    sort: { createdAt: 1 },
   };
 
   try {

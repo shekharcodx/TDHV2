@@ -112,6 +112,7 @@ exports.getListing = async (req, res) => {
                 },
               },
             },
+            category: "$carCategory.name",
             regionalSpecsId: "$regionalSpecs._id",
             regionalSpecs: "$regionalSpecs.name",
             carInsurance: "$carInsurance",

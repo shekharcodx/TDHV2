@@ -9,6 +9,7 @@ const validate = require("../../middlewares/validate.middleware");
 const {
   getCarModels,
   getCarTrims,
+  getCategories,
   getYears,
   getBodyTypes,
   getCarRegionalSpecs,
@@ -38,6 +39,8 @@ router.get(
   validate,
   getCarTrims
 );
+
+router.get("/carCategories", getCategories);
 
 router.get("/years", getYears);
 

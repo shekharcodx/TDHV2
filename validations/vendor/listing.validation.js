@@ -23,6 +23,8 @@ exports.rentalListingValidator = [
 
   body("carTrim").isMongoId().withMessage("Invalid carTrim ID"),
 
+  body("carCategory").isMongoId("invalid carCategory ID"),
+
   body("regionalSpecs").isMongoId().withMessage("Invalid regionalSpecs ID"),
 
   body("modelYear").isMongoId().withMessage("Invalid modelYear ID"),
@@ -207,6 +209,7 @@ exports.updateListingValidation = [
       return true;
     }),
 
+  body("carCategory").optional().isMongoId("invalid carCategory ID"),
   body("regionalSpecs")
     .optional()
     .isMongoId()

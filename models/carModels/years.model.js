@@ -3,7 +3,7 @@ const mongoose = require("mongoose");
 const yearsSchema = new mongoose.Schema(
   {
     year: { type: String, required: true },
-    isActive: { type: String, default: true },
+    isActive: { type: Boolean, default: true },
   },
   { timestamps: true }
 );

@@ -13,6 +13,7 @@ const FuelType = require("../../models/carModels/carFuelType.model");
 const Transmission = require("../../models/carModels/carTransmission.model");
 const CarDoors = require("../../models/carModels/carDoors.model");
 const RentalListing = require("../../models/rentalListing.model");
+const CarCategory = require("../../models/carModels/carCategory.model");
 
 const messages = require("../../messages/messages");
 const adminMessages = require("../../messages/admin");
@@ -174,6 +175,53 @@ exports.addCarTrims = async (req, res) => {
   }
 };
 
+exports.addCarCategories = async (req, res) => {
+  try {
+    const { names } = req.body;
+
+    await CarCategory.bulkWrite(
+      names.map((name) => ({
+        updateOne: {
+          filter: { name },
+          update: { $set: { name, isActive: true } },
+          upsert: true,
+          collation: { locale: "en", strength: 2 },
+        },
+      }))
+    );
+
+    const carCategories = await CarCategory.find({
+      name: { $in: names },
+    });
+
+    const bulkOps = carCategories.map((type) => ({
+      updateMany: {
+        filter: { "carCategory._id": new mongoose.Types.ObjectId(type._id) },
+        update: {
+          $set: {
+            "carCategory.name": type.name,
+          },
+        },
+      },
+    }));
+
+    if (bulkOps.length > 0) {
+      const result = await RentalListing.bulkWrite(bulkOps);
+    }
+
+    res.status(200).json({
+      success: true,
+      ...adminMessages.CATEGORIES_CREATED,
+      data: carCategories,
+    });
+  } catch (err) {
+    console.log("Add Categories Error", err);
+    return res
+      .status(500)
+      .json({ success: false, ...messages.INTERNAL_SERVER_ERROR });
+  }
+};
+
 exports.addCarBodyTypes = async (req, res) => {
   const { names } = req.body;
   try {
@@ -233,9 +281,9 @@ exports.addYears = async (req, res) => {
       }))
     );
 
-    const years = await Year.find({ year: { $in: years } });
+    const yearsList = await Year.find({ year: { $in: years } });
 
-    const bulkOps = years.map((year) => ({
+    const bulkOps = yearsList.map((year) => ({
       updateMany: {
         filter: { "modelYear._id": year._id },
         update: {
@@ -253,8 +301,9 @@ exports.addYears = async (req, res) => {
 
     res
       .status(200)
-      .json({ success: true, ...adminMessages.YEAR_CREATED, data: years });
+      .json({ success: true, ...adminMessages.YEAR_CREATED, data: yearsList });
   } catch (err) {
+    console.log("Adding Years Err", err);
     return res
       .status(500)
       .json({ success: false, ...messages.INTERNAL_SERVER_ERROR });
@@ -311,8 +360,8 @@ exports.addCarHorsePowers = async (req, res) => {
     await HorsePower.bulkWrite(
       horsePowers.map((power) => ({
         updateOne: {
-          filter: { power },
-          update: { $set: { power, isActive: true } },
+          filter: { power: Number(power) },
+          update: { $set: { power: Number(power), isActive: true } },
           upsert: true,
           collation: { locale: "en", strength: 2 },
         },
@@ -611,8 +660,8 @@ exports.addCarDoors = async (req, res) => {
     await CarDoors.bulkWrite(
       doors.map((door) => ({
         updateOne: {
-          filter: { doors: door },
-          update: { $set: { doors: door, isActive: true } },
+          filter: { doors: Number(door) },
+          update: { $set: { doors: Number(door), isActive: true } },
           upsert: true,
           collation: { locale: "en", strength: 2 },
         },
@@ -783,6 +832,30 @@ exports.deleteCarTrim = async (req, res) => {
   }
 };
 
+exports.deleteCategory = async (req, res) => {
+  const { categoryId } = req.params;
+  try {
+    const categoryDeleted = await softDelete(CarCategory, categoryId);
+
+    if (!categoryDeleted) {
+      return res
+        .status(404)
+        .json({ success: false, ...adminMessages.RESOURCE_NOT_FOUND });
+    }
+
+    res.status(200).json({
+      success: true,
+      ...adminMessages.ACTIVE_STATUS_UPDATED,
+      data: categoryDeleted,
+    });
+  } catch (err) {
+    console.log("Category update error", err);
+    return res
+      .status(500)
+      .json({ success: false, ...messages.INTERNAL_SERVER_ERROR });
+  }
+};
+
 exports.deleteYear = async (req, res) => {
   const { yearId } = req.params;
   try {
@@ -797,9 +870,10 @@ exports.deleteYear = async (req, res) => {
     res.status(200).json({
       success: true,
       ...adminMessages.ACTIVE_STATUS_UPDATED,
-      data: brandDeleted,
+      data: yearDeleted,
     });
   } catch (err) {
+    console.log("Year update error", err);
     return res
       .status(500)
       .json({ success: false, ...messages.INTERNAL_SERVER_ERROR });
@@ -820,7 +894,7 @@ exports.deleteBodyType = async (req, res) => {
     res.status(200).json({
       success: true,
       ...adminMessages.ACTIVE_STATUS_UPDATED,
-      data: brandDeleted,
+      data: bodyTypeDeleted,
     });
   } catch (err) {
     return res
@@ -843,7 +917,7 @@ exports.deleteCarRegionalSpecs = async (req, res) => {
     res.status(200).json({
       success: true,
       ...adminMessages.ACTIVE_STATUS_UPDATED,
-      data: brandDeleted,
+      data: specDeleted,
     });
   } catch (err) {
     return res
@@ -866,7 +940,7 @@ exports.deleteCarHorsePower = async (req, res) => {
     res.status(200).json({
       success: true,
       ...adminMessages.ACTIVE_STATUS_UPDATED,
-      data: brandDeleted,
+      data: powerDeleted,
     });
   } catch (err) {
     return res
@@ -889,7 +963,7 @@ exports.deleteCarSeatingCapacity = async (req, res) => {
     res.status(200).json({
       success: true,
       ...adminMessages.ACTIVE_STATUS_UPDATED,
-      data: brandDeleted,
+      data: seatingDeleted,
     });
   } catch (err) {
     return res
@@ -912,7 +986,7 @@ exports.deleteCarColors = async (req, res) => {
     res.status(200).json({
       success: true,
       ...adminMessages.ACTIVE_STATUS_UPDATED,
-      data: brandDeleted,
+      data: colorDeleted,
     });
   } catch (err) {
     return res
@@ -938,7 +1012,7 @@ exports.deleteCarTechFeatures = async (req, res) => {
     res.status(200).json({
       success: true,
       ...adminMessages.ACTIVE_STATUS_UPDATED,
-      data: brandDeleted,
+      data: deletedFeature,
     });
   } catch (err) {
     return res
@@ -964,7 +1038,7 @@ exports.deleteCarOtherFeatures = async (req, res) => {
     res.status(200).json({
       success: true,
       ...adminMessages.ACTIVE_STATUS_UPDATED,
-      data: brandDeleted,
+      data: deletedFeature,
     });
   } catch (err) {
     return res
@@ -985,7 +1059,7 @@ exports.deleteCarFuelType = async (req, res) => {
     res.status(200).json({
       success: true,
       ...adminMessages.ACTIVE_STATUS_UPDATED,
-      data: brandDeleted,
+      data: deleted,
     });
   } catch (err) {
     return res
@@ -1006,7 +1080,7 @@ exports.deleteCarTransmission = async (req, res) => {
     res.status(200).json({
       success: true,
       ...adminMessages.ACTIVE_STATUS_UPDATED,
-      data: brandDeleted,
+      data: deleted,
     });
   } catch (err) {
     return res
@@ -1027,7 +1101,7 @@ exports.deleteCarDoors = async (req, res) => {
     res.status(200).json({
       success: true,
       ...adminMessages.ACTIVE_STATUS_UPDATED,
-      data: brandDeleted,
+      data: deleted,
     });
   } catch (err) {
     return res

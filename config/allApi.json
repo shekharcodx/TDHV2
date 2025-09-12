@@ -21,6 +21,8 @@
   "carBrand",
   "carModels",
   "carTrims",
+  "carCategories",
+  "carCategory",
   "carBodyTypes",
   "years",
   "carBrands",

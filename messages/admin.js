@@ -182,4 +182,8 @@ module.exports = {
     code: 1724,
     message: "Active status updated successfully",
   },
+  CATEGORIES_CREATED: {
+    code: 1725,
+    message: "Car categories created",
+  },
 };

@@ -46,6 +46,20 @@ exports.addCarTrimsValidation = [
     .withMessage("name cannot be empty"),
 ];
 
+exports.addCarCategoriesValidation = [
+  body("names")
+    .exists()
+    .withMessage("name is required")
+    .isArray()
+    .withMessage("name must be an array"),
+
+  body("names.*")
+    .isString()
+    .withMessage("Each name must be a string")
+    .notEmpty()
+    .withMessage("name cannot be empty"),
+];
+
 exports.addCarBodyTypesValidation = [
   body("names")
     .exists()
@@ -210,6 +224,14 @@ exports.deleteCarTrimValidation = [
     .withMessage("trimId is required")
     .isMongoId()
     .withMessage("Invalid trimId"),
+];
+
+exports.deleteCategoryValidation = [
+  param("categoryId")
+    .exists()
+    .withMessage("categoryId is required")
+    .isMongoId()
+    .withMessage("Invalid categoryId"),
 ];
 
 exports.deleteYearValidation = [

@@ -22,6 +22,7 @@ const colorModel = require("../../models/carModels/carColor.model");
 const seatingModel = require("../../models/carModels/carSeatingCapacity.model");
 const horsePowerModel = require("../../models/carModels/carHoursePower.model");
 const bodyTypeModel = require("../../models/carModels/carBodyType.model");
+const CarCategory = require("../../models/carModels/carCategory.model");
 const { USER_ROLES } = require("../../config/constants");
 
 exports.getCountriesData = async (req, res) => {
@@ -125,6 +126,7 @@ exports.createListing = async (req, res) => {
       brand,
       model,
       trim,
+      category,
       specs,
       year,
       bodyType,
@@ -139,6 +141,7 @@ exports.createListing = async (req, res) => {
       brandModel.findById(req.body.carBrand, "name logo"),
       modelModel.findById(req.body.carModel, "carBrand name"),
       trimModel.findById(req.body.carTrim, "carModel name"),
+      CarCategory.findById(req.body.carCategory, "name"),
       regionalSpecsModel.findById(req.body.regionalSpecs, "name"),
       yearModel.findById(req.body.modelYear, "year"),
       bodyTypeModel.findById(req.body.bodyType, "name"),
@@ -155,6 +158,7 @@ exports.createListing = async (req, res) => {
       !brand ||
       !model ||
       !trim ||
+      !category ||
       !year ||
       !specs ||
       !bodyType ||
@@ -214,6 +218,7 @@ exports.createListing = async (req, res) => {
       },
       carModel: { _id: req.body.carModel, name: model.name },
       carTrim: { _id: req.body.carTrim, name: trim.name },
+      carCategory: { _id: req.body.carCategory, name: category.name },
       regionalSpecs: { _id: req.body.regionalSpecs, name: specs.name },
       modelYear: { _id: req.body.modelYear, year: year.year },
       mileage: req.body.mileage,

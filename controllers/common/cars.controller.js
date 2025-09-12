@@ -12,6 +12,7 @@ const OtherFeature = require("../../models/carModels/carOtherFeatures.model");
 const FuelType = require("../../models/carModels/carFuelType.model");
 const Transmission = require("../../models/carModels/carTransmission.model");
 const CarDoors = require("../../models/carModels/carDoors.model");
+const CarCategory = require("../../models/carModels/carCategory.model");
 
 const messages = require("../../messages/messages");
 const { USER_ROLES } = require("../../config/constants");
@@ -28,11 +29,11 @@ exports.getCarBrands = async (req, res) => {
     ) {
       carBrands = await CarBrand.find()
         .select("name logo isActive")
-        .sort({ createdAt: -1 });
+        .sort({ updatedAt: -1 });
     } else {
       carBrands = await CarBrand.find({ isActive: true })
         .select("name logo isActive")
-        .sort({ createdAt: -1 });
+        .sort({ updatedAt: -1 });
     }
 
     res.status(200).json({ success: true, carBrands });
@@ -52,7 +53,7 @@ exports.getCarModels = async (req, res) => {
     })
       .select("_id name isActive")
       .populate({ path: "carBrand", select: "_id logo name isActive" })
-      .sort({ createdAt: -1 });
+      .sort({ updatedAt: -1 });
 
     res.status(200).json({ success: true, carModels });
   } catch (err) {
@@ -71,9 +72,32 @@ exports.getCarTrims = async (req, res) => {
     })
       .select("name")
       .populate({ path: "carModel", select: "name" })
-      .sort({ createdAt: -1 });
+      .sort({ updatedAt: -1 });
 
     res.status(200).json({ success: true, carTrims });
+  } catch (err) {
+    return res
+      .status(500)
+      .json({ success: false, ...messages.INTERNAL_SERVER_ERROR });
+  }
+};
+
+exports.getCategories = async (req, res) => {
+  try {
+    const { all } = req.query;
+    let categories = {};
+
+    if (all && all == "true" && req.user.role === USER_ROLES.ADMIN) {
+      categories = await CarCategory.find()
+        .select("name isActive")
+        .sort({ updatedAt: -1 });
+    } else {
+      categories = await CarCategory.find({ isActive: true })
+        .select("name")
+        .sort({ updatedAt: -1 });
+    }
+
+    res.status(200).json({ success: true, categories });
   } catch (err) {
     return res
       .status(500)
@@ -87,11 +111,11 @@ exports.getYears = async (req, res) => {
     let years = {};
 
     if (all && all == "true" && req.user.role === USER_ROLES.ADMIN) {
-      years = await Year.find().select("year isActive").sort({ createdAt: -1 });
+      years = await Year.find().select("year isActive").sort({ updatedAt: -1 });
     } else {
       years = await Year.find({ isActive: true })
         .select("year")
-        .sort({ createdAt: -1 });
+        .sort({ updatedAt: -1 });
     }
 
     res.status(200).json({ success: true, years });
@@ -110,12 +134,12 @@ exports.getBodyTypes = async (req, res) => {
     if (all && all == "true" && req.user.role === USER_ROLES.ADMIN) {
       bodyTypes = await CarBodyType.find()
         .select("name isActive")
-        .sort({ createdAt: -1 });
+        .sort({ updatedAt: -1 });
     } else {
       bodyTypes = await CarBodyType.find({ isActive: true })
         .select("name")
         .sort({
-          createdAt: -1,
+          updatedAt: -1,
         });
     }
 
@@ -134,11 +158,11 @@ exports.getCarRegionalSpecs = async (req, res) => {
     if (all && all == "true" && req.user.role === USER_ROLES.ADMIN) {
       specs = await RegionalSpecs.find()
         .select("name isActive")
-        .sort({ createdAt: -1 });
+        .sort({ updatedAt: -1 });
     } else {
       specs = await RegionalSpecs.find({ isActive: true })
         .select("name")
-        .sort({ createdAt: -1 });
+        .sort({ updatedAt: -1 });
     }
 
     res.status(200).json({ success: true, specs });
@@ -156,11 +180,11 @@ exports.getCarHorsePowers = async (req, res) => {
 
     if (all && all == "true" && req.user.role === USER_ROLES.ADMIN) {
       powers = await HorsePower.find().select("power isActive").sort({
-        createdAt: -1,
+        updatedAt: -1,
       });
     } else {
       powers = await HorsePower.find({ isActive: true }).select("power").sort({
-        createdAt: -1,
+        updatedAt: -1,
       });
     }
 
@@ -180,12 +204,12 @@ exports.getCarSeatingCapacities = async (req, res) => {
     if (all && all == "true" && req.user.role === USER_ROLES.ADMIN) {
       capacities = await SeatingCapacity.find()
         .select("seats isActive")
-        .sort({ createdAt: -1 });
+        .sort({ updatedAt: -1 });
     } else {
       capacities = await SeatingCapacity.find({ isActive: true })
         .select("seats")
         .sort({
-          createdAt: -1,
+          updatedAt: -1,
         });
     }
 
@@ -205,11 +229,11 @@ exports.getCarColors = async (req, res) => {
     if (all && all == "true" && req.user.role === USER_ROLES.ADMIN) {
       colors = await CarColor.find()
         .select("name isActive")
-        .sort({ createdAt: -1 });
+        .sort({ updatedAt: -1 });
     } else {
       colors = await CarColor.find({ isActive: true })
         .select("name")
-        .sort({ createdAt: -1 });
+        .sort({ updatedAt: -1 });
     }
 
     res.status(200).json({ success: true, colors });
@@ -222,7 +246,7 @@ exports.getCarColors = async (req, res) => {
 
 exports.getCarTechFeatures = async (req, res) => {
   try {
-    const features = await TechnicalFeature.find();
+    const features = await TechnicalFeature.find().sort({ updatedAt: -1 });
     res.status(200).json({ success: true, features });
   } catch (err) {
     return res
@@ -233,7 +257,7 @@ exports.getCarTechFeatures = async (req, res) => {
 
 exports.getCarOtherFeatures = async (req, res) => {
   try {
-    const features = await OtherFeature.find();
+    const features = await OtherFeature.find().sort({ updatedAt: -1 });
     res.status(200).json({ success: true, features });
   } catch (err) {
     return res
@@ -250,11 +274,11 @@ exports.getCarFuelType = async (req, res) => {
     if (all && all == "true" && req.user.role === USER_ROLES.ADMIN) {
       fuelTypes = await FuelType.find()
         .select("name isActive")
-        .sort({ createdAt: -1 });
+        .sort({ updatedAt: -1 });
     } else {
       fuelTypes = await FuelType.find({ isActive: true })
         .select("name")
-        .sort({ createdAt: -1 });
+        .sort({ updatedAt: -1 });
     }
 
     res.status(200).json({ success: true, fuelTypes });
@@ -273,11 +297,11 @@ exports.getCarTransmission = async (req, res) => {
     if (all && all == "true" && req.user.role === USER_ROLES.ADMIN) {
       transmissions = await Transmission.find()
         .select("transmission isActive")
-        .sort({ createdAt: -1 });
+        .sort({ updatedAt: -1 });
     } else {
       transmissions = await Transmission.find({ isActive: true })
         .select("transmission")
-        .sort({ createdAt: -1 });
+        .sort({ updatedAt: -1 });
     }
 
     res.status(200).json({ success: true, transmissions });
@@ -296,11 +320,11 @@ exports.getCarDoors = async (req, res) => {
     if (all && all == "true" && req.user.role === USER_ROLES.ADMIN) {
       doors = await CarDoors.find()
         .select("doors isActive")
-        .sort({ createdAt: -1 });
+        .sort({ updatedAt: -1 });
     } else {
       doors = await CarDoors.find({ isActive: true })
         .select("doors isActive")
-        .sort({ createdAt: -1 });
+        .sort({ updatedAt: -1 });
     }
 
     res.status(200).json({ success: true, doors });

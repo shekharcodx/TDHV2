@@ -5,6 +5,7 @@ const {
   addCarBrand,
   addCarModels,
   addCarTrims,
+  addCarCategories,
   addCarBodyTypes,
   addYears,
   addCarRegionalSpecs,
@@ -13,23 +14,10 @@ const {
   addCarColors,
   addCarTechFeatures,
   addCarOtherFeatures,
-  getCarBrands,
-  // getCarModels,
-  // getCarTrims,
-  // getYears,
-  // getBodyTypes,
-  // getCarRegionalSpecs,
-  // getCarHorsePowers,
-  // getCarSeatingCapacities,
-  // getCarColors,
-  // getCarTechFeatures,
-  // getCarOtherFeatures,
-  // getCarFuelType,
-  // getCarDoors,
-  // getCarTransmission,
   deleteCarBrand,
   deleteCarModel,
   deleteCarTrim,
+  deleteCategory,
   deleteYear,
   deleteBodyType,
   deleteCarRegionalSpecs,
@@ -53,17 +41,17 @@ const {
   addCarModelsValidation,
   addCarBodyTypesValidation,
   addCarTrimsValidation,
+  addCarCategoriesValidation,
   addYearsValidation,
   addCarRegionalSpecsValidation,
   addCarHorsePowersValidate,
   addCarSeatingCapacityValidate,
   addCarColorsValidate,
   addCarTechFeaturesValidate,
-  // getCarModelsValidation,
-  // getCarTrimsValidation,
   deleteCarBrandValidation,
   deleteCarModelValidation,
   deleteCarTrimValidation,
+  deleteCategoryValidation,
   deleteYearValidation,
   deleteBodyTypeValidate,
   deleteRegionalSpecsValidate,
@@ -95,6 +83,13 @@ router.post(
 router.post("/carModels", addCarModelsValidation, validate, addCarModels);
 
 router.post("/carTrims", addCarTrimsValidation, validate, addCarTrims);
+
+router.post(
+  "/carCategories",
+  addCarCategoriesValidation,
+  validate,
+  addCarCategories
+);
 
 router.post(
   "/carBodyTypes",
@@ -181,6 +176,13 @@ router.delete(
   deleteCarTrimValidation,
   validate,
   deleteCarTrim
+);
+
+router.delete(
+  "/carCategory/:categoryId",
+  deleteCategoryValidation,
+  validate,
+  deleteCategory
 );
 
 router.delete("/year/:yearId", deleteYearValidation, validate, deleteYear);
