@@ -214,6 +214,12 @@ exports.forgetPasswordValidation = [
     .withMessage("email is required")
     .isEmail()
     .withMessage("email must be valid"),
+
+  body("role")
+    .exists()
+    .withMessage("role is required")
+    .isIn([USER_ROLES.ADMIN, USER_ROLES.VENDOR, USER_ROLES.CUSTOMER])
+    .withMessage("role must be admin(1), vendor (2) or customer (3)"),
 ];
 
 exports.resetPasswordValidation = [

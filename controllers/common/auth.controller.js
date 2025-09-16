@@ -48,18 +48,18 @@ exports.register = async (req, res) => {
     let status = ACCOUNT_STATUS.APPROVED;
     let documents = {};
 
-    const [country, state, city] = await Promise.all([
-      Country.findById(req.body.country).select("name"),
-      State.findById(req.body.state).select("name"),
-      City.findById(req.body.city).select("name"),
-    ]);
+    // const [country, state, city] = await Promise.all([
+    //   Country.findById(req.body.country).select("name"),
+    //   State.findById(req.body.state).select("name"),
+    //   City.findById(req.body.city).select("name"),
+    // ]);
 
-    if (!country || !state || !city) {
-      return res.status(400).json({
-        success: false,
-        message: "Invalid location reference provided",
-      });
-    }
+    // if (!country || !state || !city) {
+    //   return res.status(400).json({
+    //     success: false,
+    //     message: "Invalid location reference provided",
+    //   });
+    // }
 
     if (role === USER_ROLES.VENDOR) {
       status = ACCOUNT_STATUS.PENDING;
@@ -128,9 +128,9 @@ exports.register = async (req, res) => {
       userData.businessName = businessName;
       userData.address = {
         street,
-        country: country?.name,
-        city: city?.name,
-        state: state?.name,
+        country: req.body.country,
+        city: req.body.city,
+        state: req.body.state,
         mapUrl,
       };
       userData.contact = { whatsappNum, landlineNum, mobileNum };
@@ -259,7 +259,7 @@ exports.createNewPassword = async (req, res) => {
 };
 
 exports.forgetPassword = async (req, res) => {
-  const { email } = req.body;
+  const { email, role } = req.body;
   try {
     const user = await User.findOne({ email });
 
@@ -289,7 +289,16 @@ exports.forgetPassword = async (req, res) => {
 
     await user.save();
 
-    const resetLink = `${process.env.RESET_LINK}${resetToken}`;
+    let resetLink = "";
+
+    if (role && Number(role) == 1) {
+      resetLink = `${process.env.RESET_LINK_ADMIN}${resetToken}`;
+    } else if (role && Number(role) == 2) {
+      resetLink = `${process.env.RESET_LINK_VENDOR}${resetToken}`;
+    } else {
+      resetLink = `${process.env.RESET_LINK_ADMIN}${resetToken}`;
+    }
+
     await sendEmailFromTemplate("password_reset", user.email, {
       name: user.name,
       resetLink,
