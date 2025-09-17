@@ -271,6 +271,7 @@ exports.getListings = async (req, res) => {
   const options = {
     page: req.query.page || 1,
     limit: req.query.limit || 10,
+    sort: { createdAt: -1 },
   };
   try {
     let pipeline = [
@@ -366,6 +367,7 @@ exports.getListings = async (req, res) => {
                 },
               },
             },
+            category: "$carCategory.name",
             regionalSpecs: "$regionalSpecs.name",
             carInsurance: "$carInsurance",
             warranty: "$warranty",
@@ -382,6 +384,7 @@ exports.getListings = async (req, res) => {
           status: 1,
           isFeatured: 1,
           isPremium: 1,
+          createdAt: 1,
         },
       },
     ];
