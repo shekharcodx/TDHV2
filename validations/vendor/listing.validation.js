@@ -35,6 +35,35 @@ exports.rentalListingValidator = [
     .isInt({ min: 0 })
     .withMessage("mileage cannot be negative"),
 
+  body("extraMileageRate")
+    .notEmpty()
+    .withMessage("extraMileageRate is required field")
+    .isInt()
+    .withMessage("extraMileageRate must be a number")
+    .toInt(),
+
+  body("dailyMileage")
+    .notEmpty()
+    .withMessage("dailyMileage is required field")
+    .isInt()
+    .withMessage("dailyMileage must be a number")
+    .toInt(),
+
+  body("weeklyMileage")
+    .optional()
+    .notEmpty()
+    .withMessage("weeklyMileage is required field")
+    .isInt()
+    .withMessage("weeklyMileage must be a number")
+    .toInt(),
+
+  body("monthlyMileage")
+    .notEmpty()
+    .withMessage("monthlyMileage is required field")
+    .isInt()
+    .withMessage("monthlyMileage must be a number")
+    .toInt(),
+
   body("bodyType").isMongoId().withMessage("Invalid bodyType ID"),
 
   body("carInsurance").notEmpty().withMessage("carInsurance is required"),
@@ -119,6 +148,20 @@ exports.rentalListingValidator = [
 
   body("location").notEmpty().withMessage("location is required"),
 
+  body("airBags")
+    .notEmpty()
+    .withMessage("airBags is required field")
+    .isInt()
+    .withMessage("airBags must be a number")
+    .toInt(),
+
+  body("tankCapacity")
+    .notEmpty()
+    .withMessage("tankCapacity is required field")
+    .isInt()
+    .withMessage("tankCapacity must be a number")
+    .toInt(),
+
   body("images").custom((value, { req }) => {
     console.log("images", req.files.length);
     if (!req.files || req.files.length === 0) {
@@ -126,6 +169,45 @@ exports.rentalListingValidator = [
     }
     return true;
   }),
+
+  body("deliveryCharges")
+    .notEmpty()
+    .withMessage("deliveryCharges is required field")
+    .isInt()
+    .withMessage("deliveryCharges must be a number")
+    .toInt(),
+
+  body("tollCharges")
+    .notEmpty()
+    .withMessage("tollCharges is required field")
+    .isInt()
+    .withMessage("tollCharges must be a number")
+    .toInt(),
+
+  body("securityDeposit")
+    .optional()
+    .isInt()
+    .withMessage("securityDeposit must be a number")
+    .toInt(),
+
+  body("minRentalDays")
+    .notEmpty()
+    .withMessage("minRentalDays is required field")
+    .isInt()
+    .withMessage("minRentalDays must be a number")
+    .toInt(),
+
+  body("pickupAvailable")
+    .exists()
+    .withMessage("pickupAvailable is required field")
+    .isBoolean()
+    .withMessage("pickupAvailable must be a boolean"),
+
+  body("depositRequired")
+    .exists()
+    .withMessage("depositRequired is required field")
+    .isBoolean()
+    .withMessage("depositRequired must be a boolean"),
 
   body("status").optional().isInt().withMessage("Invalid status"),
 
@@ -244,6 +326,31 @@ exports.updateListingValidation = [
     .optional()
     .isNumeric()
     .withMessage("mileage must be a number"),
+
+  body("extraMileageRate")
+    .optional()
+    .isInt()
+    .withMessage("extraMileageRate must be a number")
+    .toInt(),
+
+  body("dailyMileage")
+    .optional()
+    .isInt()
+    .withMessage("dailyMileage must be a number")
+    .toInt(),
+
+  body("weeklyMileage")
+    .optional()
+    .isInt()
+    .withMessage("weeklyMileage must be a number")
+    .toInt(),
+
+  body("monthlyMileage")
+    .optional()
+    .isInt()
+    .withMessage("monthlyMileage must be a number")
+    .toInt(),
+
   body("carInsurance")
     .optional()
     .notEmpty()
@@ -281,4 +388,46 @@ exports.updateListingValidation = [
     .optional()
     .isString()
     .withMessage("location must be a string"),
+
+  body("airBags")
+    .optional()
+    .isInt()
+    .withMessage("airBags must be an integar")
+    .toInt(),
+
+  body("tankCapacity").optional().isInt().withMessage("tankCapacity").toInt(),
+
+  body("deliveryCharges")
+    .optional()
+    .isInt()
+    .withMessage("deliveryCharges must be a number")
+    .toInt(),
+
+  body("tollCharges")
+    .optional()
+    .isInt()
+    .withMessage("tollCharges must be a number")
+    .toInt(),
+
+  body("securityDeposit")
+    .optional()
+    .isInt()
+    .withMessage("securityDeposit must be a number")
+    .toInt(),
+
+  body("minRentalDays")
+    .optional()
+    .isInt()
+    .withMessage("minRentalDays must be a number")
+    .toInt(),
+
+  body("pickupAvailable")
+    .optional()
+    .isBoolean()
+    .withMessage("pickupAvailable must be a boolean"),
+
+  body("depositRequired")
+    .optional()
+    .isBoolean()
+    .withMessage("depositRequired must be a boolean"),
 ];

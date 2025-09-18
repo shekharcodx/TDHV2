@@ -250,6 +250,18 @@ exports.createListing = async (req, res) => {
       otherFeatures: req.body.otherFeatures,
       location: req.body.location,
       images: imagesArr,
+      airBags: req.body.airBags,
+      tankCapacity: req.body.tankCapacity,
+      extraMileageRate: req.body.extraMileageRate,
+      deliveryCharges: req.body.deliveryCharges,
+      tollCharges: req.body.tollCharges,
+      securityDeposit: req.body.securityDeposit,
+      dailyMileage: req.body.dailyMileage,
+      weeklyMileage: req.body.weeklyMileage,
+      monthlyMileage: req.body.monthlyMileage,
+      minRentalDays: req.body.minRentalDays,
+      pickupAvailable: req.body.pickupAvailable,
+      depositRequired: req.body.depositRequired,
     });
 
     await carListing.save();
@@ -260,6 +272,7 @@ exports.createListing = async (req, res) => {
       data: carListing,
     });
   } catch (err) {
+    console.log("listing creation err", err);
     return res
       .status(500)
       .json({ success: false, ...messages.INTERNAL_SERVER_ERROR });

@@ -38,6 +38,15 @@ const rentalListingSchema = new mongoose.Schema(
       name: { type: String },
     },
 
+    airBags: {
+      type: Number,
+      required: true,
+    },
+
+    tankCapacity: { type: Number, required: true },
+
+    extraMileageRate: { type: Number, required: true },
+
     carCategory: {
       _id: { type: mongoose.Schema.Types.ObjectId, ref: "CarCategory" },
       name: { type: String },
@@ -164,6 +173,24 @@ const rentalListingSchema = new mongoose.Schema(
         url: { type: String, required: true },
       },
     ],
+
+    deliveryCharges: { type: Number, required: true },
+
+    tollCharges: { type: Number, required: true },
+
+    securityDeposit: { type: Number },
+
+    dailyMileage: { type: Number, required: true },
+
+    weeklyMileage: { type: Number },
+
+    monthlyMileage: { type: Number, required: true },
+
+    minRentalDays: { type: Number, default: 1 },
+
+    pickupAvailable: { type: Boolean, default: false },
+
+    depositRequired: { type: Boolean, default: false },
 
     status: {
       type: Number,

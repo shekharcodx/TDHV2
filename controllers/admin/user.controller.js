@@ -1,4 +1,6 @@
+const mongoose = require("mongoose");
 const User = require("../../models/user.model");
+const VendorDetail = require("../../models/vendor.model");
 const messages = require("../../messages/messages");
 const adminMessages = require("../../messages/admin");
 const bcrypt = require("bcrypt");
@@ -280,27 +282,56 @@ exports.getAllVendors = async (req, res) => {
     const limit = parseInt(req.query.limit) || 10;
     const { status, isActive, search } = req.query;
 
-    console.log("searchString", search);
+    const pipeline = [
+      { $match: { role: USER_ROLES.VENDOR } },
+      {
+        $lookup: {
+          from: "vendordetails",
+          localField: "_id",
+          foreignField: "userId",
+          as: "vendorDetails",
+          pipeline: [
+            { $project: { _id: 0, userId: 0, createdAt: 0, updatedAt: 0 } },
+          ],
+        },
+      },
+      { $unwind: { path: "$vendorDetails", preserveNullAndEmptyArrays: true } },
+      {
+        $replaceRoot: {
+          newRoot: { $mergeObjects: ["$vendorDetails", "$$ROOT"] },
+        },
+      },
+      {
+        $project: {
+          vendorDetails: 0, // remove the nested vendorDetails field
+          passwordResetExpires: 0,
+          passwordResetToken: 0,
+        },
+      },
+    ];
 
-    let filter = { role: USER_ROLES.VENDOR };
+    // Dynamic filtering
+    const filter = {};
 
     if (search) {
       const safeSearch = escapeRegex(search.trim());
-
-      filter = {
-        role: USER_ROLES.VENDOR,
-        $or: [
-          { name: { $regex: safeSearch, $options: "i" } },
-          { email: { $regex: safeSearch, $options: "i" } },
-        ],
-      };
+      filter.$or = [
+        { name: { $regex: safeSearch, $options: "i" } },
+        { email: { $regex: safeSearch, $options: "i" } },
+        { businessName: { $regex: safeSearch, $options: "i" } },
+      ];
     } else {
       if (status) {
         filter.status = parseInt(status);
       }
+
       if (isActive) {
         filter.isActive = isActive === "true";
       }
+    }
+
+    if (Object.keys(filter).length > 0) {
+      pipeline.push({ $match: filter });
     }
 
     const options = {
@@ -310,7 +341,10 @@ exports.getAllVendors = async (req, res) => {
       select: "-password",
     };
 
-    const vendors = await User.paginate(filter, options);
+    // ✅ Must wrap pipeline with User.aggregate()
+    const aggregate = User.aggregate(pipeline);
+
+    const vendors = await User.aggregatePaginate(aggregate, options);
 
     res.status(200).json({ success: true, vendors });
   } catch (err) {
@@ -428,8 +462,30 @@ exports.getUser = async (req, res) => {
         .status(404)
         .json({ success: false, ...messages.AUTH_USER_NOT_FOUND });
     }
+    let vendorDetails = {};
+    if (user.role === USER_ROLES.VENDOR) {
+      vendorDetails = await VendorDetail.findOne({ userId: user._id }).select(
+        "-_id -userId -__v -createdAt -updatedAt"
+      );
+    }
 
-    res.status(200).json({ success: true, data: user });
+    res.status(200).json({
+      success: true,
+      data: {
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        temporaryPassword: user.temporaryPassword,
+        profilePicture: user.profilePicture,
+        status: user.status,
+        isActive: user.isActive,
+        businessName: vendorDetails?.businessName,
+        address: vendorDetails?.address,
+        contact: vendorDetails?.contact,
+        vendorInformation: vendorDetails?.vendorInformation,
+      },
+    });
   } catch (err) {
     console.log("User fetching err", err);
     return res
@@ -439,6 +495,8 @@ exports.getUser = async (req, res) => {
 };
 
 exports.editVendorProfile = async (req, res) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
   try {
     const {
       vendorId,
@@ -459,15 +517,23 @@ exports.editVendorProfile = async (req, res) => {
     } = req.body;
 
     // Find the user
-    const userObj = await User.findById(vendorId);
+    const userObj = await User.findById(vendorId).session(session);
     if (!userObj) {
+      await session.abortTransaction();
       return res
         .status(400)
         .json({ success: false, ...messages.AUTH_USER_NOT_FOUND });
     }
+    let vendorDetails = {};
+    if (userObj.role === USER_ROLES.VENDOR) {
+      vendorDetails = await VendorDetail.findOne({
+        userId: userObj._id,
+      }).session(session);
+    }
 
     // Prevent editing super admin if needed
-    if (userObj.role === 1) {
+    if (userObj.role === USER_ROLES.ADMIN) {
+      await session.abortTransaction();
       return res.status(403).json({
         success: false,
         ...messages.NOT_ALLOWED_TO_PERFORM_THIS_OPERATION,
@@ -476,8 +542,9 @@ exports.editVendorProfile = async (req, res) => {
 
     // Check email uniqueness
     if (email) {
-      const userExists = await User.findOne({ email });
+      const userExists = await User.findOne({ email }).session(session);
       if (userExists && userExists._id.toString() !== userObj._id.toString()) {
+        await session.abortTransaction();
         return res
           .status(403)
           .json({ success: false, ...messages.AUTH_USER_ALREADY_EXISTS });
@@ -500,7 +567,8 @@ exports.editVendorProfile = async (req, res) => {
     for (const field of docFields) {
       if (req.files && req.files[field] && req.files[field][0]) {
         const file = req.files[field][0];
-        const previousKey = userObj.vendorInformation?.documents?.[field]?.key;
+        const previousKey =
+          vendorDetails?.vendorInformation?.documents?.[field]?.key;
 
         const result = await uploadFile(
           file.buffer,
@@ -516,11 +584,15 @@ exports.editVendorProfile = async (req, res) => {
       }
     }
 
-    // Update only uploaded fields
-    if (!userObj.vendorInformation.documents)
-      userObj.vendorInformation.documents = {};
+    // Ensure nested objects exist
+    if (!vendorDetails.address) vendorDetails.address = {};
+    if (!vendorDetails.contact) vendorDetails.contact = {};
+    if (!vendorDetails.vendorInformation) vendorDetails.vendorInformation = {};
+    if (!vendorDetails.vendorInformation.documents)
+      vendorDetails.vendorInformation.documents = {};
+
     for (const field of Object.keys(documents)) {
-      userObj.vendorInformation.documents[field] = documents[field];
+      vendorDetails.vendorInformation.documents[field] = documents[field];
     }
 
     // Handle profile picture
@@ -543,19 +615,25 @@ exports.editVendorProfile = async (req, res) => {
     if (email) userObj.email = email;
     if (password) userObj.password = await bcrypt.hash(password, 10);
     if (status !== undefined) userObj.status = status;
-    if (businessName) userObj.businessName = businessName;
-    if (country) userObj.address["country"] = country;
-    if (state) userObj.address["state"] = state;
-    if (city) userObj.address["city"] = city;
-    if (street) userObj.address["street"] = street;
-    if (mapUrl) userObj.address["mapUrl"] = mapUrl;
-    if (landlineNum) userObj.contact["landlineNum"] = landlineNum;
-    if (whatsappNum) userObj.contact["whatsappNum"] = whatsappNum;
-    if (mobileNum) userObj.contact["mobileNum"] = mobileNum;
-    if (fleetSize) userObj.vendorInformation.fleetSize = fleetSize;
 
-    // Save the user
-    await userObj.save();
+    // Update vendor fields
+    if (country) vendorDetails.address.country = country;
+    if (state) vendorDetails.address.state = state;
+    if (city) vendorDetails.address.city = city;
+
+    if (businessName) vendorDetails.businessName = businessName;
+    if (street) vendorDetails.address.street = street;
+    if (mapUrl) vendorDetails.address.mapUrl = mapUrl;
+    if (whatsappNum) vendorDetails.contact.whatsappNum = whatsappNum;
+    if (landlineNum) vendorDetails.contact.landlineNum = landlineNum;
+    if (mobileNum) vendorDetails.contact.mobileNum = mobileNum;
+    if (fleetSize) vendorDetails.vendorInformation.fleetSize = fleetSize;
+
+    // Save both in transaction
+    await userObj.save({ session });
+    await vendorDetails.save({ session });
+
+    await session.commitTransaction();
 
     res.status(200).json({
       success: true,
@@ -566,11 +644,15 @@ exports.editVendorProfile = async (req, res) => {
         email: userObj.email,
         role: userObj.role,
         profilePicture: userObj.profilePicture,
-        documents: userObj.vendorInformation.documents,
+        businessName: vendorDetails.businessName,
+        documents: vendorDetails.vendorInformation,
       },
     });
   } catch (error) {
     console.error(error);
+    await session.abortTransaction();
     res.status(500).json({ success: false, ...messages.INTERNAL_SERVER_ERROR });
+  } finally {
+    session.endSession();
   }
 };

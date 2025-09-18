@@ -1,5 +1,7 @@
 const bcrypt = require("bcrypt");
+const mongoose = require("mongoose");
 const User = require("../../models/user.model");
+const VendorDetail = require("../../models/vendor.model");
 const generateToken = require("../../utils/generateToken");
 const jwt = require("jsonwebtoken");
 const messages = require("../../messages/messages");
@@ -38,6 +40,9 @@ exports.register = async (req, res) => {
       .json({ success: false, ...messages.AUTH_REGISTRAION_ROLE_INVALID });
   }
 
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
   try {
     let userExists = await User.findOne({ email });
     if (userExists)
@@ -46,7 +51,8 @@ exports.register = async (req, res) => {
         .json({ success: false, ...messages.AUTH_USER_ALREADY_EXISTS });
 
     let status = ACCOUNT_STATUS.APPROVED;
-    let documents = {};
+    let profilePic = {};
+    let vendorDocs = {};
 
     // const [country, state, city] = await Promise.all([
     //   Country.findById(req.body.country).select("name"),
@@ -80,10 +86,6 @@ exports.register = async (req, res) => {
           const file = req.files[field][0];
           const fileBuffer = file.buffer;
           const fileName = file.originalname;
-          // const result = await uploadBufferToCloudinary(
-          //   fileBuffer,
-          //   "vendor_documents"
-          // );
 
           const result = await uploadFile(
             fileBuffer,
@@ -91,7 +93,7 @@ exports.register = async (req, res) => {
             fileName
           );
 
-          documents[field] = {
+          vendorDocs[field] = {
             key: result.key,
             filename: result.filename,
           };
@@ -107,7 +109,7 @@ exports.register = async (req, res) => {
 
       const result = await uploadFile(fileBuffer, "profile_pictures", fileName);
 
-      documents["profilePicture"] = {
+      profilePic = {
         url: result.url,
         key: result.key,
       };
@@ -124,32 +126,42 @@ exports.register = async (req, res) => {
       status,
     };
 
+    if (profilePic) {
+      userData.profilePicture = profilePic;
+    }
     if (role === USER_ROLES.VENDOR) {
-      userData.businessName = businessName;
-      userData.address = {
+      userData.temporaryPassword = true;
+    }
+
+    const user = await User.create([userData], { session });
+    const createdUser = user[0];
+
+    if (role === USER_ROLES.VENDOR) {
+      const vendorDetails = {};
+      vendorDetails.userId = createdUser._id;
+      vendorDetails.businessName = businessName;
+      vendorDetails.address = {
         street,
         country: req.body.country,
         city: req.body.city,
         state: req.body.state,
         mapUrl,
       };
-      userData.contact = { whatsappNum, landlineNum, mobileNum };
-      userData.temporaryPassword = true;
-      userData.vendorInformation = {
+      vendorDetails.contact = { whatsappNum, landlineNum, mobileNum };
+      vendorDetails.temporaryPassword = true;
+      vendorDetails.vendorInformation = {
         fleetSize: fleetSize,
-        documents,
+        documents: vendorDocs,
       };
+
+      await VendorDetail.create([vendorDetails], { session });
     }
 
-    if (documents.profilePicture) {
-      userData.profilePicture = documents.profilePicture;
-    }
-
-    const user = await User.create(userData);
+    await session.commitTransaction();
 
     if (role === USER_ROLES.VENDOR) {
-      await sendEmailFromTemplate("temporary_password", user.email, {
-        name: user.name,
+      await sendEmailFromTemplate("temporary_password", createdUser.email, {
+        name: createdUser.name,
         tempPassword: password,
       });
     }
@@ -161,22 +173,31 @@ exports.register = async (req, res) => {
 
     let info =
       role === USER_ROLES.CUSTOMER
-        ? { token: generateToken(user._id, user.role, user.email) }
+        ? {
+            token: generateToken(
+              createdUser._id,
+              createdUser.role,
+              createdUser.email
+            ),
+          }
         : null;
 
     res.status(201).json({
       success: true,
       ...messageObj,
       data: {
-        _id: user._id,
-        name: user.name,
-        email: user.email,
-        role: user.role,
+        _id: createdUser._id,
+        name: createdUser.name,
+        email: createdUser.email,
+        role: createdUser.role,
         ...info,
       },
     });
   } catch (error) {
+    await session.abortTransaction();
     res.status(500).json({ message: error.message });
+  } finally {
+    session.endSession();
   }
 };
 
@@ -361,7 +382,7 @@ exports.resetPassword = async (req, res) => {
 };
 
 exports.getCurrentLoggedInUser = async (req, res) => {
-  const { id } = req.user;
+  const { id, role } = req.user;
   try {
     const user = await User.findById(id)
       .select("-password -createdAt -updatedAt")
@@ -371,9 +392,15 @@ exports.getCurrentLoggedInUser = async (req, res) => {
         .status(404)
         .json({ success: false, ...messages.AUTH_USER_NOT_FOUND });
     }
+    let vendorDetails = null;
+    if (role == USER_ROLES.VENDOR) {
+      vendorDetails = await VendorDetail.findOne({ userId: user._id });
+    }
+
+    console.log("vendorDetails", vendorDetails);
 
     const userObj =
-      user.role === 1
+      user.role === USER_ROLES.ADMIN
         ? {
             name: user.name,
             email: user.email,
@@ -384,20 +411,22 @@ exports.getCurrentLoggedInUser = async (req, res) => {
             token: generateToken(user._id, user.role, user.email),
             profilePicture: user.profilePicture.url || null,
           }
-        : {
+        : user.role === USER_ROLES.VENDOR
+        ? {
             _id: user._id,
             name: user.name,
             email: user.email,
-            businessName: user.businessName,
-            address: user.address,
-            contact: user.contact,
-            vendorInformation: user.vendorInformation,
+            businessName: vendorDetails?.businessName,
+            address: vendorDetails?.address,
+            contact: vendorDetails?.contact,
+            vendorInformation: vendorDetails?.vendorInformation,
             token: generateToken(user._id, user.role, user.email),
             role: user.role,
             status: user.status,
             profilePicture: user.profilePicture.url || null,
             isActive: user.isActive,
-          };
+          }
+        : null;
 
     res.json({
       success: true,
