@@ -190,8 +190,8 @@ exports.createListing = async (req, res) => {
       imagesArr = await Promise.all(
         req.files.map(async (file) => {
           const optimizedImage = await sharp(file.buffer)
-            .resize(1280, 720, { fit: "cover" })
-            .toFormat("webp") // 👈 convert to webp
+            .resize(1280, 720, { fit: "inside" }) // keeps aspect ratio, no crop
+            .toFormat("webp")
             .webp({ quality: 80 })
             .toBuffer();
           const result = await uploadFile(
@@ -380,6 +380,11 @@ exports.getListings = async (req, res) => {
                 },
               },
             },
+            airBags: "$airBags",
+            tankCapacity: "$tankCapacity",
+            dailyMileage: "$dailyMileage",
+            weeklyMileage: "$weeklyMileage",
+            monthlyMileage: "$monthlyMileage",
             category: "$carCategory.name",
             regionalSpecs: "$regionalSpecs.name",
             carInsurance: "$carInsurance",
@@ -390,6 +395,13 @@ exports.getListings = async (req, res) => {
           rentPerDay: 1,
           rentPerWeek: 1,
           rentPerMonth: 1,
+          extraMileageRate: 1,
+          deliveryCharges: 1,
+          tollCharges: 1,
+          securityDeposit: 1,
+          minRentalDays: 1,
+          pickupAvailable: 1,
+          depositRequired: 1,
           title: 1,
           description: 1,
           location: 1,
@@ -554,7 +566,7 @@ exports.updateListing = async (req, res) => {
       const uploadedImages = await Promise.all(
         req.files.map(async (file, i) => {
           const optimizedImage = await sharp(file.buffer)
-            .resize(1280, 720, { fit: "cover" })
+            .resize(1280, 720, { fit: "inside" }) // keeps aspect ratio, no crop
             .toFormat("webp")
             .webp({ quality: 80 })
             .toBuffer();
@@ -623,6 +635,28 @@ exports.updateListing = async (req, res) => {
     if (body.techFeatures) listing.techFeatures = body.techFeatures;
     if (body.otherFeatures) listing.otherFeatures = body.otherFeatures;
     if (body.location) listing.location = body.location;
+    if (body.airBags) listing.airBags = req.body.airBags;
+    if (body.tankCapacity) listing.tankCapacity = req.body.tankCapacity;
+    if (body.extraMileageRate !== undefined)
+      listing.extraMileageRate = req.body.extraMileageRate;
+    if (body.deliveryCharges !== undefined)
+      listing.deliveryCharges = req.body.deliveryCharges;
+    if (body.tollCharges !== undefined)
+      listing.tollCharges = req.body.tollCharges;
+    if (body.securityDeposit !== undefined)
+      listing.securityDeposit = req.body.securityDeposit;
+    if (body.dailyMileage !== undefined)
+      listing.dailyMileage = req.body.dailyMileage;
+    if (body.weeklyMileage !== undefined)
+      listing.weeklyMileage = req.body.weeklyMileage;
+    if (body.monthlyMileage !== undefined)
+      listing.monthlyMileage = req.body.monthlyMileage;
+    if (body.minRentalDays !== undefined)
+      listing.minRentalDays = req.body.minRentalDays;
+    if (body.pickupAvailable)
+      listing.pickupAvailable = req.body.pickupAvailable;
+    if (body.depositRequired)
+      listing.depositRequired = req.body.depositRequired;
     listing.images = imagesArr;
 
     await listing.save();
