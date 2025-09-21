@@ -2,7 +2,8 @@ const bcrypt = require("bcrypt");
 const mongoose = require("mongoose");
 const User = require("../../models/user.model");
 const VendorDetail = require("../../models/vendor.model");
-const generateToken = require("../../utils/generateToken");
+const RefreshToken = require("../../models/refreshToken.model");
+const generateAccessToken = require("../../utils/generateAccessToken");
 const jwt = require("jsonwebtoken");
 const messages = require("../../messages/messages");
 const uploadBufferToCloudinary = require("../../utils/uploadToClaudinary");
@@ -16,6 +17,7 @@ const Country = require("../../models/locationModels/country.model");
 const State = require("../../models/locationModels/state.model");
 const City = require("../../models/locationModels/city.model");
 const crypto = require("crypto");
+const generateRefreshToken = require("../../utils/generateRefreshToken");
 
 exports.register = async (req, res) => {
   let {
@@ -174,7 +176,7 @@ exports.register = async (req, res) => {
     let info =
       role === USER_ROLES.CUSTOMER
         ? {
-            token: generateToken(
+            token: generateAccessToken(
               createdUser._id,
               createdUser.role,
               createdUser.email
@@ -204,6 +206,7 @@ exports.register = async (req, res) => {
 exports.login = async (req, res) => {
   let { email, password } = req.body;
   email = email.toLowerCase();
+  console.log("userEmail", email);
 
   try {
     const user = await User.findOne({ email });
@@ -228,25 +231,91 @@ exports.login = async (req, res) => {
 
     if (user.temporaryPassword) {
       return res
-        .status(430)
+        .status(403)
         .json({ success: false, ...messages.AUTH_VENDOR_CREATE_NEW_PASSWORD });
     }
 
-    res.json({
-      success: true,
-      ...messages.AUTH_LOGIN_SUCCESS,
-      data: {
-        _id: user._id,
-        name: user.name,
-        email: user.email,
-        token: generateToken(user._id, user.role, user.email),
-        role: user.role,
-        status: user.status,
-        profilePicture: user.profilePicture?.url || null,
-      },
-    });
+    const accessToken = generateAccessToken(user._id, user.role, user.email);
+    console.log("accessToekn", accessToken);
+    await RefreshToken.deleteOne({ userId: user.id });
+    const refreshToken = await generateRefreshToken(
+      user._id,
+      user.role,
+      user.email
+    );
+
+    res
+      .status(200)
+      .cookie("refreshToken", refreshToken, {
+        httpOnly: true,
+        sameSite: "lax",
+        secure: process.env.NODE_ENV === "production" ? "none" : "lax",
+        maxAge: 7 * 24 * 60 * 60 * 1000,
+      })
+      .json({
+        success: true,
+        ...messages.AUTH_LOGIN_SUCCESS,
+        data: {
+          _id: user._id,
+          name: user.name,
+          email: user.email,
+          token: accessToken,
+          role: user.role,
+          status: user.status,
+          profilePicture: user.profilePicture?.url || null,
+        },
+      });
   } catch (error) {
     res.status(500).json({ message: error.message });
+  }
+};
+
+exports.refresh = async (req, res) => {
+  try {
+    const { refreshToken } = req.cookies;
+    if (!refreshToken)
+      return res
+        .status(401)
+        .json({ success: false, message: "No refresh token" });
+
+    const tokenDoc = await RefreshToken.findOne({ token: refreshToken });
+    if (!tokenDoc)
+      return res
+        .status(401)
+        .json({ success: false, message: "Invalid refresh token" });
+
+    let decoded;
+    try {
+      decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
+    } catch (err) {
+      return res
+        .status(401)
+        .json({ success: false, message: "Invalid refresh token" });
+    }
+    console.log("decoded refresh token:", decoded);
+
+    const user = await User.findById(decoded.id);
+    if (!user || !user.isActive)
+      return res.status(403).json({ success: false, message: "User inactive" });
+
+    // Delete old refresh token
+    // await RefreshToken.deleteOne({ _id: tokenDoc._id });
+
+    // Generate new tokens
+    // const newRefreshToken = await generateRefreshToken(
+    //   user._id,
+    //   user.role,
+    //   user.email
+    // );
+    const accessToken = generateAccessToken(user._id, user.role, user.email);
+
+    res.status(200).json({
+      success: true,
+      data: { id: user._id, email: user.email, token: accessToken },
+    });
+  } catch (err) {
+    console.log("refresh token api error", err);
+    res.status(500).json({ success: false, message: "Internal server error" });
   }
 };
 
@@ -275,7 +344,9 @@ exports.createNewPassword = async (req, res) => {
 
     res.json({ success: true, ...messages.AUTH_PASSWORD_CHANGED });
   } catch (err) {
-    res.status(500).json({ success: false, ...messages.INTERNAL_SERVER_ERROR });
+    return res
+      .status(500)
+      .json({ success: false, ...messages.INTERNAL_SERVER_ERROR });
   }
 };
 
@@ -408,7 +479,7 @@ exports.getCurrentLoggedInUser = async (req, res) => {
             status: user.status,
             contact: user.contact,
             isActive: user.isActive,
-            token: generateToken(user._id, user.role, user.email),
+            token: generateAccessToken(user._id, user.role, user.email),
             profilePicture: user.profilePicture.url || null,
           }
         : user.role === USER_ROLES.VENDOR
@@ -420,7 +491,7 @@ exports.getCurrentLoggedInUser = async (req, res) => {
             address: vendorDetails?.address,
             contact: vendorDetails?.contact,
             vendorInformation: vendorDetails?.vendorInformation,
-            token: generateToken(user._id, user.role, user.email),
+            token: generateAccessToken(user._id, user.role, user.email),
             role: user.role,
             status: user.status,
             profilePicture: user.profilePicture.url || null,

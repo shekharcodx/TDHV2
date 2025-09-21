@@ -15,7 +15,7 @@ const protect = async (req, res, next) => {
 
       if (!result?.valid || result?.expired) {
         return res
-          .status(403)
+          .status(401)
           .json({ success: false, ...messages.AUTH_INVALID_RESET_TOKEN });
       }
 

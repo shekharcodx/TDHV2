@@ -5,7 +5,7 @@ const messages = require("../../messages/messages");
 const adminMessages = require("../../messages/admin");
 const bcrypt = require("bcrypt");
 const { ACCOUNT_STATUS, USER_ROLES } = require("../../config/constants");
-const generateToken = require("../../utils/generateToken");
+const generateAccessToken = require("../../utils/generateAccessToken");
 const { getFile, uploadFile } = require("../../utils/s3");
 const mime = require("mime-types");
 const escapeRegex = require("../../utils/escapeRegex");
@@ -80,7 +80,7 @@ exports.createAdmin = async (req, res) => {
         id: admin._id,
         name: admin.name,
         email: admin.email,
-        token: generateToken(admin._id, admin.role, admin.email),
+        // token: generateAccessToken(admin._id, admin.role, admin.email),
         role: admin.role,
         isActive: admin.isActive,
       },

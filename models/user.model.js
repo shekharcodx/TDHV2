@@ -7,23 +7,7 @@ const userSchema = new mongoose.Schema(
   {
     name: { type: String, required: true },
     email: { type: String, required: true, unique: true, lowercase: true },
-    //   type: String,
-    //   required: function () {
-    //     return this.role === USER_ROLES.VENDOR;
-    //   },
-    // },
     password: { type: String, required: true },
-    //   street: String,
-    //   country: String,
-    //   city: String,
-    //   state: String,
-    //   mapUrl: String,
-    // },
-    // contact: {
-    //   whatsappNum: String,
-    //   landlineNum: String,
-    //   mobileNum: String,
-    // },
     role: {
       type: Number,
       enum: Object.values(USER_ROLES),
@@ -35,16 +19,6 @@ const userSchema = new mongoose.Schema(
       enum: Object.values(ACCOUNT_STATUS),
       default: ACCOUNT_STATUS.PENDING,
     },
-    //   fleetSize: { type: Number },
-    //   documents: {
-    //     ijariCertificate: { key: String, filename: String },
-    //     tradeLicense: { key: String, filename: String },
-    //     vatCertificate: { key: String, filename: String },
-    //     noc: { key: String, filename: String },
-    //     emiratesId: { key: String, filename: String },
-    //     poa: { key: String, filename: String },
-    //   },
-    // },
     profilePicture: {
       url: String,
       key: String,

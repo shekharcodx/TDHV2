@@ -3,12 +3,12 @@ const helmet = require("helmet");
 const dotenv = require("dotenv");
 const connectDB = require("./config/db");
 const cors = require("cors");
+const cookieParser = require("cookie-parser");
 const rateLimit = require("express-rate-limit");
 
 const { startBookingExpiryJob } = require("./utils/jobs/bookingExpiry");
 
 dotenv.config();
-
 const runMigration = require("./migrations/migration");
 const apisMiddleware = require("./middlewares/api.middleware");
 const aclMiddleware = require("./middlewares/acl.middleware");
@@ -27,14 +27,31 @@ const limiter = rateLimit({
 
 // app.use(limiter);
 
+const allowedOrigins = [
+  "http://localhost:5173", // dev frontend
+  "http://localhost:5174",
+  "http://localhost:5175",
+  "https://tdhv2-vendor.vercel.app", // production frontend
+  "https://tdhv-2-adminv2.vercel.app",
+];
+
 // CORS
 const corsOptions = {
-  origin: "*",
-  methods: ["GET", "POST", "DELETE", "UPDATE", "PUT", "PATCH"],
+  origin: (origin, callback) => {
+    if (!origin) return callback(null, true); // allow non-browser requests like Postman
+    if (allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
+  credentials: true, // 🔑 allow cookies
+  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
 };
 
 app.use(cors(corsOptions));
 app.use(helmet());
+app.use(cookieParser());
 
 // Body parser
 app.use(express.json());

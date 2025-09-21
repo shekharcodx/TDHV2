@@ -14,6 +14,7 @@ const {
   forgetPassword,
   resetPassword,
   updatePassword,
+  refresh,
 } = require("../../controllers/common/auth.controller");
 const {
   registerValidation,
@@ -28,6 +29,8 @@ const {
 router.post("/register", cpUpload, registerValidation, validate, register);
 
 router.post("/login", loginValidation, validate, login);
+
+router.post("/refresh", refresh);
 
 router.put(
   "/createNewPassword",
