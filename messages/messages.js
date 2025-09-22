@@ -134,7 +134,7 @@ module.exports = {
   ACCOUNT_NOT_APPROVED: {
     code: 9028,
     error: "ACCOUNT_NOT_APPROVED",
-    message: "Your account has not been approved, please contact support",
+    message: "Your account approval is pending",
   },
   AUTH_PASSWORD_UPDATED: {
     code: 9029,

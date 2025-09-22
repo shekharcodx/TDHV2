@@ -12,7 +12,7 @@ const checkIsApproved = async (req, res, next) => {
       return res.status(403).json({ success: false, ...msg });
     }
 
-    if (user.status !== ACCOUNT_STATUS.APPROVED) {
+    if (user.status === ACCOUNT_STATUS.PENDING) {
       return res
         .status(403)
         .json({ success: false, ...messages.ACCOUNT_NOT_APPROVED });
