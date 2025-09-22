@@ -201,6 +201,15 @@ const rentalListingSchema = new mongoose.Schema(
     isActive: { type: Boolean, default: true },
     isFeatured: { type: Boolean, default: false },
     isPremium: { type: Boolean, default: false },
+
+    isBest: { type: Boolean, default: false },
+    bestUpdatedAt: { type: Date, default: null },
+
+    isPopular: { type: Boolean, default: false },
+    popularUpdatedAt: { type: Date, default: null },
+
+    isTopChoice: { type: Boolean, default: false },
+    topChoiceUpdatedAt: { type: Date, default: null },
   },
   { timestamps: true }
 );

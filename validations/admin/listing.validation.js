@@ -47,4 +47,22 @@ exports.listingCategoryValidate = [
     .isBoolean()
     .withMessage("isPremium must be a boolean")
     .toBoolean(),
+
+  body("isBest")
+    .optional()
+    .isBoolean()
+    .withMessage("isBest must be a boolean")
+    .toBoolean(),
+
+  body("isTopChoice")
+    .optional()
+    .isBoolean()
+    .withMessage("isPremium must be a boolean")
+    .toBoolean(),
+
+  body("isPopular")
+    .optional()
+    .isBoolean()
+    .withMessage("isPopular must be a boolean")
+    .toBoolean(),
 ];

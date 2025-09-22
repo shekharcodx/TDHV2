@@ -208,7 +208,7 @@ exports.listingIsActive = async (req, res) => {
 exports.listingCategory = async (req, res) => {
   try {
     const { listingId } = req.params;
-    const { isFeatured, isPremium } = req.body;
+    const { isFeatured, isPremium, isBest, isPopular, isTopChoice } = req.body;
 
     let data = {};
     if (typeof isFeatured !== "undefined") {
@@ -216,6 +216,18 @@ exports.listingCategory = async (req, res) => {
     }
     if (typeof isPremium !== "undefined") {
       data.isPremium = isPremium;
+    }
+    if (isBest !== undefined) {
+      update.isBest = req.body.isBest;
+      update.bestUpdatedAt = req.body.isBest ? new Date() : null;
+    }
+    if (isPopular !== undefined) {
+      update.isPopular = req.body.isPopular;
+      update.popularUpdatedAt = req.body.isPopular ? new Date() : null;
+    }
+    if (isTopChoice !== undefined) {
+      update.isTopChoice = req.body.isTopChoice;
+      update.topChoiceUpdatedAt = req.body.isTopChoice ? new Date() : null;
     }
 
     const rentalListing = await RentalListing.findOneAndUpdate(
