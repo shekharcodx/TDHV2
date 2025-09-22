@@ -25,13 +25,14 @@ const {
   forgetPasswordValidation,
   resetPasswordValidation,
   updatePasswordValidation,
+  refreshTokenValidation,
 } = require("../../validations/common/auth.validation");
 
 router.post("/register", cpUpload, registerValidation, validate, register);
 
 router.post("/login", loginValidation, validate, login);
 
-router.post("/refresh", refresh);
+router.post("/refresh", refreshTokenValidation, validate, refresh);
 
 router.post("/logout", authMiddleware, logout);
 

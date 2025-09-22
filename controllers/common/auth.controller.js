@@ -244,9 +244,19 @@ exports.login = async (req, res) => {
       user.email
     );
 
+    let refreshTokenName = "";
+
+    if (user.role === USER_ROLES.ADMIN) {
+      refreshTokenName = "adminRefreshToken";
+    } else if (user.role === USER_ROLES.VENDOR) {
+      refreshTokenName = "vendorRefreshToken";
+    } else {
+      refreshTokenName = "customerRefreshToken";
+    }
+
     res
       .status(200)
-      .cookie("refreshToken", refreshToken, {
+      .cookie(refreshTokenName, refreshToken, {
         httpOnly: true,
         sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
         secure: process.env.NODE_ENV === "production",
@@ -272,7 +282,14 @@ exports.login = async (req, res) => {
 
 exports.refresh = async (req, res) => {
   try {
-    const { refreshToken } = req.cookies;
+    const { role } = req.body;
+
+    let refreshToken;
+    if (role === USER_ROLES.ADMIN) refreshToken = req.cookies.adminRefreshToken;
+    else if (role === USER_ROLES.VENDOR)
+      refreshToken = req.cookies.vendorRefreshToken;
+    else refreshToken = req.cookies.customerRefreshToken;
+
     if (!refreshToken)
       return res
         .status(401)

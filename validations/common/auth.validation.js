@@ -193,6 +193,15 @@ exports.loginValidation = [
   body("password").notEmpty().withMessage("password is required"),
 ];
 
+exports.refreshTokenValidation = [
+  body("role")
+    .exists()
+    .withMessage("role is required")
+    .isInt()
+    .withMessage("role must be a number")
+    .toInt(),
+];
+
 exports.changePasswordValidation = [
   body("email")
     .trim()
