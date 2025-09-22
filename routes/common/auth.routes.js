@@ -15,6 +15,7 @@ const {
   resetPassword,
   updatePassword,
   refresh,
+  logout,
 } = require("../../controllers/common/auth.controller");
 const {
   registerValidation,
@@ -31,6 +32,8 @@ router.post("/register", cpUpload, registerValidation, validate, register);
 router.post("/login", loginValidation, validate, login);
 
 router.post("/refresh", refresh);
+
+router.post("/logout", authMiddleware, logout);
 
 router.put(
   "/createNewPassword",

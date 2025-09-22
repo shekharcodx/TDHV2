@@ -248,8 +248,8 @@ exports.login = async (req, res) => {
       .status(200)
       .cookie("refreshToken", refreshToken, {
         httpOnly: true,
-        sameSite: "lax",
-        secure: process.env.NODE_ENV === "production" ? "none" : "lax",
+        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+        secure: process.env.NODE_ENV === "production",
         maxAge: 7 * 24 * 60 * 60 * 1000,
       })
       .json({
@@ -316,6 +316,32 @@ exports.refresh = async (req, res) => {
   } catch (err) {
     console.log("refresh token api error", err);
     res.status(500).json({ success: false, message: "Internal server error" });
+  }
+};
+
+exports.logout = async (req, res) => {
+  try {
+    const { id } = req.user;
+    const deleted = await RefreshToken.deleteOne({ userId: id });
+    if (deleted.deletedCount === 0) {
+      return res
+        .status(400)
+        .json({ success: false, message: "No token found to delete" });
+    }
+
+    res
+      .status(200)
+      .clearCookie("refreshToken", {
+        httpOnly: true,
+        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+        secure: process.env.NODE_ENV === "production",
+      })
+      .json({ success: true, message: "Logged out successfully" });
+  } catch (err) {
+    console.log("Logout api error", err);
+    return res
+      .status(500)
+      .json({ success: false, ...messages.INTERNAL_SERVER_ERROR });
   }
 };
 

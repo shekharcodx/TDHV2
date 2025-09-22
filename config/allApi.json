@@ -1,6 +1,7 @@
 [
   "register",
   "login",
+  "logout",
   "refresh",
   "createNewPassword",
   "profile",
