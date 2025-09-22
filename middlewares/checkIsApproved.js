@@ -18,6 +18,18 @@ const checkIsApproved = async (req, res, next) => {
         .json({ success: false, ...messages.ACCOUNT_NOT_APPROVED });
     }
 
+    if (user.status === ACCOUNT_STATUS.ON_HOLD) {
+      return res
+        .status(403)
+        .json({ success: false, ...messages.ACCOUNT_ON_HOLD });
+    }
+
+    if (user.status === ACCOUNT_STATUS.BLOCKED) {
+      return res
+        .status(403)
+        .json({ success: false, ...messages.ACCOUNT_BLOCKED });
+    }
+
     return next();
   } catch (err) {
     console.error("checkIsApproved error:", err);

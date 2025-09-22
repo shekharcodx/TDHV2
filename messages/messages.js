@@ -140,6 +140,16 @@ module.exports = {
     code: 9029,
     message: "Password updated successfully",
   },
+  ACCOUNT_ON_HOLD: {
+    code: 9030,
+    error: "ACCOUNT_ON_HOLD",
+    message: "Your account is on hold",
+  },
+  ACCOUNT_BLOCKED: {
+    code: 9031,
+    error: "ACCOUNT_BLOCKED",
+    message: "Your account has been blocked",
+  },
   CAR_ALREADY_BOOKED: {
     code: 3000,
     error: "CAR_ALREADY_BOOKED",
