@@ -159,13 +159,16 @@ exports.register = async (req, res) => {
       await VendorDetail.create([vendorDetails], { session });
     }
 
-    await session.commitTransaction();
-
     if (role === USER_ROLES.VENDOR) {
-      await sendEmailFromTemplate("temporary_password", createdUser.email, {
-        name: createdUser.name,
-        tempPassword: password,
-      });
+      try {
+        await sendEmailFromTemplate("temporary_password", createdUser.email, {
+          name: createdUser.name,
+          tempPassword: password,
+        });
+      } catch (err) {
+        console.log("Sending email error", err);
+        await session.abortTransaction();
+      }
     }
 
     let messageObj =
@@ -183,6 +186,8 @@ exports.register = async (req, res) => {
             ),
           }
         : null;
+
+    await session.commitTransaction();
 
     res.status(201).json({
       success: true,
