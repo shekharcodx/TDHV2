@@ -69,5 +69,6 @@
   "allListings",
   "getListing",
   "listingStatus",
-  "booking"
+  "booking",
+  "listings"
 ]
