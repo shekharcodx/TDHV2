@@ -76,28 +76,28 @@ exports.getAllListings = async (req, res) => {
           carBrand: {
             name: "$carBrand.name",
             logo: "$carBrand.logo",
-            carModel: {
-              name: "$carModel.name",
-              details: {
-                carTrim: "$carTrim.name",
-                modelYear: "$modelYear.year",
-                bodyType: "$bodyType.name",
-                fuelType: "$fuelType.name",
-                doors: "$carDoors.doors",
-                transmission: "$transmission.transmission",
-                seatingCapacity: "$seatingCapacity.seats",
-                horsePower: "$horsePower.power",
-                interiorColor: "$interiorColor.name",
-                exteriorColor: "$exteriorColor.name",
-                techFeatures: {
-                  $map: { input: "$techFeatures", as: "tf", in: "$$tf.name" },
-                },
-                otherFeatures: {
-                  $map: { input: "$otherFeatures", as: "of", in: "$$of.name" },
-                },
-              },
-            },
           },
+          carModel: {
+            name: "$carModel.name",
+          },
+          // details: {
+          carTrim: "$carTrim.name",
+          modelYear: "$modelYear.year",
+          bodyType: "$bodyType.name",
+          fuelType: "$fuelType.name",
+          doors: "$carDoors.doors",
+          transmission: "$transmission.transmission",
+          seatingCapacity: "$seatingCapacity.seats",
+          horsePower: "$horsePower.power",
+          interiorColor: "$interiorColor.name",
+          exteriorColor: "$exteriorColor.name",
+          techFeatures: {
+            $map: { input: "$techFeatures", as: "tf", in: "$$tf.name" },
+          },
+          otherFeatures: {
+            $map: { input: "$otherFeatures", as: "of", in: "$$of.name" },
+          },
+          // },
           airBags: "$airBags",
           tankCapacity: "$tankCapacity",
           dailyMileage: "$dailyMileage",
