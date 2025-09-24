@@ -27,11 +27,11 @@ exports.getAllListings = async (req, res) => {
           foreignField: "_id",
           as: "vendor",
           pipeline: [
-            { $project: { name: 1, email: 1, _id: 0, address: 1, contact: 1 } },
+            { $project: { name: 1, email: 1, _id: 1, address: 1, contact: 1 } },
             {
               $lookup: {
                 from: "vendordetails",
-                localField: "_id",
+                localField: "$_id",
                 foreignField: "userId",
                 as: "vendorDetails",
                 pipeline: [{ $project: { businessName: 1, _id: 0 } }],
