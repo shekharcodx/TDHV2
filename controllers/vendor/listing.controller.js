@@ -570,8 +570,10 @@ exports.updateListing = async (req, res) => {
         req.files.map(async (file, i) => {
           const optimizedImage = await sharp(file.buffer)
             .resize(1280, 960, {
-              fit: "cover", // crop to maintain aspect ratio
-              position: "center", // crop from the center (default)
+              //fit: "cover", // crop to maintain aspect ratio
+              //position: "center", // crop from the center (default)
+              fit: "contain",
+              background: { r: 255, g: 255, b: 255, alpha: 1 },
             })
             .toFormat("webp")
             .webp({ quality: 80 })
