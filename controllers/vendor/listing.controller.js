@@ -566,7 +566,7 @@ exports.updateListing = async (req, res) => {
       const uploadedImages = await Promise.all(
         req.files.map(async (file, i) => {
           const optimizedImage = await sharp(file.buffer)
-            .resize(1280, 720, { fit: "inside" }) // keeps aspect ratio, no crop
+            .resize(1280, 960, { fit: "fill" }) // keeps aspect ratio, no crop
             .toFormat("webp")
             .webp({ quality: 80 })
             .toBuffer();
