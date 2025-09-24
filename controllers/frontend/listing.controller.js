@@ -87,6 +87,7 @@ exports.getAllListings = async (req, res) => {
     pipeline.push({
       $project: {
         vendor: 1,
+        VendorDetails: "$vendor.vendorDetails",
         car: {
           carBrand: {
             name: "$carBrand.name",
