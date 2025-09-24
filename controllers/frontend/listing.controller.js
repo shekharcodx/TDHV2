@@ -28,6 +28,21 @@ exports.getAllListings = async (req, res) => {
           as: "vendor",
           pipeline: [
             { $project: { name: 1, email: 1, _id: 0, address: 1, contact: 1 } },
+            {
+              $lookup: {
+                from: "vendors",
+                localField: "_id",
+                foreignField: "userId",
+                as: "vendorDetails",
+                pipeline: [{ $project: { businessName: 1, _id: 0 } }],
+              },
+            },
+            {
+              $unwind: {
+                path: "$vendorDetails",
+                preserveNullAndEmptyArrays: true,
+              },
+            },
           ],
         },
       },
