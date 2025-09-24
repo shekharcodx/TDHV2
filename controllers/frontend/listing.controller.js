@@ -77,9 +77,8 @@ exports.getAllListings = async (req, res) => {
             name: "$carBrand.name",
             logo: "$carBrand.logo",
           },
-          carModel: {
-            name: "$carModel.name",
-          },
+          carModel: "$carModel.name",
+
           // details: {
           carTrim: "$carTrim.name",
           modelYear: "$modelYear.year",
