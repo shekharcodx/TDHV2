@@ -70,5 +70,6 @@
   "getListing",
   "listingStatus",
   "booking",
-  "listings"
+  "listings",
+  "carsByCategories"
 ]
