@@ -192,6 +192,11 @@ exports.getCarouselListings = async (req, res) => {
     // Group cars based on category flags (bestCars, popularCars, topChoice)
     pipeline.push({
       $facet: {
+        allCars: [
+          { $project: createCarProjection() },
+          { $limit: 10 },
+          { $sort: { createdAt: -1 } },
+        ],
         bestCars: [
           {
             $match: {
