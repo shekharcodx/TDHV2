@@ -9,20 +9,19 @@ const vendorDetailsSchema = new mongoose.Schema(
     },
     businessName: {
       type: String,
-      required: true,
       default: "",
     },
     address: {
-      street: { type: String, required: true, default: "" },
-      country: { type: String, required: true, default: "" },
-      city: { type: String, required: true, default: "" },
-      state: { type: String, required: true, default: "" },
-      mapUrl: { type: String, required: true, default: "" },
+      street: { type: String, default: "" },
+      country: { type: String, default: "" },
+      city: { type: String, default: "" },
+      state: { type: String, default: "" },
+      mapUrl: { type: String, default: "" },
     },
     contact: {
-      whatsappNum: { type: String, required: true, default: "" },
-      landlineNum: { type: String, required: true, default: "" },
-      mobileNum: { type: String, required: true, default: "" },
+      whatsappNum: { type: String, default: "" },
+      landlineNum: { type: String, default: "" },
+      mobileNum: { type: String, default: "" },
     },
     vendorInformation: {
       fleetSize: { type: Number },
