@@ -40,7 +40,7 @@ exports.editVendorProfile = async (req, res) => {
         .json({ success: false, ...messages.AUTH_USER_NOT_FOUND });
     }
 
-    const vendorDetails = await VendorDetail.findOne({
+    let vendorDetails = await VendorDetail.findOne({
       userId: userObj._id,
     }).session(session);
 
