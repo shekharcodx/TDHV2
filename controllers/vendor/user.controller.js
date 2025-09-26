@@ -44,6 +44,15 @@ exports.editVendorProfile = async (req, res) => {
       userId: userObj._id,
     }).session(session);
 
+    if (!vendorDetails) {
+      vendorDetails = new VendorDetail({
+        userId: userObj._id,
+        address: {},
+        contact: {},
+        vendorInformation: { documents: {} },
+      });
+    }
+
     // Prevent editing super admin if needed
     if (userObj.role === USER_ROLES.ADMIN) {
       await session.abortTransaction();
