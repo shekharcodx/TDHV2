@@ -249,6 +249,35 @@ exports.getCarouselListings = async (req, res) => {
           { $unwind: "$brands" },
           { $replaceRoot: { newRoot: "$brands" } },
         ],
+        categories: [
+          {
+            $project: createCarProjection(), // 👈 apply here
+          },
+          {
+            $lookup: {
+              from: "carcategories",
+              localField: "car.categoryId",
+              foreignField: "_id",
+              as: "categoryData",
+            },
+          },
+          { $unwind: "$categoryData" },
+          {
+            $group: {
+              _id: "$categoryData._id",
+              name: { $first: "$categoryData.name" },
+              listings: { $push: "$$ROOT" }, // $$ROOT is now already projected ✅
+            },
+          },
+          {
+            $project: {
+              _id: 1,
+              name: 1,
+              listings: { $slice: ["$listings", 10] }, // limit to 10 ✅
+            },
+          },
+          { $sort: { name: 1 } },
+        ],
       },
     });
 
@@ -296,6 +325,7 @@ function createCarProjection() {
       weeklyMileage: "$weeklyMileage",
       monthlyMileage: "$monthlyMileage",
       category: "$carCategory.name",
+      categoryId: "$carCategory._id",
       regionalSpecs: "$regionalSpecs.name",
       carInsurance: "$carInsurance",
       warranty: "$warranty",
