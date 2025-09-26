@@ -46,7 +46,14 @@ exports.getAllListings = async (req, res) => {
                       $expr: { $eq: ["$userId", "$$vendorId"] }, // compare userId with outer _id
                     },
                   },
-                  { $project: { businessName: 1, _id: 0 } },
+                  {
+                    $project: {
+                      businessName: 1,
+                      address: 1,
+                      contact: 1,
+                      _id: 0,
+                    },
+                  },
                 ],
                 as: "vendorDetails",
               },
@@ -150,7 +157,14 @@ exports.getCarouselListings = async (req, res) => {
                       $expr: { $eq: ["$userId", "$$vendorId"] }, // compare userId with outer _id
                     },
                   },
-                  { $project: { businessName: 1, _id: 0 } },
+                  {
+                    $project: {
+                      businessName: 1,
+                      address: 1,
+                      contact: 1,
+                      _id: 0,
+                    },
+                  },
                 ],
                 as: "vendorDetails",
               },

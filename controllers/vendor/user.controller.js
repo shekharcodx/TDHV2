@@ -125,7 +125,7 @@ exports.editVendorProfile = async (req, res) => {
 
     // Update user fields
     if (name) userObj.name = name;
-    if (email) userObj.email = email;
+    if (email && req.user.role === USER_ROLES.ADMIN) userObj.email = email;
     if (password) userObj.password = await bcrypt.hash(password, 10);
     if (status !== undefined) userObj.status = status;
 
