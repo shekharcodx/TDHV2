@@ -240,14 +240,15 @@ exports.getCarouselListings = async (req, res) => {
               pipeline: [
                 { $match: { isActive: true } },
                 { $project: { _id: 1, name: 1, logo: 1 } },
-                { $sort: { name: 1 } }, // or popularScore if available
-                { $limit: 10 },
+                { $sort: { createdAt: -1 } }, // or popularScore if available
+                // { $limit: 10 },
               ],
               as: "brands",
             },
           },
           { $unwind: "$brands" },
           { $replaceRoot: { newRoot: "$brands" } },
+          { $limit: 10 },
         ],
         categories: [
           {
