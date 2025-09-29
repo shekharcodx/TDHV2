@@ -256,12 +256,24 @@ exports.getCarouselListings = async (req, res) => {
           {
             $lookup: {
               from: "carcategories",
-              localField: "car.categoryId",
-              foreignField: "_id",
+              let: { categoryId: "$car.categoryId" }, // pass variable
+              pipeline: [
+                {
+                  $match: {
+                    $expr: {
+                      $and: [
+                        { $eq: ["$_id", "$$categoryId"] }, // join condition
+                        { $eq: ["$isActive", true] }, // only active categories
+                      ],
+                    },
+                  },
+                },
+              ],
               as: "categoryData",
             },
           },
           { $unwind: "$categoryData" },
+
           {
             $group: {
               _id: "$categoryData._id",
