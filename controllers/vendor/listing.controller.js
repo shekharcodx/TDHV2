@@ -6,7 +6,7 @@ const cityModel = require("../../models/locationModels/city.model");
 
 const { default: mongoose } = require("mongoose");
 const RentalListing = require("../../models/rentalListing.model");
-const { uploadFile } = require("../../utils/s3");
+const { uploadFile, deleteFile } = require("../../utils/s3");
 const vendorMessages = require("../../messages/vendor");
 const sharp = require("sharp");
 
@@ -24,6 +24,7 @@ const horsePowerModel = require("../../models/carModels/carHoursePower.model");
 const bodyTypeModel = require("../../models/carModels/carBodyType.model");
 const CarCategory = require("../../models/carModels/carCategory.model");
 const { USER_ROLES } = require("../../config/constants");
+const { optimizeImage } = require("../../utils/optimizeImage");
 
 exports.getCountriesData = async (req, res) => {
   try {
@@ -184,19 +185,34 @@ exports.createListing = async (req, res) => {
         .json({ success: false, ...vendorMessages.UNRELATED_CAR_DATA });
     }
 
+    let coverImageData = null;
     let imagesArr = [];
 
-    if (req.files && req.files.length > 0) {
+    // Handle cover image (single)
+    if (req.files?.coverImage?.length > 0) {
+      const file = req.files.coverImage[0];
+      const optimizedImage = await optimizeImage(file);
+
+      const result = await uploadFile(
+        optimizedImage,
+        "listing_images",
+        file.originalname,
+        null,
+        {
+          contentType: "image/webp",
+          extension: ".webp",
+        }
+      );
+
+      coverImageData = { url: result.url, key: result.key };
+    }
+
+    // Handle additional images (multiple)
+    if (req.files?.images?.length > 0) {
       imagesArr = await Promise.all(
-        req.files.map(async (file) => {
-          const optimizedImage = await sharp(file.buffer)
-            .resize(1280, 960, {
-              fit: "cover", // crop to maintain aspect ratio
-              position: "center", // crop from the center (default)
-            })
-            .toFormat("webp")
-            .webp({ quality: 80 })
-            .toBuffer();
+        req.files.images.map(async (file) => {
+          const optimizedImage = await optimizeImage(file);
+
           const result = await uploadFile(
             optimizedImage,
             "listing_images",
@@ -207,6 +223,7 @@ exports.createListing = async (req, res) => {
               extension: ".webp",
             }
           );
+
           return { url: result.url, key: result.key };
         })
       );
@@ -252,6 +269,7 @@ exports.createListing = async (req, res) => {
       techFeatures: req.body.techFeatures,
       otherFeatures: req.body.otherFeatures,
       location: req.body.location,
+      coverImage: coverImageData,
       images: imagesArr,
       airBags: req.body.airBags,
       tankCapacity: req.body.tankCapacity,
@@ -564,30 +582,81 @@ exports.updateListing = async (req, res) => {
     }
 
     // Handle images
+    // let imagesArr = listing.images || [];
+    // if (req.files && req.files.length > 0) {
+    //   const uploadedImages = await Promise.all(
+    //     req.files.map(async (file, i) => {
+    //       const optimizedImage = await optimizeImage(file);
+    //       const result = await uploadFile(
+    //         optimizedImage,
+    //         "listing_images",
+    //         file.originalname,
+    //         listing.images[i]?.key || null,
+    //         { contentType: "image/webp", extension: ".webp" }
+    //       );
+    //       return { url: result.url, key: result.key };
+    //     })
+    //   );
+    //   imagesArr = uploadedImages;
+    // }
+
+    let coverImageData = listing.coverImage || null;
     let imagesArr = listing.images || [];
-    if (req.files && req.files.length > 0) {
-      const uploadedImages = await Promise.all(
-        req.files.map(async (file, i) => {
-          const optimizedImage = await sharp(file.buffer)
-            .resize(1280, 960, {
-              fit: "cover", // crop to maintain aspect ratio
-              position: "center", // crop from the center (default)
-            })
-            .toFormat("webp")
-            .webp({ quality: 80 })
-            .toBuffer();
+
+    // Handle cover image (single)
+    if (req.files?.coverImage?.length > 0) {
+      const file = req.files.coverImage[0];
+      const optimizedImage = await optimizeImage(file);
+
+      const result = await uploadFile(
+        optimizedImage,
+        "listing_images",
+        file.originalname,
+        listing.coverImage?.key || null,
+        {
+          contentType: "image/webp",
+          extension: ".webp",
+        }
+      );
+
+      coverImageData = { url: result.url, key: result.key };
+    }
+
+    // Handle additional images (multiple)
+    if (req.files?.images?.length > 0) {
+      let newImagesArr = await Promise.all(
+        req.files.images.map(async (file) => {
+          const optimizedImage = await optimizeImage(file);
 
           const result = await uploadFile(
             optimizedImage,
             "listing_images",
             file.originalname,
-            listing.images[i]?.key || null,
-            { contentType: "image/webp", extension: ".webp" }
+            null,
+            {
+              contentType: "image/webp",
+              extension: ".webp",
+            }
           );
+
           return { url: result.url, key: result.key };
         })
       );
-      imagesArr = uploadedImages;
+
+      // If old images exist, delete them before replacing
+      if (newImagesArr.length > 0 && imagesArr.length > 0) {
+        const deleteResults = await Promise.all(
+          imagesArr.map((img) => deleteFile(img.key))
+        );
+
+        // Optional: check delete results before assigning
+        if (!deleteResults.every((r) => r)) {
+          console.warn("Some images failed to delete");
+        }
+      }
+
+      // Now safely replace
+      imagesArr = newImagesArr;
     }
 
     // Update fields if provided
@@ -663,6 +732,7 @@ exports.updateListing = async (req, res) => {
       listing.pickupAvailable = req.body.pickupAvailable;
     if (body.depositRequired)
       listing.depositRequired = req.body.depositRequired;
+    listing.coverImage = coverImageData;
     listing.images = imagesArr;
 
     await listing.save();

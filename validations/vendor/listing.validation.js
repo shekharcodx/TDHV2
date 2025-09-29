@@ -162,6 +162,17 @@ exports.rentalListingValidator = [
     .withMessage("tankCapacity must be a number")
     .toInt(),
 
+  body("coverImage").custom((value, { req }) => {
+    if (
+      !req.files ||
+      !req.files["coverImage"] ||
+      req.files["coverImage"].length === 0
+    ) {
+      throw new Error("coverImage is required");
+    }
+    return true;
+  }),
+
   body("images").custom((value, { req }) => {
     console.log("images", req.files.length);
     if (!req.files || req.files.length === 0) {

@@ -17,7 +17,10 @@ const validate = require("../../middlewares/validate.middleware");
 
 router.post(
   "/listing",
-  upload.array("images"),
+  upload.fields([
+    { name: "coverImage", maxCount: 1 },
+    { name: "images", maxCount: 10 },
+  ]),
   rentalListingValidator,
   validate,
   createListing
@@ -34,7 +37,10 @@ router.patch(
 
 router.put(
   "/vendorListing/:listingId",
-  upload.array("images"),
+  upload.fields([
+    { name: "coverImage", maxCount: 1 },
+    { name: "images", maxCount: 10 },
+  ]),
   updateListingValidation,
   validate,
   updateListing

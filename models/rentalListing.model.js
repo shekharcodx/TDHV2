@@ -167,6 +167,11 @@ const rentalListingSchema = new mongoose.Schema(
 
     location: { type: String, required: true },
 
+    coverImage: {
+      key: { type: String, required: true },
+      url: { type: String, required: true },
+    },
+
     images: [
       {
         key: { type: String, required: true },
