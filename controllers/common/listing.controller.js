@@ -124,6 +124,7 @@ exports.getListing = async (req, res) => {
             warranty: "$warranty",
             mileage: "$mileage",
             images: "$images",
+            coverImage: "$coverImage",
           },
           rentPerDay: 1,
           rentPerWeek: 1,
