@@ -265,11 +265,9 @@ exports.getCatelogListings = async (req, res) => {
         },
       },
       {
-        $project: {
-          _id: 0,
-          listings: 1,
-        },
+        $unwind: "$listings",
       },
+      { $replaceRoot: { newRoot: "$listings" } },
     ];
 
     const defaultPipeline = [
@@ -421,9 +419,6 @@ exports.getfilteredListings = async (req, res) => {
       };
     }
 
-    console.log("matchOb", match);
-    console.log("req.query", req.query);
-
     const pipeline = [
       {
         $match: match,
@@ -445,8 +440,6 @@ exports.getfilteredListings = async (req, res) => {
       },
       { $project: createCarProjection() },
     ];
-
-    console.log("pipeline", pipeline);
 
     const data = await RentalListing.aggregatePaginate(pipeline, options);
     res.status(200).json({ success: true, data });
