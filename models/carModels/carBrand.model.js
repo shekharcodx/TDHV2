@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const aggregatePaginate = require("mongoose-aggregate-paginate-v2");
 
 const carBrandSchema = new mongoose.Schema(
   {
@@ -16,5 +17,7 @@ carBrandSchema.index(
   { name: 1 },
   { unique: true, collation: { locale: "en", strength: 2 } }
 );
+
+carBrandSchema.plugin(aggregatePaginate);
 
 module.exports = mongoose.model("CarBrand", carBrandSchema);

@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const aggregatePaginate = require("mongoose-aggregate-paginate-v2");
 
 const bodyTypeSchema = new mongoose.Schema(
   {
@@ -12,5 +13,7 @@ bodyTypeSchema.index(
   { name: 1 },
   { unique: true, collation: { locale: "en", strength: 2 } }
 );
+
+bodyTypeSchema.plugin(aggregatePaginate);
 
 module.exports = mongoose.model("BodyType", bodyTypeSchema);

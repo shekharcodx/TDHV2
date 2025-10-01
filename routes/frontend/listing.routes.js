@@ -3,10 +3,30 @@ const router = express.Router();
 const {
   getAllListings,
   getCarouselListings,
+  getCatelogListings,
+  getListing,
+  getfilteredListings,
 } = require("../../controllers/frontend/listing.controller");
 
-router.get("/listings", getAllListings);
+const validate = require("../../middlewares/validate.middleware");
+const {
+  getCatelogListingsValidation,
+  getListingValidation,
+} = require("../../validations/frontend/listing.validation");
 
-router.get("/carsByCategories", getCarouselListings);
+router.get("/cars", getAllListings);
+
+router.get("/home-page/data", getCarouselListings);
+
+router.get(
+  "/cars/:filterType/:filterId",
+  getCatelogListingsValidation,
+  validate,
+  getCatelogListings
+);
+
+router.get("/car/:listingId", getListingValidation, validate, getListing);
+
+router.get("/cars/filter", getfilteredListings);
 
 module.exports = router;

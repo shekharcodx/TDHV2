@@ -2,6 +2,7 @@ const messages = require("../../messages/messages");
 const adminMessages = require("../../messages/admin");
 const RentalListing = require("../../models/rentalListing.model");
 const { default: mongoose } = require("mongoose");
+const { vendorLookup } = require("../../config/constants");
 
 exports.getListing = async (req, res) => {
   const { listingId } = req.params;
@@ -13,17 +14,9 @@ exports.getListing = async (req, res) => {
 
       // vendor
       {
-        $lookup: {
-          from: "users",
-          localField: "vendor",
-          foreignField: "_id",
-          as: "vendor",
-          pipeline: [
-            { $project: { name: 1, email: 1, _id: 0, address: 1, contact: 1 } },
-          ],
-        },
+        $lookup: vendorLookup(),
       },
-      { $unwind: "$vendor" },
+      { $unwind: { path: "$vendor", preserveNullAndEmptyArrays: true } },
 
       {
         $lookup: {

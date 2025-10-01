@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const aggregatePaginate = require("mongoose-aggregate-paginate-v2");
 
 const carTransmissionSchema = new mongoose.Schema(
   {
@@ -12,5 +13,7 @@ carTransmissionSchema.index(
   { transmission: 1 },
   { unique: true, collation: { locale: "en", strength: 2 } }
 );
+
+carTransmissionSchema.plugin(aggregatePaginate);
 
 module.exports = mongoose.model("Transmission", carTransmissionSchema);

@@ -1,5 +1,15 @@
-const { LISTING_STATUS } = require("../../config/constants");
+const {
+  LISTING_STATUS,
+  vendorLookup,
+  createCarProjection,
+  featuresLookup,
+} = require("../../config/constants");
+const { default: mongoose } = require("mongoose");
 const messages = require("../../messages/messages");
+const carcategories = require("../../models/carModels/carCategory.model");
+const CarBrand = require("../../models/carModels/carBrand.model");
+const BodyType = require("../../models/carModels/carBodyType.model");
+const Transmission = require("../../models/carModels/carTransmission.model");
 const RentalListing = require("../../models/rentalListing.model");
 
 exports.getAllListings = async (req, res) => {
@@ -21,71 +31,23 @@ exports.getAllListings = async (req, res) => {
       },
       // vendor
       {
-        $lookup: {
-          from: "users",
-          localField: "vendor",
-          foreignField: "_id",
-          as: "vendor",
-          pipeline: [
-            {
-              $project: {
-                name: 1,
-                email: 1,
-                _id: 1,
-                address: 1,
-                contact: 1,
-              },
-            },
-            {
-              $lookup: {
-                from: "vendordetails",
-                let: { vendorId: "$_id" }, // pass _id to inner lookup
-                pipeline: [
-                  {
-                    $match: {
-                      $expr: { $eq: ["$userId", "$$vendorId"] }, // compare userId with outer _id
-                    },
-                  },
-                  {
-                    $project: {
-                      businessName: 1,
-                      address: 1,
-                      contact: 1,
-                      _id: 0,
-                    },
-                  },
-                ],
-                as: "vendorDetails",
-              },
-            },
-            {
-              $unwind: {
-                path: "$vendorDetails",
-                preserveNullAndEmptyArrays: true,
-              },
-            },
-          ],
+        $lookup: vendorLookup(),
+      },
+      {
+        $unwind: {
+          path: "$vendor",
+          preserveNullAndEmptyArrays: true,
         },
       },
-      { $unwind: "$vendor" },
 
+      // Technical Features Lookup
       {
-        $lookup: {
-          from: "technicalfeatures",
-          localField: "techFeatures",
-          foreignField: "_id",
-          as: "techFeatures",
-          pipeline: [{ $project: { name: 1 } }],
-        },
+        $lookup: featuresLookup("technicalfeatures"),
       },
+
+      // Other Features Lookup
       {
-        $lookup: {
-          from: "otherfeatures",
-          localField: "otherFeatures",
-          foreignField: "_id",
-          as: "otherFeatures",
-          pipeline: [{ $project: { name: 1 } }],
-        },
+        $lookup: featuresLookup("otherfeatures"),
       },
     ];
 
@@ -116,7 +78,7 @@ exports.getAllListings = async (req, res) => {
     console.log("Frontend All listings error", err);
     return res
       .status(500)
-      .json({ success: true, ...messages.INTERNAL_SERVER_ERROR });
+      .json({ success: false, ...messages.INTERNAL_SERVER_ERROR });
   }
 };
 
@@ -132,74 +94,23 @@ exports.getCarouselListings = async (req, res) => {
 
       // Vendor lookup
       {
-        $lookup: {
-          from: "users",
-          localField: "vendor",
-          foreignField: "_id",
-          as: "vendor",
-          pipeline: [
-            {
-              $project: {
-                name: 1,
-                email: 1,
-                _id: 1,
-                address: 1,
-                contact: 1,
-              },
-            },
-            {
-              $lookup: {
-                from: "vendordetails",
-                let: { vendorId: "$_id" }, // pass _id to inner lookup
-                pipeline: [
-                  {
-                    $match: {
-                      $expr: { $eq: ["$userId", "$$vendorId"] }, // compare userId with outer _id
-                    },
-                  },
-                  {
-                    $project: {
-                      businessName: 1,
-                      address: 1,
-                      contact: 1,
-                      _id: 0,
-                    },
-                  },
-                ],
-                as: "vendorDetails",
-              },
-            },
-            {
-              $unwind: {
-                path: "$vendorDetails",
-                preserveNullAndEmptyArrays: true,
-              },
-            },
-          ],
+        $lookup: vendorLookup(),
+      },
+      {
+        $unwind: {
+          path: "$vendor",
+          preserveNullAndEmptyArrays: true,
         },
       },
-      { $unwind: "$vendor" },
 
       // Technical Features Lookup
       {
-        $lookup: {
-          from: "technicalfeatures",
-          localField: "techFeatures",
-          foreignField: "_id",
-          as: "techFeatures",
-          pipeline: [{ $project: { name: 1 } }],
-        },
+        $lookup: featuresLookup("technicalfeatures"),
       },
 
       // Other Features Lookup
       {
-        $lookup: {
-          from: "otherfeatures",
-          localField: "otherFeatures",
-          foreignField: "_id",
-          as: "otherFeatures",
-          pipeline: [{ $project: { name: 1 } }],
-        },
+        $lookup: featuresLookup("otherfeatures"),
       },
     ];
 
@@ -301,67 +212,248 @@ exports.getCarouselListings = async (req, res) => {
     console.log("Frontend Carousel listings error", err);
     return res
       .status(500)
-      .json({ success: true, ...messages.INTERNAL_SERVER_ERROR });
+      .json({ success: false, ...messages.INTERNAL_SERVER_ERROR });
   }
 };
 
-// Helper function to create the common projection structure for each car
-function createCarProjection() {
-  return {
-    vendor: 1,
-    // vendorDetails: "$vendor.vendorDetails",
-    car: {
-      carBrand: {
-        name: "$carBrand.name",
-        logo: "$carBrand.logo",
+exports.getCatelogListings = async (req, res) => {
+  try {
+    const options = {
+      page: req.query.page || 1,
+      limit: req.query.limit || 10,
+      sort: { createdAt: -1 },
+    };
+
+    const pipeline = [
+      {
+        $match: {
+          _id: new mongoose.Types.ObjectId(req.params.filterId),
+          isActive: true,
+        },
       },
-      carModel: "$carModel.name",
-      carTrim: "$carTrim.name",
-      modelYear: "$modelYear.year",
-      bodyType: "$bodyType.name",
-      fuelType: "$fuelType.name",
-      doors: "$carDoors.doors",
-      transmission: "$transmission.transmission",
-      seatingCapacity: "$seatingCapacity.seats",
-      horsePower: "$horsePower.power",
-      interiorColor: "$interiorColor.name",
-      exteriorColor: "$exteriorColor.name",
-      techFeatures: {
-        $map: { input: "$techFeatures", as: "tf", in: "$$tf.name" },
+      {
+        $lookup: {
+          from: "rentallistings",
+          localField: "_id",
+          foreignField: getForeignCollection(),
+          as: "listings",
+          pipeline: [
+            {
+              $match: { status: LISTING_STATUS.APPROVED, isActive: true },
+            },
+            {
+              $lookup: vendorLookup(),
+            },
+            {
+              $unwind: {
+                path: "$vendor",
+                preserveNullAndEmptyArrays: true,
+              },
+            },
+
+            // Technical Features Lookup
+            {
+              $lookup: featuresLookup("technicalfeatures"),
+            },
+
+            // Other Features Lookup
+            {
+              $lookup: featuresLookup("otherfeatures"),
+            },
+            { $project: createCarProjection() },
+          ],
+        },
       },
-      otherFeatures: {
-        $map: { input: "$otherFeatures", as: "of", in: "$$of.name" },
+      {
+        $project: {
+          _id: 0,
+          listings: 1,
+        },
       },
-      airBags: "$airBags",
-      tankCapacity: "$tankCapacity",
-      dailyMileage: "$dailyMileage",
-      weeklyMileage: "$weeklyMileage",
-      monthlyMileage: "$monthlyMileage",
-      category: "$carCategory.name",
-      categoryId: "$carCategory._id",
-      regionalSpecs: "$regionalSpecs.name",
-      carInsurance: "$carInsurance",
-      warranty: "$warranty",
-      mileage: "$mileage",
-      images: "$images",
-      coverImage: "$coverImage",
-    },
-    rentPerDay: 1,
-    rentPerWeek: 1,
-    rentPerMonth: 1,
-    extraMileageRate: 1,
-    deliveryCharges: 1,
-    tollCharges: 1,
-    securityDeposit: 1,
-    minRentalDays: 1,
-    pickupAvailable: 1,
-    depositRequired: 1,
-    title: 1,
-    description: 1,
-    location: 1,
-    isActive: 1,
-    status: 1,
-    isFeatured: 1,
-    isPremium: 1,
-  };
-}
+    ];
+
+    const defaultPipeline = [
+      {
+        $match: {
+          isActive: true,
+          status: LISTING_STATUS.APPROVED,
+        },
+      },
+      {
+        $lookup: vendorLookup(),
+      },
+      {
+        $unwind: {
+          path: "$vendor",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+
+      // Technical Features Lookup
+      {
+        $lookup: featuresLookup("technicalfeatures"),
+      },
+
+      // Other Features Lookup
+      {
+        $lookup: featuresLookup("otherfeatures"),
+      },
+
+      { $project: createCarProjection() },
+    ];
+
+    function getForeignCollection() {
+      switch (req.params.filterType) {
+        case "categories":
+          return "carCategory._id";
+        case "brands":
+          return "carBrand._id";
+        case "body-types":
+          return "bodyType._id";
+        case "transmissions":
+          return "transmission._id";
+        default:
+          return null;
+      }
+    }
+
+    let data = null;
+    switch (req.params.filterType) {
+      case "categories":
+        data = await carcategories.aggregatePaginate(pipeline, options);
+        break;
+      case "brands":
+        data = await CarBrand.aggregatePaginate(pipeline, options);
+        break;
+      case "body-types":
+        data = await BodyType.aggregatePaginate(pipeline, options);
+        break;
+      case "transmissions":
+        data = await Transmission.aggregatePaginate(pipeline, options);
+        break;
+      default:
+        data = await RentalListing.aggregatePaginate(defaultPipeline, options);
+    }
+
+    res.status(200).json({ success: true, data });
+  } catch (err) {
+    console.log("Frontend Catelog listings error", err);
+    return res
+      .status(500)
+      .json({ success: false, ...messages.INTERNAL_SERVER_ERROR });
+  }
+};
+
+exports.getListing = async (req, res) => {
+  try {
+    const pipeline = [
+      {
+        $match: {
+          _id: new mongoose.Types.ObjectId(req.params.listingId),
+        },
+      },
+      {
+        $lookup: vendorLookup(),
+      },
+      {
+        $unwind: {
+          path: "$vendor",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $lookup: featuresLookup("technicalfeatures"),
+      },
+      {
+        $lookup: featuresLookup("otherfeatures"),
+      },
+      { $project: createCarProjection() },
+    ];
+
+    const data = await RentalListing.aggregate(pipeline);
+
+    res.status(200).json({ success: false, data });
+  } catch (err) {
+    console.log("get listing error", err);
+    return res
+      .status(500)
+      .json({ success: false, ...messages.INTERNAL_SERVER_ERROR });
+  }
+};
+
+exports.getfilteredListings = async (req, res) => {
+  try {
+    let options = {
+      page: parseInt(req.query.page) || 1,
+      limit: parseInt(req.query.limit) || 10,
+      sort: { createdAt: -1 },
+    };
+
+    const toArray = (val) => (val ? (Array.isArray(val) ? val : [val]) : []);
+
+    let brands = toArray(req.query.brand);
+    let bodyTypes = toArray(req.query.bodyType);
+    let locations = toArray(req.query.location);
+    let transmissions = toArray(req.query.transmission);
+
+    const match = {};
+
+    if (brands.length > 0) {
+      match["carBrand._id"] = {
+        $in: brands.map((id) => new mongoose.Types.ObjectId(id)),
+      };
+    }
+
+    if (bodyTypes.length > 0) {
+      match["bodyType._id"] = {
+        $in: bodyTypes.map((id) => new mongoose.Types.ObjectId(id)),
+      };
+    }
+
+    if (locations.length > 0) {
+      match["location"] = {
+        $in: locations.map((name) => new RegExp(`^${name}$`, "i")),
+      };
+    }
+    if (transmissions.length > 0) {
+      match["transmission._id"] = {
+        $in: transmissions.map((id) => new mongoose.Types.ObjectId(id)),
+      };
+    }
+
+    console.log("matchOb", match);
+    console.log("req.query", req.query);
+
+    const pipeline = [
+      {
+        $match: match,
+      },
+      {
+        $lookup: vendorLookup(),
+      },
+      {
+        $unwind: {
+          path: "$vendor",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $lookup: featuresLookup("technicalfeatures"),
+      },
+      {
+        $lookup: featuresLookup("otherfeatures"),
+      },
+      { $project: createCarProjection() },
+    ];
+
+    console.log("pipeline", pipeline);
+
+    const data = await RentalListing.aggregatePaginate(pipeline, options);
+    res.status(200).json({ success: true, data });
+  } catch (err) {
+    console.log("getfilteredlisting error", err);
+    return res
+      .status(500)
+      .json({ success: false, ...messages.INTERNAL_SERVER_ERROR });
+  }
+};

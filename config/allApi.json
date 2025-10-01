@@ -70,6 +70,7 @@
   "getListing",
   "listingStatus",
   "booking",
-  "listings",
-  "carsByCategories"
+  "home-page",
+  "car",
+  "cars"
 ]
