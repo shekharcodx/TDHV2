@@ -219,6 +219,8 @@ const rentalListingSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+rentalListingSchema.index({ title: 1 });
+rentalListingSchema.index({ title: "text" });
 rentalListingSchema.plugin(mongoosePaginate);
 rentalListingSchema.plugin(aggregatePaginate);
 

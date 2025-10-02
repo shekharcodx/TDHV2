@@ -6,6 +6,7 @@ const {
   getCatelogListings,
   getListing,
   getfilteredListings,
+  getSearchedListings,
 } = require("../../controllers/frontend/listing.controller");
 
 const validate = require("../../middlewares/validate.middleware");
@@ -28,5 +29,7 @@ router.get(
 router.get("/car/:listingId", getListingValidation, validate, getListing);
 
 router.get("/cars/filter", getfilteredListings);
+
+router.get("/cars/search", getSearchedListings);
 
 module.exports = router;

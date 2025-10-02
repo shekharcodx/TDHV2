@@ -11,6 +11,8 @@ const CarBrand = require("../../models/carModels/carBrand.model");
 const BodyType = require("../../models/carModels/carBodyType.model");
 const Transmission = require("../../models/carModels/carTransmission.model");
 const RentalListing = require("../../models/rentalListing.model");
+const escapeRegex = require("../../utils/escapeRegex");
+const Fuse = require("fuse.js");
 
 exports.getAllListings = async (req, res) => {
   const { search } = req.query;
@@ -448,5 +450,49 @@ exports.getfilteredListings = async (req, res) => {
     return res
       .status(500)
       .json({ success: false, ...messages.INTERNAL_SERVER_ERROR });
+  }
+};
+
+exports.getSearchedListings = async (req, res) => {
+  try {
+    const searchTerm = (req.query.search || "").trim();
+    if (!searchTerm) {
+      return res.status(200).json({ success: true, result: [] });
+    }
+
+    // 1️⃣ Try exact / prefix match using B-tree index
+    let result = await RentalListing.find({
+      title: { $regex: `^${escapeRegex(searchTerm)}`, $options: "i" },
+    }).select("title");
+
+    // If exact/prefix match found, return it
+    if (result.length > 0) {
+      return res.status(200).json({ success: true, result });
+    }
+
+    // 2️⃣ If not, try text search (word-based)
+    result = await RentalListing.find({
+      $text: { $search: searchTerm },
+    }).select("title");
+
+    if (result.length > 0) {
+      return res.status(200).json({ success: true, result });
+    }
+
+    // 3️⃣ Fallback: Fuzzy search with Fuse.js (for typos)
+    const allListings = await RentalListing.find().select("title"); // fetch all or a limited subset
+    const fuse = new Fuse(allListings, {
+      keys: ["title"],
+      threshold: 0.3, // adjust for fuzziness
+    });
+
+    result = fuse.search(searchTerm).map((r) => r.item);
+
+    return res.status(200).json({ success: true, result });
+  } catch (err) {
+    console.error("getSearchedListings error:", err);
+    return res
+      .status(500)
+      .json({ success: false, message: "Internal server error" });
   }
 };
