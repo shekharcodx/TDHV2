@@ -226,14 +226,12 @@ exports.getCarouselListings = async (req, res) => {
               pipeline: [
                 {
                   $match: {
-                    $expr: {
-                      $eq: ["$isActive", true],
-                    },
+                    $expr: { $eq: ["$isActive", true] },
                   },
                 },
                 { $project: { name: 1 } },
                 {
-                  // Bring in all cars that belong to this category (reverse join)
+                  // Bring in all cars that belong to this category
                   $lookup: {
                     from: "rentallistings",
                     let: { catId: "$_id" },
@@ -263,12 +261,23 @@ exports.getCarouselListings = async (req, res) => {
               as: "allCategories",
             },
           },
+
+          // Flatten categories
+          { $unwind: "$allCategories" },
+          { $replaceRoot: { newRoot: "$allCategories" } },
+
+          // ✅ Group by category _id to remove duplicates
           {
-            $unwind: "$allCategories",
+            $group: {
+              _id: "$_id",
+              name: { $first: "$name" },
+              cars: { $first: "$cars" },
+              totalCars: { $first: "$totalCars" },
+            },
           },
-          {
-            $replaceRoot: { newRoot: "$allCategories" },
-          },
+
+          // Optional: sort again
+          { $sort: { name: 1 } },
         ],
       },
     });
