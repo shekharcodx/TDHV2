@@ -173,7 +173,7 @@ exports.getCarouselListings = async (req, res) => {
           },
           { $unwind: "$brands" },
           { $replaceRoot: { newRoot: "$brands" } },
-          { $limit: 10 },
+          { $limit: 20 },
         ],
         categories: [
           {
