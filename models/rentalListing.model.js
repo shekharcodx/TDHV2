@@ -205,7 +205,9 @@ const rentalListingSchema = new mongoose.Schema(
 
     isActive: { type: Boolean, default: true },
     isFeatured: { type: Boolean, default: false },
+    featuredUpdatedAt: { type: Date, default: null },
     isPremium: { type: Boolean, default: false },
+    premiumUpdatedAt: { type: Date, default: null },
 
     isBest: { type: Boolean, default: false },
     bestUpdatedAt: { type: Date, default: null },

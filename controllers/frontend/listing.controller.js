@@ -146,6 +146,18 @@ exports.getCarouselListings = async (req, res) => {
           { $limit: 10 },
           { $sort: { topChoiceUpdatedAt: -1 } },
         ],
+        featured: [
+          { $match: { isFeatured: true } },
+          { $project: createCarProjection() },
+          { $limit: 10 },
+          { $sort: { featuredUpdatedAt: -1 } },
+        ],
+        premium: [
+          { $match: { isPremium: true } },
+          { $project: createCarProjection() },
+          { $limit: 10 },
+          { $sort: { premiumUpdatedAt: -1 } },
+        ],
         carBrands: [
           {
             $lookup: {
@@ -193,6 +205,7 @@ exports.getCarouselListings = async (req, res) => {
               _id: "$categoryData._id",
               name: { $first: "$categoryData.name" },
               listings: { $push: "$$ROOT" }, // $$ROOT is now already projected ✅
+              totalCars: { $sum: 1 },
             },
           },
           {
@@ -200,9 +213,62 @@ exports.getCarouselListings = async (req, res) => {
               _id: 1,
               name: 1,
               listings: { $slice: ["$listings", 10] }, // limit to 10 ✅
+              totalCars: 1,
             },
           },
           { $sort: { name: 1 } },
+        ],
+        allCategories: [
+          {
+            $lookup: {
+              from: "carcategories",
+              let: { categoryId: "$car.categoryId" },
+              pipeline: [
+                {
+                  $match: {
+                    $expr: {
+                      $eq: ["$isActive", true],
+                    },
+                  },
+                },
+                { $project: { name: 1 } },
+                {
+                  // Bring in all cars that belong to this category (reverse join)
+                  $lookup: {
+                    from: "rentallistings",
+                    let: { catId: "$_id" },
+                    pipeline: [
+                      {
+                        $match: {
+                          $expr: {
+                            $and: [
+                              { $eq: ["$carCategory._id", "$$catId"] },
+                              { $eq: ["$status", LISTING_STATUS.APPROVED] },
+                            ],
+                          },
+                        },
+                      },
+                      { $project: createCarProjection() },
+                    ],
+                    as: "cars",
+                  },
+                },
+                {
+                  $addFields: {
+                    totalCars: { $size: "$cars" },
+                  },
+                },
+                { $sort: { name: 1 } },
+              ],
+              as: "allCategories",
+            },
+          },
+          {
+            $unwind: "$allCategories",
+          },
+          {
+            $replaceRoot: { newRoot: "$allCategories" },
+          },
         ],
       },
     });
