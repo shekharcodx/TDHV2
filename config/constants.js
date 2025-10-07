@@ -104,7 +104,16 @@ exports.vendorLookup = () => {
     foreignField: "_id",
     as: "vendor",
     pipeline: [
-      { $project: { name: 1, email: 1, _id: 1, address: 1, contact: 1 } },
+      {
+        $project: {
+          name: 1,
+          email: 1,
+          _id: 1,
+          address: 1,
+          contact: 1,
+          profilePicture: 1,
+        },
+      },
       {
         $lookup: {
           from: "vendordetails",
