@@ -160,19 +160,45 @@ exports.getCarouselListings = async (req, res) => {
         ],
         carBrands: [
           {
+            $project: createCarProjection(),
+          },
+          {
             $lookup: {
               from: "carbrands",
+              let: { brandId: "$car.carBrand._id" },
               pipeline: [
-                { $match: { isActive: true } },
-                { $project: { _id: 1, name: 1, logo: 1 } },
-                { $sort: { createdAt: -1 } }, // or popularScore if available
-                // { $limit: 10 },
+                {
+                  $match: {
+                    $expr: {
+                      $and: [
+                        { $eq: ["$_id", "$$brandId"] },
+                        { $eq: ["$isActive", true] },
+                      ],
+                    },
+                  },
+                },
+                { $project: { _id: 1, name: 1, logo: 1, createdAt: 1 } },
               ],
               as: "brands",
             },
           },
           { $unwind: "$brands" },
-          { $replaceRoot: { newRoot: "$brands" } },
+          {
+            $group: {
+              _id: "$brands._id",
+              name: { $first: "$brands.name" },
+              logo: { $first: "$brands.logo" },
+              createdAt: { $first: "$brands.createdAt" },
+            },
+          },
+          { $sort: { createdAt: -1 } },
+          {
+            $project: {
+              _id: 1,
+              name: 1,
+              logo: 1,
+            },
+          },
           { $limit: 20 },
         ],
         categories: [

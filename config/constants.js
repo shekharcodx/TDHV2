@@ -43,6 +43,7 @@ exports.createCarProjection = () => {
     // vendorDetails: "$vendor.vendorDetails",
     car: {
       carBrand: {
+        _id: "$carBrand._id",
         name: "$carBrand.name",
         logo: "$carBrand.logo",
       },
