@@ -21,10 +21,11 @@ exports.getCatelogListingsValidation = [
       "filterType must be between categories, body-types, transmissions, brands, best, popular, top-choice or featured"
     ),
   param("filterId")
+    .optional()
     .notEmpty()
     .withMessage("filterId is required")
-    .isMongoId()
-    .withMessage("filterId is invalid"),
+    .isString()
+    .withMessage("filterId must be a string"),
 ];
 
 exports.getListingValidation = [

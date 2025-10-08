@@ -327,51 +327,53 @@ exports.getCatelogListings = async (req, res) => {
       sort: { createdAt: -1 },
     };
 
-    const pipeline = [
-      {
-        $match: {
-          _id: new mongoose.Types.ObjectId(req.params.filterId),
-          isActive: true,
+    function returnPipeline(filterId, foreignField) {
+      return [
+        {
+          $match: {
+            _id: new mongoose.Types.ObjectId(filterId),
+            isActive: true,
+          },
         },
-      },
-      {
-        $lookup: {
-          from: "rentallistings",
-          localField: "_id",
-          foreignField: getForeignCollection(),
-          as: "listings",
-          pipeline: [
-            {
-              $match: { status: LISTING_STATUS.APPROVED, isActive: true },
-            },
-            {
-              $lookup: vendorLookup(),
-            },
-            {
-              $unwind: {
-                path: "$vendor",
-                preserveNullAndEmptyArrays: true,
+        {
+          $lookup: {
+            from: "rentallistings",
+            localField: "_id",
+            foreignField: foreignField,
+            as: "listings",
+            pipeline: [
+              {
+                $match: { status: LISTING_STATUS.APPROVED, isActive: true },
               },
-            },
+              {
+                $lookup: vendorLookup(),
+              },
+              {
+                $unwind: {
+                  path: "$vendor",
+                  preserveNullAndEmptyArrays: true,
+                },
+              },
 
-            // Technical Features Lookup
-            {
-              $lookup: featuresLookup("technicalfeatures"),
-            },
+              // Technical Features Lookup
+              {
+                $lookup: featuresLookup("technicalfeatures"),
+              },
 
-            // Other Features Lookup
-            {
-              $lookup: featuresLookup("otherfeatures"),
-            },
-            { $project: createCarProjection() },
-          ],
+              // Other Features Lookup
+              {
+                $lookup: featuresLookup("otherfeatures"),
+              },
+              { $project: createCarProjection() },
+            ],
+          },
         },
-      },
-      {
-        $unwind: "$listings",
-      },
-      { $replaceRoot: { newRoot: "$listings" } },
-    ];
+        {
+          $unwind: "$listings",
+        },
+        { $replaceRoot: { newRoot: "$listings" } },
+      ];
+    }
 
     function returnDefaultPipeline(filter) {
       return [
@@ -405,35 +407,6 @@ exports.getCatelogListings = async (req, res) => {
         { $project: createCarProjection() },
       ];
     }
-    const defaultPipeline = [
-      {
-        $match: {
-          isActive: true,
-          status: LISTING_STATUS.APPROVED,
-        },
-      },
-      {
-        $lookup: vendorLookup(),
-      },
-      {
-        $unwind: {
-          path: "$vendor",
-          preserveNullAndEmptyArrays: true,
-        },
-      },
-
-      // Technical Features Lookup
-      {
-        $lookup: featuresLookup("technicalfeatures"),
-      },
-
-      // Other Features Lookup
-      {
-        $lookup: featuresLookup("otherfeatures"),
-      },
-
-      { $project: createCarProjection() },
-    ];
 
     function getForeignCollection() {
       switch (req.params.filterType) {
@@ -453,16 +426,28 @@ exports.getCatelogListings = async (req, res) => {
     let data = null;
     switch (req.params.filterType) {
       case "categories":
-        data = await carcategories.aggregatePaginate(pipeline, options);
+        data = await carcategories.aggregatePaginate(
+          returnPipeline(req.params.filterId, "carCategory._id"),
+          options
+        );
         break;
       case "brands":
-        data = await CarBrand.aggregatePaginate(pipeline, options);
+        data = await CarBrand.aggregatePaginate(
+          returnPipeline(req.params.filterId, "carBrand._id"),
+          options
+        );
         break;
       case "body-types":
-        data = await BodyType.aggregatePaginate(pipeline, options);
+        data = await BodyType.aggregatePaginate(
+          returnPipeline(req.params.filterId, "bodyType._id"),
+          options
+        );
         break;
       case "transmissions":
-        data = await Transmission.aggregatePaginate(pipeline, options);
+        data = await Transmission.aggregatePaginate(
+          returnPipeline(req.params.filterId, "transmission._id"),
+          options
+        );
         break;
       case "featured":
         data = await RentalListing.aggregatePaginate(
