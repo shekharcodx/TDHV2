@@ -6,9 +6,19 @@ exports.getCatelogListingsValidation = [
     .withMessage("filterType is required")
     .isString()
     .withMessage("filterType must be a string")
-    .isIn(["categories", "body-types", "transmissions", "brands"])
+    .isIn([
+      "categories",
+      "body-types",
+      "transmissions",
+      "brands",
+      "featured",
+      "best",
+      "popular",
+      "top-choice",
+      "all",
+    ])
     .withMessage(
-      "filterType must be between categories, body-types, transmissions or brands"
+      "filterType must be between categories, body-types, transmissions, brands, best, popular, top-choice or featured"
     ),
   param("filterId")
     .notEmpty()

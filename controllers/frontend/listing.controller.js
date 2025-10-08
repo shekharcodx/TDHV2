@@ -373,6 +373,38 @@ exports.getCatelogListings = async (req, res) => {
       { $replaceRoot: { newRoot: "$listings" } },
     ];
 
+    function returnDefaultPipeline(filter) {
+      return [
+        {
+          $match: {
+            isActive: true,
+            status: LISTING_STATUS.APPROVED,
+            ...(filter || ""),
+          },
+        },
+        {
+          $lookup: vendorLookup(),
+        },
+        {
+          $unwind: {
+            path: "$vendor",
+            preserveNullAndEmptyArrays: true,
+          },
+        },
+
+        // Technical Features Lookup
+        {
+          $lookup: featuresLookup("technicalfeatures"),
+        },
+
+        // Other Features Lookup
+        {
+          $lookup: featuresLookup("otherfeatures"),
+        },
+
+        { $project: createCarProjection() },
+      ];
+    }
     const defaultPipeline = [
       {
         $match: {
@@ -432,8 +464,41 @@ exports.getCatelogListings = async (req, res) => {
       case "transmissions":
         data = await Transmission.aggregatePaginate(pipeline, options);
         break;
+      case "featured":
+        data = await RentalListing.aggregatePaginate(
+          returnDefaultPipeline({ isFeatured: true }),
+          options
+        );
+        break;
+      case "best":
+        data = await RentalListing.aggregatePaginate(
+          returnDefaultPipeline({ isBest: true }),
+          options
+        );
+        break;
+      case "popular":
+        data = await RentalListing.aggregatePaginate(
+          returnDefaultPipeline({ isPopular: true }),
+          options
+        );
+        break;
+      case "top-choice":
+        data = await RentalListing.aggregatePaginate(
+          returnDefaultPipeline({ isTopChoice: true }),
+          options
+        );
+        break;
+      case "all":
+        data = await RentalListing.aggregatePaginate(
+          returnDefaultPipeline(),
+          options
+        );
+        break;
       default:
-        data = await RentalListing.aggregatePaginate(defaultPipeline, options);
+        data = await RentalListing.aggregatePaginate(
+          returnDefaultPipeline(),
+          options
+        );
     }
 
     res.status(200).json({ success: true, data });

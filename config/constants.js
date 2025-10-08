@@ -95,6 +95,9 @@ exports.createCarProjection = () => {
     status: 1,
     isFeatured: 1,
     isPremium: 1,
+    isBest: 1,
+    isPopular: 1,
+    isTopChoice: 1,
   };
 };
 
