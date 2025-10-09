@@ -31,6 +31,7 @@ const allowedOrigins = [
   "http://localhost:5173", // dev frontend
   "http://localhost:5174",
   "http://localhost:5175",
+  "http://localhost:3000",
   "https://tdhv2-vendor.vercel.app", // production frontend
   "https://tdhv-2-adminv2.vercel.app",
 ];

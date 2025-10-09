@@ -421,6 +421,7 @@ exports.getCatelogListings = async (req, res) => {
           $match: {
             _id: new mongoose.Types.ObjectId(filterId),
             isActive: true,
+            status: LISTING_STATUS.APPROVED,
           },
         },
         {
@@ -468,6 +469,7 @@ exports.getCatelogListings = async (req, res) => {
         {
           $match: {
             isActive: true,
+            status: LISTING_STATUS.APPROVED,
             status: LISTING_STATUS.APPROVED,
             ...(filter || ""),
           },
@@ -634,8 +636,11 @@ exports.getfilteredListings = async (req, res) => {
     let bodyTypes = toArray(req.query.bodyType);
     let locations = toArray(req.query.location);
     let transmissions = toArray(req.query.transmission);
+    let priceRange = req.query.priceRange;
+    let startDates = toArray(req.query.startDate);
+    let endDates = toArray(req.query.endDate);
 
-    const match = {};
+    const match = { isActive: true, status: LISTING_STATUS.APPROVED };
 
     if (brands.length > 0) {
       match["carBrand._id"] = {
@@ -658,6 +663,33 @@ exports.getfilteredListings = async (req, res) => {
       match["transmission._id"] = {
         $in: transmissions.map((id) => new mongoose.Types.ObjectId(id)),
       };
+    }
+
+    // if (priceRange !== undefined) {
+    //   const [min, max] = priceRange.split("-").map(Number);
+
+    //   match["rentPerDay"] = { $gte: min, $lte: max };
+    // }
+
+    if (priceRange !== undefined && priceRange !== "") {
+      const [minStr, maxStr] = priceRange.split("-").map((v) => v.trim());
+      const min = minStr ? Number(minStr) : null;
+      const max = maxStr ? Number(maxStr) : null;
+
+      match["rentPerDay"] = {};
+
+      if (min !== null && !isNaN(min)) {
+        match["rentPerDay"]["$gte"] = min;
+      }
+
+      if (max !== null && !isNaN(max)) {
+        match["rentPerDay"]["$lte"] = max;
+      }
+
+      // Clean up if no valid filters were added
+      if (Object.keys(match["rentPerDay"]).length === 0) {
+        delete match["rentPerDay"];
+      }
     }
 
     const pipeline = [
