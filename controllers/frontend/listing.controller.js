@@ -201,6 +201,39 @@ exports.getCarouselListings = async (req, res) => {
           },
           { $limit: 20 },
         ],
+        allBrands: [
+          {
+            $lookup: {
+              from: "carbrands",
+              let: {},
+              pipeline: [
+                {
+                  $match: {
+                    $expr: { $eq: ["$isActive", true] },
+                  },
+                },
+                {
+                  $sort: { createdAt: -1 },
+                },
+                {
+                  $project: {
+                    name: 1,
+                  },
+                },
+              ],
+              as: "brands",
+            },
+          },
+          {
+            $unwind: {
+              path: "$brands",
+              preserveNullAndEmptyArrays: true,
+            },
+          },
+          {
+            $replaceRoot: { newRoot: "$brands" },
+          },
+        ],
         categories: [
           {
             $project: createCarProjection(), // 👈 apply here
