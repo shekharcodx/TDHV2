@@ -421,7 +421,6 @@ exports.getCatelogListings = async (req, res) => {
           $match: {
             _id: new mongoose.Types.ObjectId(filterId),
             isActive: true,
-            status: LISTING_STATUS.APPROVED,
           },
         },
         {
@@ -496,21 +495,6 @@ exports.getCatelogListings = async (req, res) => {
 
         { $project: createCarProjection() },
       ];
-    }
-
-    function getForeignCollection() {
-      switch (req.params.filterType) {
-        case "categories":
-          return "carCategory._id";
-        case "brands":
-          return "carBrand._id";
-        case "body-types":
-          return "bodyType._id";
-        case "transmissions":
-          return "transmission._id";
-        default:
-          return null;
-      }
     }
 
     let data = null;
