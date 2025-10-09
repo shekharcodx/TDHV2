@@ -205,7 +205,6 @@ exports.getCarouselListings = async (req, res) => {
           {
             $lookup: {
               from: "carbrands",
-              let: {},
               pipeline: [
                 {
                   $match: {
@@ -217,7 +216,9 @@ exports.getCarouselListings = async (req, res) => {
                 },
                 {
                   $project: {
+                    _id: 1,
                     name: 1,
+                    createdAt: 1,
                   },
                 },
               ],
@@ -232,6 +233,60 @@ exports.getCarouselListings = async (req, res) => {
           },
           {
             $replaceRoot: { newRoot: "$brands" },
+          },
+          {
+            $group: {
+              _id: "$_id", // ensures unique brands
+              name: { $first: "$name" },
+              createdAt: { $first: "$createdAt" },
+            },
+          },
+          {
+            $sort: { createdAt: -1 },
+          },
+        ],
+        allBodyTypes: [
+          {
+            $lookup: {
+              from: "bodytypes",
+              pipeline: [
+                {
+                  $match: {
+                    $expr: { $eq: ["$isActive", true] },
+                  },
+                },
+                {
+                  $sort: { createdAt: -1 },
+                },
+                {
+                  $project: {
+                    _id: 1,
+                    name: 1,
+                    createdAt: 1,
+                  },
+                },
+              ],
+              as: "bodytypes",
+            },
+          },
+          {
+            $unwind: {
+              path: "$bodytypes",
+              preserveNullAndEmptyArrays: true,
+            },
+          },
+          {
+            $replaceRoot: { newRoot: "$bodytypes" },
+          },
+          {
+            $group: {
+              _id: "$_id",
+              name: { $first: "$name" },
+              createdAt: { $first: "$createdAt" },
+            },
+          },
+          {
+            $sort: { createdAt: -1 },
           },
         ],
         categories: [
