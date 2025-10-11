@@ -587,6 +587,15 @@ exports.getListing = async (req, res) => {
         },
       },
       {
+        $lookup: vendorLookup(),
+      },
+      {
+        $unwind: {
+          path: "$vendor",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
         $lookup: featuresLookup("technicalfeatures"),
       },
       {
@@ -594,9 +603,6 @@ exports.getListing = async (req, res) => {
       },
       {
         $project: createCarProjection(),
-      },
-      {
-        $replaceRoot: { newRoot: "$car" },
       },
     ];
 
