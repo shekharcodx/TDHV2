@@ -592,12 +592,17 @@ exports.getListing = async (req, res) => {
       {
         $lookup: featuresLookup("otherfeatures"),
       },
-      { $project: createCarProjection() },
+      {
+        $project: createCarProjection(),
+      },
+      {
+        $replaceRoot: { newRoot: "$car" },
+      },
     ];
 
     const data = await RentalListing.aggregate(pipeline);
 
-    res.status(200).json({ success: false, data });
+    res.status(200).json({ success: false, data: data[0] || null });
   } catch (err) {
     console.log("get listing error", err);
     return res
