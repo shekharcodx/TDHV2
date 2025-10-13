@@ -594,15 +594,6 @@ exports.getListing = async (req, res) => {
         },
       },
       {
-        $lookup: vendorLookup(),
-      },
-      {
-        $unwind: {
-          path: "$vendor",
-          preserveNullAndEmptyArrays: true,
-        },
-      },
-      {
         $lookup: featuresLookup("technicalfeatures"),
       },
       {
