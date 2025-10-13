@@ -774,7 +774,15 @@ exports.getFiltersMasterData = async (req, res) => {
       .select("logo name")
       .sort({ createdAt: -1 });
 
-    res.status(200).json({ success: true, data: { categories, brands } });
+    const bodyTypes = await BodyType.find({ isActive: true })
+      .select("name")
+      .sort({
+        createdAt: -1,
+      });
+
+    res
+      .status(200)
+      .json({ success: true, data: { categories, brands, bodyTypes } });
   } catch (err) {
     console.log("filtersMasterDataErr", err);
     return res
