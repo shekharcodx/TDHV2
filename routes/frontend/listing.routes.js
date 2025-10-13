@@ -7,6 +7,7 @@ const {
   getListing,
   getfilteredListings,
   getSearchedListings,
+  getFiltersMasterData,
 } = require("../../controllers/frontend/listing.controller");
 
 const validate = require("../../middlewares/validate.middleware");
@@ -18,6 +19,8 @@ const {
 router.get("/cars", getAllListings);
 
 router.get("/home-page/data", getCarouselListings);
+
+router.get("/cars/filter/master-data", getFiltersMasterData);
 
 router.get(
   "/cars/:filterType/:filterId",

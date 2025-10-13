@@ -12,6 +12,8 @@ const BodyType = require("../../models/carModels/carBodyType.model");
 const Transmission = require("../../models/carModels/carTransmission.model");
 const RentalListing = require("../../models/rentalListing.model");
 const User = require("../../models/user.model");
+const Category = require("../../models/carModels/carCategory.model");
+const Brand = require("../../models/carModels/carBrand.model");
 const escapeRegex = require("../../utils/escapeRegex");
 const Fuse = require("fuse.js");
 
@@ -470,7 +472,6 @@ exports.getCatelogListings = async (req, res) => {
           $match: {
             isActive: true,
             status: LISTING_STATUS.APPROVED,
-            status: LISTING_STATUS.APPROVED,
             ...(filter || ""),
           },
         },
@@ -758,5 +759,26 @@ exports.getSearchedListings = async (req, res) => {
     return res
       .status(500)
       .json({ success: false, message: "Internal server error" });
+  }
+};
+
+exports.getFiltersMasterData = async (req, res) => {
+  try {
+    const categories = await Category.find({ isActive: true })
+      .select("name")
+      .sort({
+        createdAt: -1,
+      });
+
+    const brands = await Brand.find({ isActive: true })
+      .select("logo name")
+      .sort({ createdAt: -1 });
+
+    res.status(200).json({ success: true, data: { categories, brands } });
+  } catch (err) {
+    console.log("filtersMasterDataErr", err);
+    return res
+      .status(500)
+      .json({ success: false, ...messages.INTERNAL_SERVER_ERROR });
   }
 };
