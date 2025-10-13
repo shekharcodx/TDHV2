@@ -1,16 +1,17 @@
+const { default: mongoose } = require("mongoose");
 const {
   LISTING_STATUS,
   vendorLookup,
   createCarProjection,
   featuresLookup,
 } = require("../../config/constants");
-const { default: mongoose } = require("mongoose");
 const messages = require("../../messages/messages");
 const carcategories = require("../../models/carModels/carCategory.model");
 const CarBrand = require("../../models/carModels/carBrand.model");
 const BodyType = require("../../models/carModels/carBodyType.model");
 const Transmission = require("../../models/carModels/carTransmission.model");
 const RentalListing = require("../../models/rentalListing.model");
+const User = require("../../models/user.model");
 const escapeRegex = require("../../utils/escapeRegex");
 const Fuse = require("fuse.js");
 
@@ -520,6 +521,12 @@ exports.getCatelogListings = async (req, res) => {
       case "transmissions":
         data = await Transmission.aggregatePaginate(
           returnPipeline(req.params.filterId, "transmission._id"),
+          options
+        );
+        break;
+      case "vendor-cars":
+        data = await User.aggregatePaginate(
+          returnPipeline(req.params.filterId, "vendor"),
           options
         );
         break;

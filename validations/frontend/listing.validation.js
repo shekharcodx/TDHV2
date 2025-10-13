@@ -10,6 +10,7 @@ exports.getCatelogListingsValidation = [
       "categories",
       "body-types",
       "transmissions",
+      "vendor-cars",
       "brands",
       "featured",
       "best",
@@ -18,7 +19,7 @@ exports.getCatelogListingsValidation = [
       "all",
     ])
     .withMessage(
-      "filterType must be between categories, body-types, transmissions, brands, best, popular, top-choice or featured"
+      "filterType must be between categories, body-types, transmissions, brands, best, popular, top-choice, vendor-cars or featured"
     ),
   param("filterId")
     .optional()
