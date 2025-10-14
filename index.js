@@ -34,6 +34,7 @@ const allowedOrigins = [
   "http://localhost:3000",
   "https://tdhv2-vendor.vercel.app", // production frontend
   "https://tdhv-2-adminv2.vercel.app",
+  "https://tdhv2-site2.vercel.app",
 ];
 
 // CORS
