@@ -630,7 +630,9 @@ exports.getfilteredListings = async (req, res) => {
     let bodyTypes = toArray(req.query.bodyType);
     let locations = toArray(req.query.location);
     let transmissions = toArray(req.query.transmission);
+    let categories = toArray(req.query.category);
     let priceRange = req.query.priceRange;
+    let noDeposit = req.query.noDeposit;
     let startDates = toArray(req.query.startDate);
     let endDates = toArray(req.query.endDate);
 
@@ -657,6 +659,14 @@ exports.getfilteredListings = async (req, res) => {
       match["transmission._id"] = {
         $in: transmissions.map((id) => new mongoose.Types.ObjectId(id)),
       };
+    }
+    if (categories.length > 0) {
+      match["carCategory._id"] = {
+        $in: categories.map((id) => new mongoose.Types.ObjectId(id)),
+      };
+    }
+    if (noDeposit !== undefined) {
+      match["depositRequired"] = noDeposit === "true";
     }
 
     // if (priceRange !== undefined) {
