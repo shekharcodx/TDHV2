@@ -2,6 +2,7 @@ const bcrypt = require("bcrypt");
 const mongoose = require("mongoose");
 const User = require("../../models/user.model");
 const VendorDetail = require("../../models/vendor.model");
+const CustomerDetail = require("../../models/customer.model");
 const RefreshToken = require("../../models/refreshToken.model");
 const generateAccessToken = require("../../utils/generateAccessToken");
 const jwt = require("jsonwebtoken");
@@ -11,11 +12,10 @@ const deleteImage = require("../../utils/deleteImage");
 const generateRandomPassword = require("../../utils/generatePassword");
 const { sendEmailFromTemplate } = require("../../utils/sendEmail");
 const { uploadFile } = require("../../utils/s3");
-const { validateJWT } = require("../../utils/verifyToken");
 const { ACCOUNT_STATUS, USER_ROLES } = require("../../config/constants");
-const Country = require("../../models/locationModels/country.model");
-const State = require("../../models/locationModels/state.model");
-const City = require("../../models/locationModels/city.model");
+// const Country = require("../../models/locationModels/country.model");
+// const State = require("../../models/locationModels/state.model");
+// const City = require("../../models/locationModels/city.model");
 const crypto = require("crypto");
 const generateRefreshToken = require("../../utils/generateRefreshToken");
 
@@ -30,6 +30,7 @@ exports.register = async (req, res) => {
     mobileNum,
     whatsappNum,
     landlineNum,
+    phoneNum,
     fleetSize,
     mapUrl,
   } = req.body;
@@ -55,6 +56,7 @@ exports.register = async (req, res) => {
     let status = ACCOUNT_STATUS.APPROVED;
     let profilePic = {};
     let vendorDocs = {};
+    let customerDocs = {};
 
     // const [country, state, city] = await Promise.all([
     //   Country.findById(req.body.country).select("name"),
@@ -103,6 +105,37 @@ exports.register = async (req, res) => {
       }
     }
 
+    if (role === USER_ROLES.CUSTOMER) {
+      // Upload vendor documents
+      const docFields = [
+        "emiratesIdFront",
+        "emiratesIdBack",
+        "drivingLicenseFront",
+        "drivingLicenseBack",
+        "passport",
+        "visaCopy",
+      ];
+
+      for (const field of docFields) {
+        if (req.files && req.files[field]) {
+          const file = req.files[field][0];
+          const fileBuffer = file.buffer;
+          const fileName = file.originalname;
+
+          const result = await uploadFile(
+            fileBuffer,
+            "customer_documents",
+            fileName
+          );
+
+          customerDocs[field] = {
+            key: result.key,
+            filename: result.filename,
+          };
+        }
+      }
+    }
+
     // Upload profile picture if present
     if (req.files && req.files["profilePicture"]) {
       const file = req.files["profilePicture"][0];
@@ -137,6 +170,18 @@ exports.register = async (req, res) => {
 
     const user = await User.create([userData], { session });
     const createdUser = user[0];
+
+    if (role === USER_ROLES.CUSTOMER) {
+      const customerDetails = {
+        userId: createdUser._id,
+        contact: {
+          phoneNum,
+        },
+        documents: customerDocs,
+      };
+
+      await CustomerDetail.create([customerDetails], { session });
+    }
 
     if (role === USER_ROLES.VENDOR) {
       const vendorDetails = {};
