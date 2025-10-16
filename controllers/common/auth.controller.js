@@ -524,41 +524,65 @@ exports.getCurrentLoggedInUser = async (req, res) => {
         .status(404)
         .json({ success: false, ...messages.AUTH_USER_NOT_FOUND });
     }
+
     let vendorDetails = null;
     if (role == USER_ROLES.VENDOR) {
       vendorDetails = await VendorDetail.findOne({ userId: user._id });
     }
+    let customerDetails = null;
+    if (role == USER_ROLES.CUSTOMER) {
+      customerDetails = await CustomerDetail.findOne({
+        userId: user._id,
+      });
+    }
 
-    console.log("vendorDetails", vendorDetails);
-
-    const userObj =
-      user.role === USER_ROLES.ADMIN
-        ? {
-            name: user.name,
-            email: user.email,
-            role: user.role,
-            status: user.status,
-            contact: user.contact,
-            isActive: user.isActive,
-            token: generateAccessToken(user._id, user.role, user.email),
-            profilePicture: user.profilePicture.url || null,
-          }
-        : user.role === USER_ROLES.VENDOR
-        ? {
-            _id: user._id,
-            name: user.name,
-            email: user.email,
-            businessName: vendorDetails?.businessName,
-            address: vendorDetails?.address,
-            contact: vendorDetails?.contact,
-            vendorInformation: vendorDetails?.vendorInformation,
-            token: generateAccessToken(user._id, user.role, user.email),
-            role: user.role,
-            status: user.status,
-            profilePicture: user.profilePicture.url || null,
-            isActive: user.isActive,
-          }
-        : null;
+    let userObj = {};
+    switch (user.role) {
+      case USER_ROLES.ADMIN:
+        userObj = {
+          name: user.name,
+          email: user.email,
+          role: user.role,
+          status: user.status,
+          contact: user.contact,
+          isActive: user.isActive,
+          token: generateAccessToken(user._id, user.role, user.email),
+          profilePicture: user.profilePicture.url || null,
+        };
+        break;
+      case USER_ROLES.VENDOR:
+        userObj = {
+          _id: user._id,
+          name: user.name,
+          email: user.email,
+          businessName: vendorDetails?.businessName,
+          address: vendorDetails?.address,
+          contact: vendorDetails?.contact,
+          vendorInformation: vendorDetails?.vendorInformation,
+          token: generateAccessToken(user._id, user.role, user.email),
+          role: user.role,
+          status: user.status,
+          profilePicture: user.profilePicture.url || null,
+          isActive: user.isActive,
+        };
+        break;
+      case USER_ROLES.CUSTOMER:
+        userObj = {
+          _id: user._id,
+          name: user.name,
+          email: user.email,
+          contact: customerDetails?.contact,
+          documents: customerDetails?.documents,
+          profileComplete:
+            Object.entries(customerDetails?.documents)?.length >= 6,
+          token: generateAccessToken(user._id, user.role, user.email),
+          role: user.role,
+          status: user.status,
+          profilePicture: user.profilePicture.url || null,
+          isActive: user.isActive,
+        };
+        break;
+    }
 
     res.json({
       success: true,

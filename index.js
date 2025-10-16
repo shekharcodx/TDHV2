@@ -77,6 +77,8 @@ app.use("/api", require("./routes/frontend/listing.routes"));
 app.use(authMiddleware);
 app.use(aclMiddleware);
 
+app.use("/api", require("./routes/frontend/profile.routes"));
+
 app.use("/api", require("./routes/admin/users.routes"));
 
 app.use("/api", require("./routes/admin/locations.routes"));

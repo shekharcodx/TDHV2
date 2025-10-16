@@ -118,7 +118,7 @@
     "delete": []
   },
   "3": {
-    "post": ["updateProfile", "booking"],
+    "post": ["updateProfile", "booking", "complete-profile"],
     "get": ["getCurrentUser"],
     "put": ["updateProfile"],
     "patch": ["updatePassword"],
