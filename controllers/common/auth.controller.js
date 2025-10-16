@@ -105,37 +105,6 @@ exports.register = async (req, res) => {
       }
     }
 
-    if (role === USER_ROLES.CUSTOMER) {
-      // Upload vendor documents
-      const docFields = [
-        "emiratesIdFront",
-        "emiratesIdBack",
-        "drivingLicenseFront",
-        "drivingLicenseBack",
-        "passport",
-        "visaCopy",
-      ];
-
-      for (const field of docFields) {
-        if (req.files && req.files[field]) {
-          const file = req.files[field][0];
-          const fileBuffer = file.buffer;
-          const fileName = file.originalname;
-
-          const result = await uploadFile(
-            fileBuffer,
-            "customer_documents",
-            fileName
-          );
-
-          customerDocs[field] = {
-            key: result.key,
-            filename: result.filename,
-          };
-        }
-      }
-    }
-
     // Upload profile picture if present
     if (req.files && req.files["profilePicture"]) {
       const file = req.files["profilePicture"][0];
@@ -177,7 +146,6 @@ exports.register = async (req, res) => {
         contact: {
           phoneNum,
         },
-        documents: customerDocs,
       };
 
       await CustomerDetail.create([customerDetails], { session });
