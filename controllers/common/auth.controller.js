@@ -202,17 +202,24 @@ exports.register = async (req, res) => {
 
     await session.commitTransaction();
 
-    res.status(201).json({
-      success: true,
-      ...messageObj,
-      data: {
-        _id: createdUser._id,
-        name: createdUser.name,
-        email: createdUser.email,
-        role: createdUser.role,
-        ...info,
-      },
-    });
+    const { refreshToken, refreshTokenName } = await getRefreshToken(
+      createdUser
+    );
+
+    res
+      .status(201)
+      .cookie(refreshTokenName, refreshToken, cookieConfig())
+      .json({
+        success: true,
+        ...messageObj,
+        data: {
+          _id: createdUser._id,
+          name: createdUser.name,
+          email: createdUser.email,
+          role: createdUser.role,
+          ...info,
+        },
+      });
   } catch (error) {
     await session.abortTransaction();
     res.status(500).json({ message: error.message });
@@ -224,7 +231,6 @@ exports.register = async (req, res) => {
 exports.login = async (req, res) => {
   let { email, password } = req.body;
   email = email.toLowerCase();
-  console.log("userEmail", email);
 
   try {
     const user = await User.findOne({ email });
@@ -254,32 +260,12 @@ exports.login = async (req, res) => {
     }
 
     const accessToken = generateAccessToken(user._id, user.role, user.email);
-    console.log("accessToekn", accessToken);
-    await RefreshToken.deleteOne({ userId: user.id });
-    const refreshToken = await generateRefreshToken(
-      user._id,
-      user.role,
-      user.email
-    );
 
-    let refreshTokenName = "";
-
-    if (user.role === USER_ROLES.ADMIN) {
-      refreshTokenName = "adminRefreshToken";
-    } else if (user.role === USER_ROLES.VENDOR) {
-      refreshTokenName = "vendorRefreshToken";
-    } else {
-      refreshTokenName = "customerRefreshToken";
-    }
+    const { refreshToken, refreshTokenName } = await getRefreshToken(user);
 
     res
       .status(200)
-      .cookie(refreshTokenName, refreshToken, {
-        httpOnly: true,
-        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-        secure: process.env.NODE_ENV === "production",
-        maxAge: 7 * 24 * 60 * 60 * 1000,
-      })
+      .cookie(refreshTokenName, refreshToken, cookieConfig())
       .json({
         success: true,
         ...messages.AUTH_LOGIN_SUCCESS,
@@ -676,4 +662,36 @@ exports.updatePassword = async (req, res) => {
       .status(500)
       .json({ success: false, ...messages.INTERNAL_SERVER_ERROR });
   }
+};
+
+const getRefreshToken = async (user) => {
+  await RefreshToken.deleteOne({ userId: user._id });
+  const refreshToken = await generateRefreshToken(
+    user._id,
+    user.role,
+    user.email
+  );
+
+  let refreshTokenName = "";
+
+  if (user.role === USER_ROLES.ADMIN) {
+    refreshTokenName = "adminRefreshToken";
+  } else if (user.role === USER_ROLES.VENDOR) {
+    refreshTokenName = "vendorRefreshToken";
+  } else {
+    refreshTokenName = "customerRefreshToken";
+  }
+
+  return { refreshToken, refreshTokenName };
+};
+
+const cookieConfig = () => {
+  const config = {
+    httpOnly: true,
+    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+    secure: process.env.NODE_ENV === "production",
+    maxAge: 7 * 24 * 60 * 60 * 1000,
+  };
+
+  return config;
 };
