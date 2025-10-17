@@ -22,7 +22,7 @@ exports.completeProfile = async (req, res) => {
       "drivingLicenseFront",
       "drivingLicenseBack",
       "passport",
-      "visaCopy",
+      "visa",
     ];
 
     if (req.files) {

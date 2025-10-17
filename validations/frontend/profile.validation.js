@@ -72,7 +72,7 @@ exports.completeProfileValidation = [
       return true;
     }),
 
-  body("visaCopy")
+  body("visa")
     .if(body("role").equals(USER_ROLES.CUSTOMER.toString()))
     .custom((value, { req }) => {
       // console.log("emiratesId", req.files.emiratesId);

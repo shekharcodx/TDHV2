@@ -6,7 +6,7 @@ const customerUpload = upload.fields([
   { name: "drivingLicenseFront", maxCount: 1 },
   { name: "drivingLicenseBack", maxCount: 1 },
   { name: "passport", maxCount: 1 },
-  { name: "visaCopy", maxCount: 1 },
+  { name: "visa", maxCount: 1 },
 ]);
 
 module.exports = customerUpload;
