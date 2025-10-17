@@ -76,12 +76,8 @@ exports.completeProfileValidation = [
     .if(body("role").equals(USER_ROLES.CUSTOMER.toString()))
     .custom((value, { req }) => {
       // console.log("emiratesId", req.files.emiratesId);
-      if (
-        !req.files ||
-        !req.files.visaCopy ||
-        req.files.visaCopy.length === 0
-      ) {
-        throw new Error("visaCopy is required");
+      if (!req.files || !req.files.visa || req.files.visa.length === 0) {
+        throw new Error("visa is required");
       }
       return true;
     }),
