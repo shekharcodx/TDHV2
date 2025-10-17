@@ -104,7 +104,7 @@ exports.getCarouselListings = async (req, res) => {
       {
         $unwind: {
           path: "$vendor",
-          preserveNullAndEmptyArrays: true,
+          preserveNullAndEmptyArrays: false,
         },
       },
       { $match: { "vendor.isActive": true } },
