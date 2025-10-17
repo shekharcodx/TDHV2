@@ -116,6 +116,7 @@ exports.vendorLookup = () => {
           address: 1,
           contact: 1,
           profilePicture: 1,
+          isActive: 1,
         },
       },
       {

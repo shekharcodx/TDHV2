@@ -442,7 +442,12 @@ exports.getCatelogListings = async (req, res) => {
               {
                 $unwind: {
                   path: "$vendor",
-                  preserveNullAndEmptyArrays: true,
+                  preserveNullAndEmptyArrays: false,
+                },
+              },
+              {
+                $match: {
+                  "vendor.isActive": true, // ✅ only active vendors
                 },
               },
 
@@ -481,7 +486,12 @@ exports.getCatelogListings = async (req, res) => {
         {
           $unwind: {
             path: "$vendor",
-            preserveNullAndEmptyArrays: true,
+            preserveNullAndEmptyArrays: false,
+          },
+        },
+        {
+          $match: {
+            "vendor.isActive": true, // ✅ only active vendors
           },
         },
 
@@ -592,6 +602,11 @@ exports.getListing = async (req, res) => {
         $unwind: {
           path: "$vendor",
           preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $match: {
+          "vendor.isActive": true, // ✅ only active vendors
         },
       },
       {
@@ -706,7 +721,12 @@ exports.getfilteredListings = async (req, res) => {
       {
         $unwind: {
           path: "$vendor",
-          preserveNullAndEmptyArrays: true,
+          preserveNullAndEmptyArrays: false,
+        },
+      },
+      {
+        $match: {
+          "vendor.isActive": true, // ✅ only active vendors
         },
       },
       {
@@ -729,6 +749,7 @@ exports.getfilteredListings = async (req, res) => {
 };
 
 exports.getSearchedListings = async (req, res) => {
+  //need to handle vendor inactive listings
   try {
     const searchTerm = (req.query.search || "").trim();
     if (!searchTerm) {
