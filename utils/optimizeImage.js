@@ -5,7 +5,7 @@ async function optimizeImage(
   options = {
     width: 1280,
     height: 960,
-    quality: 80,
+    quality: 100,
     format: "webp",
     fit: "cover", // crop to maintain aspect ratio
     position: "center", // crop from the center (default)
