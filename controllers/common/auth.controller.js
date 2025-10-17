@@ -560,7 +560,11 @@ exports.getCurrentLoggedInUser = async (req, res) => {
           contact: customerDetails?.contact,
           documents: customerDetails?.documents,
           profileComplete:
-            Object.entries(customerDetails?.documents)?.length >= 6,
+            customerDetails?.documents &&
+            Object.entries(customerDetails.documents).length >= 6 &&
+            Object.values(customerDetails.documents).every(
+              (doc) => doc && Object.keys(doc).length > 0
+            ),
           token: generateAccessToken(user._id, user.role, user.email),
           role: user.role,
           status: user.status,
