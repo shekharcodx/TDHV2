@@ -107,6 +107,7 @@ exports.getCarouselListings = async (req, res) => {
           preserveNullAndEmptyArrays: true,
         },
       },
+      { $match: { "vendor.isActive": true } },
 
       // Technical Features Lookup
       {
