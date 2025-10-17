@@ -18,7 +18,7 @@ const customerSchema = new mongoose.Schema(
       drivingLicenseFront: { key: String, filename: String },
       drivingLicenseBack: { key: String, filename: String },
       passport: { key: String, filename: String },
-      visaCopy: { key: String, filename: String },
+      visa: { key: String, filename: String },
     },
   },
   { timestamps: true }
