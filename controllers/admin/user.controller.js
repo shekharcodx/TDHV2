@@ -291,7 +291,7 @@ exports.getAllVendors = async (req, res) => {
           foreignField: "userId",
           as: "vendorDetails",
           pipeline: [
-            { $project: { _id: 0, userId: 0, createdAt: 0, updatedAt: 0 } },
+            { $project: { _id: 1, userId: 0, createdAt: 0, updatedAt: 0 } },
           ],
         },
       },

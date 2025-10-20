@@ -21,9 +21,12 @@ async function checkAccess(req, res, next) {
     if (rolePermissions) {
       const allowedApis = rolePermissions[method];
 
+      console.log("allowedApis", allowedApis);
+
       if (allowedApis && allowedApis.includes(url)) {
         return next(); // Access granted
       } else {
+        console.log("ACL middleware failed");
         return res.status(403).json({
           success: false,
           ...messages.ACCESS_DENIED,
