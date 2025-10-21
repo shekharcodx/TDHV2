@@ -9,8 +9,13 @@ const {
 } = require("../../validations/frontend/booking.validation");
 const validate = require("../../middlewares/validate.middleware");
 
-router.post("/booking", bookingValidation, validate, createBooking);
+router.post("/booking/create", bookingValidation, validate, createBooking);
 
-router.post("/booking/calculation", calculateBooking);
+router.post(
+  "/booking/calculation",
+  bookingValidation,
+  validate,
+  calculateBooking
+);
 
 module.exports = router;

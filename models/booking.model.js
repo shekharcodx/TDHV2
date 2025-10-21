@@ -19,9 +19,14 @@ const bookingSchema = new mongoose.Schema(
       ref: "RentalListing",
       required: true,
     },
-    startDate: { type: Date, required: true },
-    endDate: { type: Date, required: true },
-
+    pickupDate: { type: Date, required: true },
+    dropoffDate: { type: Date, required: true },
+    deliveryRequired: { type: Boolean, default: false },
+    priceType: {
+      type: String,
+      enum: ["daily", "weekly", "monthly"],
+      required: true,
+    },
     totalAmount: { type: Number, required: true },
     refundAmount: { type: Number, default: 0 },
     refundMethod: {
@@ -29,7 +34,6 @@ const bookingSchema = new mongoose.Schema(
       enum: ["cash", "stripe", "bank"],
       default: null,
     },
-
     payment: {
       type: Number,
       enum: Object.values(PAYMENT_STATUS),
@@ -40,7 +44,7 @@ const bookingSchema = new mongoose.Schema(
       enum: Object.values(BOOKING_STATUS),
       default: BOOKING_STATUS.PENDING,
     },
-    expireAt: { type: Date },
+    // expireAt: { type: Date },
     isActive: { type: Boolean, default: true },
   },
   { timestamps: true }

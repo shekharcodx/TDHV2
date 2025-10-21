@@ -104,7 +104,7 @@ app.use("/api", require("./routes/vendor/user.routes"));
 // Connect DB and run migrations
 connectDB().then(() => runMigration());
 
-startBookingExpiryJob();
+// startBookingExpiryJob();
 
 // Start server
 const PORT = process.env.PORT || 5000;

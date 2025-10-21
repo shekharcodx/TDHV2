@@ -4,14 +4,36 @@ const RentalListing = require("../../models/rentalListing.model");
 const { BOOKING_STATUS, PAYMENT_STATUS } = require("../../config/constants");
 const messages = require("../../messages/messages");
 const { calculateAmount } = require("../../utils/calculateAmount");
+const frontend = require("../../messages/frontend");
 
 exports.calculateBooking = async (req, res) => {
   try {
-    const { pickup, dropoff, priceType, carId } = req.body;
+    const {
+      deliveryRequired,
+      pickupDate,
+      pickupTime,
+      dropoffDate,
+      dropoffTime,
+      priceType,
+      carId,
+    } = req.body;
+
+    const pickupString = new Date(`${pickupDate}T${pickupTime}:00`);
+    const dropoffString = new Date(`${dropoffDate}T${dropoffTime}:00`);
+
+    const pickup = pickupString.toISOString();
+    const dropoff = dropoffString.toISOString();
+
+    if (dropoff <= pickup) {
+      return res
+        .status(400)
+        .json({ success: false, ...frontend.DROPOFF_MUST_BE_AFTER_PICKUP });
+    }
+
     const car = await RentalListing.findById(carId).select(
-      "rentPerDay rentPerWeek rentPerMonth depositRequired securityDeposit"
+      "rentPerDay rentPerWeek rentPerMonth depositRequired securityDeposit deliveryCharges isActive"
     );
-    if (!car) {
+    if (!car || !car.isActive) {
       return res
         .status(404)
         .json({ success: false, ...messages.CAR_NOT_FOUND });
@@ -23,16 +45,24 @@ exports.calculateBooking = async (req, res) => {
       priceType
     );
 
-    const { grandTotal, total } = calculateRent(car, unit, priceType);
+    const { grandTotal, total } = calculateRent(
+      car,
+      unit,
+      priceType,
+      deliveryRequired
+    );
 
     res.status(200).json({
       success: true,
       data: {
         total,
+        units: unit,
+        priceType,
         depositRequired: car.depositRequired,
         securityDeposit: car.securityDeposit,
+        deliveryCharges: car.deliveryCharges,
         grandTotal,
-        aboveGrace,
+        aboveGraceHour: aboveGrace,
       },
     });
   } catch (err) {
@@ -47,63 +77,59 @@ exports.createBooking = async (req, res) => {
   const session = await mongoose.startSession();
   session.startTransaction();
   try {
-    const { listingId, startDate, endDate } = req.body;
+    const {
+      deliveryRequired,
+      pickupDate,
+      pickupTime,
+      dropoffDate,
+      dropoffTime,
+      priceType,
+      carId,
+    } = req.body;
     const { id: customerId } = req.user;
-    const start = new Date(startDate);
-    const end = new Date(endDate);
 
-    if (end < start) {
+    const pickupString = new Date(`${pickupDate}T${pickupTime}:00`);
+    const dropoffString = new Date(`${dropoffDate}T${dropoffTime}:00`);
+
+    const pickup = pickupString.toISOString();
+    const dropoff = dropoffString.toISOString();
+
+    if (dropoff <= pickup) {
       return res
         .status(400)
-        .json({ success: false, message: "endDate must be after startDate" });
+        .json({ success: false, ...frontend.DROPOFF_MUST_BE_AFTER_PICKUP });
     }
 
-    const car = await RentalListing.findById(listingId);
+    const car = await RentalListing.findById(carId).select(
+      "vendor rentPerDay rentPerWeek rentPerMonth depositRequired securityDeposit deliveryCharges isActive"
+    );
     if (!car || !car.isActive) {
       return res
         .status(400)
         .json({ success: false, ...messages.CAR_NOT_FOUND });
     }
 
-    const overlapping = await Booking.findOne({
-      listing: listingId,
-      status: {
-        $in: [BOOKING_STATUS.PENDING, BOOKING_STATUS.CONFIRMED],
-      },
-      startDate: { $lte: end },
-      endDate: { $gte: start },
-    }).session(session);
+    const { unit } = calculateRentalUnits(pickup, dropoff, priceType);
 
-    if (overlapping) {
-      return res.status(400).json({
-        success: false,
-        ...messages.CAR_ALREADY_BOOKED,
-      });
-    }
-
-    const expireAt = new Date();
-    expireAt.setMinutes(
-      expireAt.getMinutes() + Number(process.env.UNPAID_EXPIRY_MINUTES)
+    const { grandTotal } = calculateRent(
+      car,
+      unit,
+      priceType,
+      deliveryRequired
     );
-
-    const amount = calculateAmount(start, end, {
-      perMonth: car.rentPerMonth,
-      perWeek: car.rentPerWeek,
-      perDay: car.rentPerDay,
-    });
 
     const booking = await Booking.create(
       [
         {
           customer: customerId,
           vendor: car.vendor,
-          listing: listingId,
-          startDate: start,
-          endDate: end,
-          totalAmount: amount,
+          listing: carId,
+          pickupDate: pickup,
+          dropoffDate: dropoff,
+          totalAmount: grandTotal,
           paymentStatus: PAYMENT_STATUS.PENDING,
           bookingStatus: BOOKING_STATUS.PENDING,
-          expireAt,
+          priceType,
         },
       ],
       { session }
@@ -123,7 +149,7 @@ exports.createBooking = async (req, res) => {
   }
 };
 
-function calculateRent(car, unit, priceType) {
+function calculateRent(car, unit, priceType, deliveryRequired) {
   let total = 0;
   switch (priceType) {
     case "daily":
@@ -139,6 +165,7 @@ function calculateRent(car, unit, priceType) {
 
   let grandTotal = total;
   if (car.depositRequired) grandTotal += car.securityDeposit;
+  if (deliveryRequired) grandTotal += car.deliveryCharges;
 
   return { grandTotal, total };
 }
@@ -184,3 +211,83 @@ function calculateRentalUnits(pickup, dropoff, priceType) {
 
   return { unit: wholeUnits > 0 ? wholeUnits : 1, aboveGrace: false };
 }
+
+// exports.createBooking = async (req, res) => {
+//   const session = await mongoose.startSession();
+//   session.startTransaction();
+//   try {
+//     const { listingId, startDate, endDate } = req.body;
+//     const { id: customerId } = req.user;
+//     const start = new Date(startDate);
+//     const end = new Date(endDate);
+
+//     if (end < start) {
+//       return res
+//         .status(400)
+//         .json({ success: false, message: "endDate must be after startDate" });
+//     }
+
+//     const car = await RentalListing.findById(listingId);
+//     if (!car || !car.isActive) {
+//       return res
+//         .status(400)
+//         .json({ success: false, ...messages.CAR_NOT_FOUND });
+//     }
+
+//     const overlapping = await Booking.findOne({
+//       listing: listingId,
+//       status: {
+//         $in: [BOOKING_STATUS.PENDING, BOOKING_STATUS.CONFIRMED],
+//       },
+//       startDate: { $lte: end },
+//       endDate: { $gte: start },
+//     }).session(session);
+
+//     if (overlapping) {
+//       return res.status(400).json({
+//         success: false,
+//         ...messages.CAR_ALREADY_BOOKED,
+//       });
+//     }
+
+//     const expireAt = new Date();
+//     expireAt.setMinutes(
+//       expireAt.getMinutes() + Number(process.env.UNPAID_EXPIRY_MINUTES)
+//     );
+
+//     const amount = calculateAmount(start, end, {
+//       perMonth: car.rentPerMonth,
+//       perWeek: car.rentPerWeek,
+//       perDay: car.rentPerDay,
+//     });
+
+//     const booking = await Booking.create(
+//       [
+//         {
+//           customer: customerId,
+//           vendor: car.vendor,
+//           listing: listingId,
+//           startDate: start,
+//           endDate: end,
+//           totalAmount: amount,
+//           paymentStatus: PAYMENT_STATUS.PENDING,
+//           bookingStatus: BOOKING_STATUS.PENDING,
+//           expireAt,
+//         },
+//       ],
+//       { session }
+//     );
+
+//     await session.commitTransaction();
+//     session.endSession();
+
+//     res.status(200).json({
+//       success: true,
+//       ...messages.BOOKING_CREATED,
+//       booking: booking[0],
+//     });
+//   } catch (err) {
+//     console.error(err);
+//     res.status(500).json({ success: false, ...messages.INTERNAL_SERVER_ERROR });
+//   }
+// };
