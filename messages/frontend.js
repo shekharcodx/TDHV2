@@ -8,4 +8,8 @@ module.exports = {
     error: "DROPOFF_MUST_BE_AFTER_PICKUP",
     message: "Dropoff date must be after the pickup date",
   },
+  PROFILE_UPDATED: {
+    code: 3002,
+    message: "Profile updated successfully!",
+  },
 };

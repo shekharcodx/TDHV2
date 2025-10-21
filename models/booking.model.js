@@ -4,6 +4,7 @@ const { PAYMENT_STATUS, BOOKING_STATUS } = require("../config/constants");
 
 const bookingSchema = new mongoose.Schema(
   {
+    bookingId: { type: String, unique: true, required: true },
     customer: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",

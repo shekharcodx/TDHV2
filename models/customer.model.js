@@ -12,6 +12,8 @@ const customerSchema = new mongoose.Schema(
       address: { type: String, default: "" },
       emirate: { type: String, default: "" },
     },
+    emiratesId: { type: String, default: "" },
+    licenseNum: { type: String, default: "" },
     origin: { type: String, default: "" },
     documents: {
       emiratesIdFront: { key: String, filename: String },

@@ -1,7 +1,13 @@
 const mongoose = require("mongoose");
 const Booking = require("../../models/booking.model");
 const RentalListing = require("../../models/rentalListing.model");
-const { BOOKING_STATUS, PAYMENT_STATUS } = require("../../config/constants");
+const {
+  BOOKING_STATUS,
+  PAYMENT_STATUS,
+  vendorLookup,
+  featuresLookup,
+  createCarProjection,
+} = require("../../config/constants");
 const messages = require("../../messages/messages");
 const { calculateAmount } = require("../../utils/calculateAmount");
 const frontend = require("../../messages/frontend");
@@ -18,11 +24,11 @@ exports.calculateBooking = async (req, res) => {
       carId,
     } = req.body;
 
-    const pickupString = new Date(`${pickupDate}T${pickupTime}:00`);
-    const dropoffString = new Date(`${dropoffDate}T${dropoffTime}:00`);
+    const pickupDateTime = new Date(`${pickupDate}T${pickupTime}:00`);
+    const dropoffDateTime = new Date(`${dropoffDate}T${dropoffTime}:00`);
 
-    const pickup = pickupString.toISOString();
-    const dropoff = dropoffString.toISOString();
+    const pickup = pickupDateTime.toISOString();
+    const dropoff = dropoffDateTime.toISOString();
 
     if (dropoff <= pickup) {
       return res
@@ -88,13 +94,15 @@ exports.createBooking = async (req, res) => {
     } = req.body;
     const { id: customerId } = req.user;
 
-    const pickupString = new Date(`${pickupDate}T${pickupTime}:00`);
-    const dropoffString = new Date(`${dropoffDate}T${dropoffTime}:00`);
+    const pickupDateTime = new Date(`${pickupDate}T${pickupTime}:00`);
+    const dropoffDateTime = new Date(`${dropoffDate}T${dropoffTime}:00`);
 
-    const pickup = pickupString.toISOString();
-    const dropoff = dropoffString.toISOString();
+    const pickup = pickupDateTime.toISOString();
+    const dropoff = dropoffDateTime.toISOString();
 
     if (dropoff <= pickup) {
+      await session.abortTransaction();
+      session.endSession();
       return res
         .status(400)
         .json({ success: false, ...frontend.DROPOFF_MUST_BE_AFTER_PICKUP });
@@ -104,6 +112,8 @@ exports.createBooking = async (req, res) => {
       "vendor rentPerDay rentPerWeek rentPerMonth depositRequired securityDeposit deliveryCharges isActive"
     );
     if (!car || !car.isActive) {
+      await session.abortTransaction();
+      session.endSession();
       return res
         .status(400)
         .json({ success: false, ...messages.CAR_NOT_FOUND });
@@ -121,6 +131,7 @@ exports.createBooking = async (req, res) => {
     const booking = await Booking.create(
       [
         {
+          bookingId: generateBookingId(),
           customer: customerId,
           vendor: car.vendor,
           listing: carId,
@@ -145,11 +156,69 @@ exports.createBooking = async (req, res) => {
     });
   } catch (err) {
     console.error(err);
+    await session.abortTransaction();
+    session.endSession();
     res.status(500).json({ success: false, ...messages.INTERNAL_SERVER_ERROR });
   }
 };
 
-function calculateRent(car, unit, priceType, deliveryRequired) {
+exports.getBookings = async (req, res) => {
+  try {
+    const pipeline = [
+      {
+        $lookup: {
+          from: "rentallistings",
+          localField: "listing",
+          foreignField: "_id",
+          as: "listing",
+          pipeline: [
+            {
+              $lookup: vendorLookup(),
+            },
+            {
+              $unwind: {
+                path: "$vendor",
+                preserveNullAndEmptyArrays: false,
+              },
+            },
+            {
+              $lookup: featuresLookup("technicalfeatures"),
+            },
+            {
+              $lookup: featuresLookup("otherfeatures"),
+            },
+            {
+              $project: createCarProjection(),
+            },
+          ],
+        },
+      },
+      {
+        $unwind: {
+          path: "$listing",
+          preserveNullAndEmptyArrays: false,
+        },
+      },
+      {
+        $project: {
+          vendor: 0,
+          customer: 0,
+        },
+      },
+    ];
+
+    const bookings = await Booking.aggregate(pipeline);
+
+    res.status(200).json({ success: true, bookings });
+  } catch (err) {
+    console.log("Get bookings error", err);
+    return res
+      .status(500)
+      .json({ success: false, ...messages.INTERNAL_SERVER_ERROR });
+  }
+};
+
+const calculateRent = (car, unit, priceType, deliveryRequired) => {
   let total = 0;
   switch (priceType) {
     case "daily":
@@ -168,9 +237,9 @@ function calculateRent(car, unit, priceType, deliveryRequired) {
   if (deliveryRequired) grandTotal += car.deliveryCharges;
 
   return { grandTotal, total };
-}
+};
 
-function calculateRentalUnits(pickup, dropoff, priceType) {
+const calculateRentalUnits = (pickup, dropoff, priceType) => {
   const start = new Date(pickup);
   const end = new Date(dropoff);
 
@@ -210,7 +279,12 @@ function calculateRentalUnits(pickup, dropoff, priceType) {
   }
 
   return { unit: wholeUnits > 0 ? wholeUnits : 1, aboveGrace: false };
-}
+};
+
+const generateBookingId = () => {
+  const random = Math.floor(1000 + Math.random() * 9000); // 4 digits
+  return `BK-${Date.now()}-${random}`;
+};
 
 // exports.createBooking = async (req, res) => {
 //   const session = await mongoose.startSession();

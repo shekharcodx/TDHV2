@@ -119,9 +119,9 @@
   },
   "3": {
     "post": ["updateProfile", "booking", "complete-profile"],
-    "get": ["getCurrentUser"],
+    "get": ["getCurrentUser", "bookings", "user-profile"],
     "put": ["updateProfile"],
-    "patch": ["updatePassword"],
+    "patch": ["updatePassword", "user-profile"],
     "delete": []
   }
 }

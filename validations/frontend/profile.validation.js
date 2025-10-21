@@ -82,3 +82,21 @@ exports.completeProfileValidation = [
       return true;
     }),
 ];
+
+exports.updateProfileValidation = [
+  body("name").optional().isString().withMessage("name must be a string"),
+  body("phoneNum")
+    .optional()
+    .isString()
+    .withMessage("phoneNum must be a string"),
+  body("emirate").optional().isString().withMessage("emirate must be string"),
+  body("address").optional().isString().withMessage("address must be a string"),
+  body("emiratesId")
+    .optional()
+    .isString()
+    .withMessage("emiratesId must be string"),
+  body("licenseNum")
+    .optional()
+    .isString()
+    .withMessage("licenseNum must be a string"),
+];

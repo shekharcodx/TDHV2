@@ -70,8 +70,10 @@
   "getListing",
   "listingStatus",
   "booking",
+  "bookings",
   "home-page",
   "car",
   "cars",
-  "complete-profile"
+  "complete-profile",
+  "user-profile"
 ]

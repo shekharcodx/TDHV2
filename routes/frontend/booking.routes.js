@@ -3,6 +3,7 @@ const router = express.Router();
 const {
   createBooking,
   calculateBooking,
+  getBookings,
 } = require("../../controllers/frontend/booking.controller");
 const {
   bookingValidation,
@@ -17,5 +18,7 @@ router.post(
   validate,
   calculateBooking
 );
+
+router.get("/bookings", getBookings);
 
 module.exports = router;
