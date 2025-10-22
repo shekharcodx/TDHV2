@@ -37,7 +37,7 @@ exports.calculateBooking = async (req, res) => {
     }
 
     const car = await RentalListing.findById(carId).select(
-      "rentPerDay rentPerWeek rentPerMonth depositRequired securityDeposit deliveryCharges isActive"
+      "carBrand location rentPerDay rentPerWeek rentPerMonth depositRequired securityDeposit deliveryCharges isActive"
     );
     if (!car || !car.isActive) {
       return res
@@ -51,7 +51,7 @@ exports.calculateBooking = async (req, res) => {
       priceType
     );
 
-    const { grandTotal, total } = calculateRent(
+    const { grandTotal, total, baseRate } = calculateRent(
       car,
       unit,
       priceType,
@@ -61,6 +61,7 @@ exports.calculateBooking = async (req, res) => {
     res.status(200).json({
       success: true,
       data: {
+        baseRate,
         total,
         units: unit,
         priceType,
@@ -69,6 +70,7 @@ exports.calculateBooking = async (req, res) => {
         deliveryCharges: car.deliveryCharges,
         grandTotal,
         aboveGraceHour: aboveGrace,
+        car,
       },
     });
   } catch (err) {
@@ -220,15 +222,19 @@ exports.getBookings = async (req, res) => {
 
 const calculateRent = (car, unit, priceType, deliveryRequired) => {
   let total = 0;
+  let baseRate = 0;
   switch (priceType) {
     case "daily":
       total = car.rentPerDay * unit;
+      baseRate = car.rentPerDay;
       break;
     case "weekly":
       total = car.rentPerWeek * unit;
+      baseRate = car.rentPerWeek;
       break;
     case "monthly":
       total = car.rentPerMonth * unit;
+      baseRate = car.rentPerMonth;
       break;
   }
 
@@ -236,7 +242,7 @@ const calculateRent = (car, unit, priceType, deliveryRequired) => {
   if (car.depositRequired) grandTotal += car.securityDeposit;
   if (deliveryRequired) grandTotal += car.deliveryCharges;
 
-  return { grandTotal, total };
+  return { grandTotal, total, baseRate };
 };
 
 const calculateRentalUnits = (pickup, dropoff, priceType) => {
