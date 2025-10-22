@@ -686,7 +686,7 @@ exports.getfilteredListings = async (req, res) => {
       };
     }
     if (noDeposit !== undefined) {
-      match["depositRequired"] = noDeposit === "true";
+      match["depositRequired"] = noDeposit !== "true";
     }
 
     // if (priceRange !== undefined) {
