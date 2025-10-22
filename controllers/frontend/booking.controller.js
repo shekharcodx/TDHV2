@@ -88,6 +88,7 @@ exports.createBooking = async (req, res) => {
   try {
     const {
       deliveryRequired,
+      address,
       pickupDate,
       pickupTime,
       dropoffDate,
@@ -135,6 +136,7 @@ exports.createBooking = async (req, res) => {
       [
         {
           bookingId: generateBookingId(),
+          dropoffAddress: address,
           customer: customerId,
           vendor: car.vendor,
           listing: carId,

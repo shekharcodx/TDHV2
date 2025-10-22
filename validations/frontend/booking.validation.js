@@ -2,6 +2,7 @@ const { body } = require("express-validator");
 
 exports.bookingValidation = [
   body("carId").isMongoId().withMessage("Valid carId is required"),
+  body("address").optional().isString().withMessage("address must be a string"),
   body("pickupDate")
     .notEmpty()
     .withMessage("pickupDate is required")

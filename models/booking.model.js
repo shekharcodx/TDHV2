@@ -29,6 +29,7 @@ const bookingSchema = new mongoose.Schema(
       required: true,
     },
     totalAmount: { type: Number, required: true },
+    dropoffAddress: { type: String, required: false },
     refundAmount: { type: Number, default: 0 },
     refundMethod: {
       type: String,
