@@ -51,10 +51,10 @@ const bookingSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-bookingSchema.index(
-  { listingId: 1, startDate: 1, endDate: 1 },
-  { unique: true }
-);
+// bookingSchema.index(
+//   { listing: 1, pickupDate: 1, dropoffDate: 1 },
+//   { unique: true }
+// );
 
 bookingSchema.plugin(mongoosePaginate);
 
