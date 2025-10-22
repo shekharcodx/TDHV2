@@ -85,4 +85,26 @@ exports.templates = [
       `,
     description: "Sent when a user requests a password reset.",
   },
+  {
+    name: "booking_created_payment_pending",
+    subject: "Your Booking Has Been Created – Complete Your Payment",
+    body: `
+    <h1>Hello {{name}},</h1>
+    <p>Thank you for choosing The Drive Hub!</p>
+    <p>Your booking for <strong>{{carName}}</strong> from <strong>{{pickupDate}}</strong> to <strong>{{dropoffDate}}</strong> has been created successfully.</p>
+    <p>To confirm your booking, please complete your payment now.</p>
+    <p><strong>Booking Summary:</strong></p>
+    <ul>
+      <li>Car: {{carName}}</li>
+      <li>Pickup Location: {{pickupLocation}}</li>
+      <li>Drop-off Location: {{dropoffLocation}}</li>
+      <li>Price Type: {{priceType}}</li>
+      <li>Total Amount: {{totalAmount}}</li>
+    </ul>
+    <p>If you have any questions, feel free to contact our support team.</p>
+    <p>Thank you,<br/>The Drive Hub Team</p>
+  `,
+    description:
+      "Sent when a booking is created and payment from the customer is pending.",
+  },
 ];

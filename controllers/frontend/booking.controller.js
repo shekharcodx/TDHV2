@@ -9,8 +9,9 @@ const {
   createCarProjection,
 } = require("../../config/constants");
 const messages = require("../../messages/messages");
-const { calculateAmount } = require("../../utils/calculateAmount");
 const frontend = require("../../messages/frontend");
+const User = require("../../models/user.model");
+const { sendEmailFromTemplate } = require("../../utils/sendEmail");
 
 exports.calculateBooking = async (req, res) => {
   try {
@@ -113,7 +114,7 @@ exports.createBooking = async (req, res) => {
     }
 
     const car = await RentalListing.findById(carId).select(
-      "vendor rentPerDay rentPerWeek rentPerMonth depositRequired securityDeposit deliveryCharges isActive"
+      "carBrand location title vendor rentPerDay rentPerWeek rentPerMonth depositRequired securityDeposit deliveryCharges isActive"
     );
     if (!car || !car.isActive) {
       await session.abortTransaction();
@@ -153,6 +154,29 @@ exports.createBooking = async (req, res) => {
 
     await session.commitTransaction();
     session.endSession();
+
+    const user = await User.findById(req.user.id);
+
+    if (user) {
+      try {
+        await sendEmailFromTemplate(
+          "booking_created_payment_pending",
+          user.email,
+          {
+            name: user.name,
+            carName: car.title,
+            pickupDate,
+            dropoffDate,
+            pickupLocation: car.location,
+            dropoffLocation: address,
+            priceType,
+            totalAmount: grandTotal,
+          }
+        );
+      } catch (err) {
+        console.log("Sending email error", err);
+      }
+    }
 
     res.status(200).json({
       success: true,
