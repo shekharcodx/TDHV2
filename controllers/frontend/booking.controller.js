@@ -70,6 +70,7 @@ exports.calculateBooking = async (req, res) => {
         deliveryCharges: car.deliveryCharges,
         grandTotal,
         aboveGraceHour: aboveGrace,
+        deliveryRequired,
         car,
       },
     });
