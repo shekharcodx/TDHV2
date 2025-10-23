@@ -111,10 +111,11 @@
       "carTransmissions",
       "carFuelTypes",
       "vendorListings",
-      "listing"
+      "listing",
+      "vendor-bookings"
     ],
     "put": ["createNewPassword", "profile", "vendorProfile", "vendorListing"],
-    "patch": ["vendorListing", "updatePassword"],
+    "patch": ["vendorListing", "updatePassword", "vendor-booking"],
     "delete": []
   },
   "3": {

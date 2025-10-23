@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const mongoosePaginate = require("mongoose-paginate-v2");
+const mongooseAggregatePaginate = require("mongoose-aggregate-paginate-v2");
 const { PAYMENT_STATUS, BOOKING_STATUS } = require("../config/constants");
 
 const bookingSchema = new mongoose.Schema(
@@ -28,6 +29,8 @@ const bookingSchema = new mongoose.Schema(
       enum: ["daily", "weekly", "monthly"],
       required: true,
     },
+    totalWithoutSecurity: { type: Number, required: true },
+    securityDeposit: { type: Number, default: 0 },
     totalAmount: { type: Number, required: true },
     dropoffAddress: { type: String, required: false },
     refundAmount: { type: Number, default: 0 },
@@ -58,5 +61,6 @@ const bookingSchema = new mongoose.Schema(
 // );
 
 bookingSchema.plugin(mongoosePaginate);
+bookingSchema.plugin(mongooseAggregatePaginate);
 
 module.exports = mongoose.model("Booking", bookingSchema);

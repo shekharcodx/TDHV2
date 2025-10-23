@@ -107,4 +107,31 @@ exports.templates = [
     description:
       "Sent when a booking is created and payment from the customer is pending.",
   },
+  {
+    name: "vendor_booking_confirmation_request",
+    subject: "New Booking Request – Please Confirm the Booking",
+    body: `
+    <h1>Hello {{vendorName}},</h1>
+    <p>You have received a new booking request on <strong>The Drive Hub</strong>.</p>
+    <p><strong>Booking Details:</strong></p>
+    <ul>
+      <li>Customer Name: {{customerName}}</li>
+      <li>Car: {{carName}}</li>
+      <li>Pickup Date: {{pickupDate}}</li>
+      <li>Drop-off Date: {{dropoffDate}}</li>
+      <li>Pickup Location: {{pickupLocation}}</li>
+      <li>Drop-off Location: {{dropoffLocation}}</li>
+      <li>Price Type: {{priceType}}</li>
+      <li>Total Amount: {{totalAmount}}</li>
+    </ul>
+    <p>Please review this booking and confirm its availability as soon as possible.</p>
+    <p>You can confirm or decline the booking by visiting your vendor dashboard:</p>
+    <p><a href="{{dashboardLink}}" style="background-color:#007bff;color:white;padding:10px 20px;text-decoration:none;border-radius:4px;">Go to Dashboard</a></p>
+    <p>If you do not respond within the required timeframe, this booking may be automatically cancelled or reassigned.</p>
+    <p>Thank you for partnering with The Drive Hub!</p>
+    <p>– The Drive Hub Team</p>
+  `,
+    description:
+      "Sent to the vendor when a new booking is created. Requests them to confirm or reject the booking.",
+  },
 ];

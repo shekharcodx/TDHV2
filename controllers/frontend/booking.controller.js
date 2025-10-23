@@ -11,6 +11,7 @@ const {
 const messages = require("../../messages/messages");
 const frontend = require("../../messages/frontend");
 const User = require("../../models/user.model");
+const VendorDetails = require("../../models/vendor.model");
 const { sendEmailFromTemplate } = require("../../utils/sendEmail");
 
 exports.calculateBooking = async (req, res) => {
@@ -113,9 +114,11 @@ exports.createBooking = async (req, res) => {
         .json({ success: false, ...frontend.DROPOFF_MUST_BE_AFTER_PICKUP });
     }
 
-    const car = await RentalListing.findById(carId).select(
-      "carBrand location title vendor rentPerDay rentPerWeek rentPerMonth depositRequired securityDeposit deliveryCharges isActive"
-    );
+    const car = await RentalListing.findById(carId)
+      .select(
+        "carBrand location title vendor rentPerDay rentPerWeek rentPerMonth depositRequired securityDeposit deliveryCharges isActive"
+      )
+      .session(session);
     if (!car || !car.isActive) {
       await session.abortTransaction();
       session.endSession();
@@ -126,7 +129,7 @@ exports.createBooking = async (req, res) => {
 
     const { unit } = calculateRentalUnits(pickup, dropoff, priceType);
 
-    const { grandTotal } = calculateRent(
+    const { grandTotal, securityDeposit, totalWitoutSecurity } = calculateRent(
       car,
       unit,
       priceType,
@@ -143,6 +146,8 @@ exports.createBooking = async (req, res) => {
           listing: carId,
           pickupDate: pickup,
           dropoffDate: dropoff,
+          totalWitoutSecurity,
+          securityDeposit,
           totalAmount: grandTotal,
           paymentStatus: PAYMENT_STATUS.PENDING,
           bookingStatus: BOOKING_STATUS.PENDING,
@@ -156,6 +161,11 @@ exports.createBooking = async (req, res) => {
     session.endSession();
 
     const user = await User.findById(req.user.id);
+    const vendor = await User.findById(car.vendor);
+    let vendorDetails = null;
+    if (vendor) {
+      vendorDetails = await VendorDetails.findOne({ user: vendor._id });
+    }
 
     if (user) {
       try {
@@ -171,6 +181,23 @@ exports.createBooking = async (req, res) => {
             dropoffLocation: address,
             priceType,
             totalAmount: grandTotal,
+          }
+        );
+        //send email to vendor
+        await sendEmailFromTemplate(
+          "vendor_booking_confirmation_request",
+          vendor.email,
+          {
+            vendorName: vendorDetails?.businessName,
+            customerName: user.name,
+            carName: car.title,
+            pickupDate,
+            dropoffDate,
+            pickupLocation: car.location,
+            dropoffLocation: address,
+            priceType,
+            totalAmount: grandTotal,
+            dashboardLink: "#",
           }
         );
       } catch (err) {
@@ -266,10 +293,20 @@ const calculateRent = (car, unit, priceType, deliveryRequired) => {
   }
 
   let grandTotal = total;
+  let totalWitoutSecurity = total;
   if (car.depositRequired) grandTotal += car.securityDeposit;
-  if (deliveryRequired) grandTotal += car.deliveryCharges;
+  if (deliveryRequired) {
+    grandTotal += car.deliveryCharges;
+    totalWitoutSecurity += car.deliveryCharges;
+  }
 
-  return { grandTotal, total, baseRate };
+  return {
+    grandTotal,
+    total,
+    baseRate,
+    totalWitoutSecurity,
+    securityDeposit: car.securityDeposit,
+  };
 };
 
 const calculateRentalUnits = (pickup, dropoff, priceType) => {

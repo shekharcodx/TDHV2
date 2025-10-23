@@ -101,6 +101,8 @@ app.use("/api", require("./routes/vendor/listing.routes"));
 
 app.use("/api", require("./routes/vendor/user.routes"));
 
+app.use("/api", require("./routes/vendor/bookings.routes"));
+
 // Connect DB and run migrations
 connectDB().then(() => runMigration());
 

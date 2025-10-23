@@ -12,4 +12,8 @@ module.exports = {
     error: "UNRELATED_CAR_DATA",
     message: "The selected brand, model, and trim do not match",
   },
+  BOOKING_STATUS_UPDATED: {
+    code: 2101,
+    message: "Booking status updated successfully!",
+  },
 };
