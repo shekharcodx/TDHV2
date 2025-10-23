@@ -222,11 +222,16 @@ exports.getBookings = async (req, res) => {
   try {
     const pipeline = [
       {
+        $match: {
+          customer: new mongoose.Types.ObjectId(req.user.id),
+        },
+      },
+      {
         $lookup: {
           from: "rentallistings",
           localField: "listing",
           foreignField: "_id",
-          as: "listing",
+          as: "car",
           pipeline: [
             {
               $lookup: vendorLookup(),
@@ -238,27 +243,31 @@ exports.getBookings = async (req, res) => {
               },
             },
             {
-              $lookup: featuresLookup("technicalfeatures"),
-            },
-            {
-              $lookup: featuresLookup("otherfeatures"),
-            },
-            {
-              $project: createCarProjection(),
+              $project: createBookingCarProjections(),
             },
           ],
         },
       },
       {
         $unwind: {
-          path: "$listing",
+          path: "$car",
           preserveNullAndEmptyArrays: false,
         },
       },
       {
         $project: {
-          vendor: 0,
-          customer: 0,
+          bookingId: 1,
+          pickupDate: 1,
+          dropoffDate: 1,
+          deliveryRequired: 1,
+          priceType: 1,
+          totalAmount: 1,
+          dropoffAddress: 1,
+          payment: 1,
+          status: 1,
+          isActive: 1,
+          createdAt: 1,
+          car: 1,
         },
       },
     ];
@@ -354,6 +363,24 @@ const calculateRentalUnits = (pickup, dropoff, priceType) => {
 const generateBookingId = () => {
   const random = Math.floor(1000 + Math.random() * 9000); // 4 digits
   return `BK-${Date.now()}-${random}`;
+};
+
+const createBookingCarProjections = () => {
+  return {
+    carBrand: {
+      _id: "$carBrand._id",
+      name: "$carBrand.name",
+      logo: "$carBrand.logo",
+    },
+    carModel: "$carModel.name",
+    carTrim: "$carTrim.name",
+    modelYear: "$modelYear.year",
+    images: "$images",
+    coverImage: "$coverImage",
+    title: "$title",
+    description: "$description",
+    location: "$location",
+  };
 };
 
 // exports.createBooking = async (req, res) => {
