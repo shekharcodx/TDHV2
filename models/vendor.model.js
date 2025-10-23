@@ -34,6 +34,12 @@ const vendorDetailsSchema = new mongoose.Schema(
         poa: { key: String, filename: String },
       },
     },
+    stripeAccountId: { type: String, default: null },
+    stripeOnboardingCompleted: { type: Boolean, default: false },
+    stripeDetailsSubmitted: { type: Boolean, default: false },
+    payoutsEnabled: { type: Boolean, default: false },
+    chargesEnabled: { type: Boolean, default: false },
+    stripeDashboardLink: { type: String, default: null },
   },
   { timestamps: true }
 );

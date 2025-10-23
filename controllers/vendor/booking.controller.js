@@ -128,6 +128,7 @@ const createBookingCarProjections = () => {
   return {
     customer: 1,
     car: {
+      _id: "$car._id",
       carBrand: {
         _id: "$car.carBrand._id",
         name: "$car.carBrand.name",

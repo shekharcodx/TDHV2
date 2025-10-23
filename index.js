@@ -95,6 +95,8 @@ app.use("/api", require("./routes/common/car.routes"));
 
 app.use("/api", require("./routes/frontend/booking.routes"));
 
+app.use("/api", require("./routes/admin/payment.routes"));
+
 app.use(checkIsApproved);
 
 app.use("/api", require("./routes/vendor/listing.routes"));

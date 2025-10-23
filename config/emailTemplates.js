@@ -134,4 +134,19 @@ exports.templates = [
     description:
       "Sent to the vendor when a new booking is created. Requests them to confirm or reject the booking.",
   },
+  {
+    name: "vendor_onboarding",
+    subject: "Complete Your Stripe Onboarding",
+    body: `
+    <h1>Hello {{name}},</h1>
+    <p>Welcome to our platform! To start receiving payments, please complete your Stripe onboarding process.</p>
+    <p>Click the link below to securely complete your onboarding on Stripe:</p>
+    <p><a href="{{onboardingLink}}" target="_blank" style="color: #635bff; font-weight: bold;">Complete Onboarding</a></p>
+    <p>If you’ve already completed this step, you can safely ignore this email.</p>
+    <br/>
+    <p>Thank you,<br/>The Drive Hub Team</p>
+  `,
+    description:
+      "Sent when an admin generates and sends a Stripe onboarding link to a vendor.",
+  },
 ];

@@ -19,7 +19,8 @@
       "carOtherFeatures",
       "carDoors",
       "carTransmissions",
-      "carFuelTypes"
+      "carFuelTypes",
+      "vendor-onboarding"
     ],
     "get": [
       "getCurrentUser",
