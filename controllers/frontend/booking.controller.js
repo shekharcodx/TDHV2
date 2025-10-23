@@ -220,6 +220,11 @@ exports.createBooking = async (req, res) => {
 
 exports.getBookings = async (req, res) => {
   try {
+    const options = {
+      page: parseInt(req.query.page) || 1,
+      limit: parseInt(req.query.limit) || 10,
+      sort: { createdAt: -1 },
+    };
     const pipeline = [
       {
         $match: {
@@ -272,7 +277,10 @@ exports.getBookings = async (req, res) => {
       },
     ];
 
-    const bookings = await Booking.aggregate(pipeline);
+    const bookings = await Booking.aggregatePaginate(
+      Booking.aggregate(pipeline),
+      options
+    );
 
     res.status(200).json({ success: true, bookings });
   } catch (err) {
