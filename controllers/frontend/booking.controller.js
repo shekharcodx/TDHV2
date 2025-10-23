@@ -129,7 +129,7 @@ exports.createBooking = async (req, res) => {
 
     const { unit } = calculateRentalUnits(pickup, dropoff, priceType);
 
-    const { grandTotal, securityDeposit, totalWitoutSecurity } = calculateRent(
+    const { grandTotal, securityDeposit, totalWithoutSecurity } = calculateRent(
       car,
       unit,
       priceType,
@@ -146,7 +146,7 @@ exports.createBooking = async (req, res) => {
           listing: carId,
           pickupDate: pickup,
           dropoffDate: dropoff,
-          totalWitoutSecurity,
+          totalWithoutSecurity,
           securityDeposit,
           totalAmount: grandTotal,
           paymentStatus: PAYMENT_STATUS.PENDING,
