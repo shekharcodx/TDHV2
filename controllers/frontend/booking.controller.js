@@ -293,18 +293,18 @@ const calculateRent = (car, unit, priceType, deliveryRequired) => {
   }
 
   let grandTotal = total;
-  let totalWitoutSecurity = total;
+  let totalWithoutSecurity = total;
   if (car.depositRequired) grandTotal += car.securityDeposit;
   if (deliveryRequired) {
     grandTotal += car.deliveryCharges;
-    totalWitoutSecurity += car.deliveryCharges;
+    totalWithoutSecurity += car.deliveryCharges;
   }
 
   return {
     grandTotal,
     total,
     baseRate,
-    totalWitoutSecurity,
+    totalWithoutSecurity,
     securityDeposit: car.securityDeposit,
   };
 };
