@@ -4,6 +4,7 @@ const {
   completeProfile,
   editProfile,
   updateProfile,
+  getDocuemnts,
 } = require("../../controllers/frontend/profile.controller");
 const {
   completeProfileValidation,
@@ -28,5 +29,7 @@ router.patch(
   validate,
   updateProfile
 );
+
+router.get("/user-profile/documents", getDocuemnts);
 
 module.exports = router;

@@ -148,3 +148,27 @@ exports.updateProfile = async (req, res) => {
       .json({ success: false, ...messages.INTERNAL_SERVER_ERROR });
   }
 };
+
+exports.getDocuemnts = async (req, res) => {
+  try {
+    const customer = await User.findById(req.user.id).select("_id");
+    if (!customer) {
+      return res
+        .status(404)
+        .json({ success: false, ...messages.AUTH_USER_NOT_FOUND });
+    }
+
+    const [customerDetails] = await CustomerDetail.find({
+      userId: customer._id,
+    });
+
+    res
+      .status(200)
+      .json({ success: true, data: customerDetails?.documents || {} });
+  } catch (err) {
+    console.log("Get Documents Err", err);
+    return res
+      .status(500)
+      .json({ sucess: false, ...messages.INTERNAL_SERVER_ERROR });
+  }
+};
