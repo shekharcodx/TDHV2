@@ -37,8 +37,7 @@ exports.createOnboardingLink = async (req, res) => {
     });
 
     const [, , , , , accountId, code] = accountLink.url.split("/");
-    console.log("code", accountLink.url.split("/"));
-    const redirectLink = `https://d1l7k6qeq75ofn.cloudfront.net/redirect/stripe-onboard/${accountId}/${code}`;
+    const redirectLink = `${process.env.APP_LINK}/redirect/stripe-onboard/${accountId}/${code}`;
 
     await sendEmailFromTemplate("vendor_onboarding", vendor.email, {
       name: vendor.name,

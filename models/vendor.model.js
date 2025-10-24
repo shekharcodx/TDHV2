@@ -39,7 +39,6 @@ const vendorDetailsSchema = new mongoose.Schema(
     stripeDetailsSubmitted: { type: Boolean, default: false },
     payoutsEnabled: { type: Boolean, default: false },
     chargesEnabled: { type: Boolean, default: false },
-    stripeDashboardLink: { type: String, default: null },
   },
   { timestamps: true }
 );
