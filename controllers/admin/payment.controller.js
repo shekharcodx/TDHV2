@@ -36,14 +36,19 @@ exports.createOnboardingLink = async (req, res) => {
       type: "account_onboarding",
     });
 
+    const [, , , , accountId, code] = accountLink.url.split("/");
+    const redirectLink = `https://d1l7k6qeq75ofn.cloudfront.net/api/redirect/stripe-onboard/${accountId}/${code}`;
+
     await sendEmailFromTemplate("vendor_onboarding", vendor.email, {
       name: vendor.name,
-      onboardingLink: accountLink.url,
+      onboardingLink: redirectLink,
     });
 
-    res
-      .status(200)
-      .json({ success: true, message: "Onboarding link sent to vendor" });
+    res.status(200).json({
+      success: true,
+      message: "Onboarding link sent to vendor",
+      url: redirectLink,
+    });
   } catch (err) {
     console.error("Stripe error:", {
       message: err.message,
@@ -52,6 +57,21 @@ exports.createOnboardingLink = async (req, res) => {
       param: err.param,
       raw: err.raw,
     });
-    res.status(500).json({ success: false, ...messages.INTERNAL_SERVER_ERROR });
+    return res
+      .status(500)
+      .json({ success: false, ...messages.INTERNAL_SERVER_ERROR });
+  }
+};
+
+exports.redirectToOnboarding = async (req, res) => {
+  try {
+    const { accountId, code } = req.params;
+    const stripeUrl = `https://connect.stripe.com/setup/s/${accountId}/${code}`;
+    res.redirect(stripeUrl);
+  } catch (err) {
+    console.log("Rediredting Error", err);
+    return res
+      .status(500)
+      .json({ success: false, ...messages.INTERNAL_SERVER_ERROR });
   }
 };

@@ -74,6 +74,8 @@ app.use("/api", require("./routes/vendor/location.routes"));
 
 app.use("/api", require("./routes/frontend/listing.routes"));
 
+app.use("/api", require("./routes/common/open.routes"));
+
 app.use(authMiddleware);
 app.use(aclMiddleware);
 
