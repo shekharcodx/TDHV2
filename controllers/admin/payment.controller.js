@@ -22,13 +22,8 @@ exports.createOnboardingLink = async (req, res) => {
 
     if (!vendorDetails.stripeAccountId) {
       const account = await stripe.accounts.create({
-        type: "express",
-        country: "AE",
+        type: "standard",
         email: vendor.email,
-        capabilities: {
-          card_payments: { requested: true },
-          transfers: { requested: true },
-        },
       });
       vendorDetails.stripeAccountId = account.id;
       await vendorDetails.save();
