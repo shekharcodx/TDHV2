@@ -36,6 +36,7 @@ const allowedOrigins = [
   "https://tdhv-2-adminv2.vercel.app",
   "https://tdhv2-site2.vercel.app",
   "https://vendor.thedrivehub.com",
+  "https://admin.thedrivehub.com",
 ];
 
 // CORS
