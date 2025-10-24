@@ -50,7 +50,13 @@ exports.createOnboardingLink = async (req, res) => {
       .status(200)
       .json({ success: true, message: "Onboarding link sent to vendor" });
   } catch (err) {
-    console.error("Stripe onboarding error:", err);
+    console.error("Stripe error:", {
+      message: err.message,
+      type: err.type,
+      code: err.code,
+      param: err.param,
+      raw: err.raw,
+    });
     res.status(500).json({ success: false, ...messages.INTERNAL_SERVER_ERROR });
   }
 };
