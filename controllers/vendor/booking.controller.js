@@ -4,6 +4,7 @@ const messages = require("../../messages/messages");
 const Booking = require("../../models/booking.model");
 const vendor = require("../../messages/vendor");
 const User = require("../../models/user.model");
+const RentalListing = require("../../models/rentalListing.model");
 const jwt = require("jsonwebtoken");
 const { sendEmailFromTemplate } = require("../../utils/sendEmail");
 
