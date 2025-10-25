@@ -1,8 +1,8 @@
 #!/bin/bash
 
-# ============================
-# Deployment script for Next.js
-# ============================
+# =============================
+# Deployment script for Backend
+# =============================
 
 APP_NAME="tdhv2-server"
 APP_DIR="/home/ubuntu/tdhv2-server"

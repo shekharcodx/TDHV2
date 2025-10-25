@@ -1,4 +1,3 @@
-import express from "express";
 const { stripe } = require("../../config/stripe.js");
 const User = require("../../models/user.model.js");
 const VendorDetail = require("../../models/vendor.model.js");
