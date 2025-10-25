@@ -3,6 +3,7 @@ const { BOOKING_STATUS } = require("../../config/constants");
 const messages = require("../../messages/messages");
 const Booking = require("../../models/booking.model");
 const vendor = require("../../messages/vendor");
+const User = require("../../models/user.model");
 const jwt = require("jsonwebtoken");
 const { sendEmailFromTemplate } = require("../../utils/sendEmail");
 
