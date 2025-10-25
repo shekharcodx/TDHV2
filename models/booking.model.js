@@ -44,10 +44,26 @@ const bookingSchema = new mongoose.Schema(
       enum: Object.values(PAYMENT_STATUS),
       default: PAYMENT_STATUS.PENDING,
     },
+    rentalPaid: {
+      type: Boolean,
+      default: false,
+    },
+    depositPaid: {
+      type: Boolean,
+      default: false,
+    },
     status: {
       type: Number,
       enum: Object.values(BOOKING_STATUS),
       default: BOOKING_STATUS.PENDING,
+    },
+    stripeRentalSessionId: {
+      type: String,
+      default: null,
+    },
+    stripeDepositSessionId: {
+      type: String,
+      default: null,
     },
     // expireAt: { type: Date },
     isActive: { type: Boolean, default: true },

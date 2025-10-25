@@ -149,4 +149,44 @@ exports.templates = [
     description:
       "Sent when an admin generates and sends a Stripe onboarding link to a vendor.",
   },
+  {
+    name: "booking_payment_links",
+    subject: "Complete Your Booking Payment",
+    body: `
+    <h1>Hello {{customerName}},</h1>
+    <p>Your booking for <strong>{{carName}}</strong> has been confirmed by the vendor.</p>
+    <p>To finalize your booking, please complete the payment using the link{{depositRequired ? 's' : ''}} below:</p>
+
+    <ul>
+      <li>
+        <strong>Rental Fee:</strong>
+        <a href="{{rentalPaymentLink}}" target="_blank" style="color: #635bff; font-weight: bold;">
+          Pay Rental Fee
+        </a>
+      </li>
+      {{#if depositRequired}}
+      <li>
+        <strong>Security Deposit:</strong>
+        <a href="{{depositPaymentLink}}" target="_blank" style="color: #635bff; font-weight: bold;">
+          Pay Security Deposit
+        </a>
+      </li>
+      {{/if}}
+    </ul>
+
+    <p><strong>Note:</strong> The security deposit is fully refundable after the rental period, provided no damages occur.</p> 
+    <p>The link(s) will expire in 24 hours</p>
+
+    <p>
+      Please complete your payment within <strong>24 hours</strong> to secure your booking.
+      After this time, your payment links may expire and new ones will be issued if needed.
+    </p>
+
+    <br/>
+    <p>Thank you for choosing Drive Hub!</p>
+    <p>— The Drive Hub Team</p>
+  `,
+    description:
+      "Sent to the customer when the vendor confirms a booking. Includes Stripe payment links for rental fee and (if applicable) security deposit.",
+  },
 ];

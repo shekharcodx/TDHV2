@@ -75,7 +75,9 @@ app.get("/", (req, res) => {
 
 app.use("/api", require("./routes/common/open.routes"));
 
-// Custom middleware
+app.use("/api", require("./routes/stripe/payment.routes"));
+
+// Middleware to check valid apis
 app.use(apisMiddleware);
 
 // Routes
@@ -85,7 +87,9 @@ app.use("/api", require("./routes/vendor/location.routes"));
 
 app.use("/api", require("./routes/frontend/listing.routes"));
 
+// middleware to check authentication
 app.use(authMiddleware);
+// middleware to check role access
 app.use(aclMiddleware);
 
 app.use("/api", require("./routes/frontend/profile.routes"));
@@ -108,6 +112,7 @@ app.use("/api", require("./routes/frontend/booking.routes"));
 
 app.use("/api", require("./routes/admin/payment.routes"));
 
+//middleware to check vendor account status
 app.use(checkIsApproved);
 
 app.use("/api", require("./routes/vendor/listing.routes"));

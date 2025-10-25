@@ -3,6 +3,8 @@ const { BOOKING_STATUS } = require("../../config/constants");
 const messages = require("../../messages/messages");
 const Booking = require("../../models/booking.model");
 const vendor = require("../../messages/vendor");
+const jwt = require("jsonwebtoken");
+const { sendEmailFromTemplate } = require("../../utils/sendEmail");
 
 exports.getAllBookings = async (req, res) => {
   try {
@@ -114,6 +116,43 @@ exports.updateBookingStatus = async (req, res) => {
 
     booking.status = bookingStat;
     await booking.save();
+
+    if (bookingStat === BOOKING_STATUS.CONFIRMED) {
+      const token = jwt.sign(
+        { bookingId: booking._id },
+        process.env.BOOKING_JWT_SECRET,
+        {
+          expiresIn: "24h",
+        }
+      );
+
+      const customer = await User.findById(booking.customer);
+      if (!customer)
+        return res
+          .status(404)
+          .json({ success: false, ...messages.AUTH_USER_NOT_FOUND });
+
+      const car = await RentalListing.findById(booking.listing).select(
+        "title depositRequired"
+      );
+
+      const emailData = {
+        customerName: customer.name,
+        carName: car.title,
+        depositRequired: car.depositRequired,
+        rentalPaymentLink: `${process.env.APP_LINK}/api/payments/rental/${booking._id}?token=${token}`,
+      };
+
+      if (car.depositRequired) {
+        emailData.depositPaymentLink = `${process.env.APP_LINK}/api/payments/deposit/${booking._id}?token=${token}`;
+      }
+
+      await sendEmailFromTemplate(
+        "booking_payment_links",
+        customer.email,
+        emailData
+      );
+    }
 
     res.status(200).json({ success: true, ...vendor.BOOKING_STATUS_UPDATED });
   } catch (err) {
