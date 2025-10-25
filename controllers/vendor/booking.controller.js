@@ -114,6 +114,17 @@ exports.updateBookingStatus = async (req, res) => {
         break;
     }
 
+    if (
+      bookingStatus === BOOKING_STATUS.CANCELED &&
+      (booking.rentalPaid || booking.depositPaid)
+    ) {
+      return res.status(403).json({
+        success: false,
+        message:
+          "Booking cannot be cancelled as payment has already been made for this booking.",
+      });
+    }
+
     booking.status = bookingStat;
     await booking.save();
 
