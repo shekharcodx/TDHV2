@@ -180,6 +180,8 @@ exports.updateBookingStatus = async (req, res) => {
           emailData.depositPaymentLink = `${process.env.APP_LINK}/api/payments/deposit/${booking._id}?token=${token}`;
         }
 
+        console.log("Email Data:", emailData);
+
         await sendEmailFromTemplate(
           "booking_payment_links",
           customer.email,
