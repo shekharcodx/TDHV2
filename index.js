@@ -58,7 +58,11 @@ app.use(cors(corsOptions));
 app.use(helmet());
 app.use(cookieParser());
 
-app.use("/api", require("./routes/stripe/webhook.routes"));
+app.use(
+  "/api/stripe/webhook",
+  express.raw({ type: "application/json" }),
+  require("./routes/stripe/webhook.routes")
+);
 
 // Body parser
 app.use(express.json());
