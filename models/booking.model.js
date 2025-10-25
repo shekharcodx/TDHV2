@@ -65,6 +65,7 @@ const bookingSchema = new mongoose.Schema(
       type: String,
       default: null,
     },
+    emailSent: { type: Boolean, default: false },
     // expireAt: { type: Date },
     isActive: { type: Boolean, default: true },
   },

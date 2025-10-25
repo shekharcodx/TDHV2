@@ -88,16 +88,23 @@ exports.getAllBookings = async (req, res) => {
 };
 
 exports.updateBookingStatus = async (req, res) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
   try {
     const { bookingId } = req.params;
     const { bookingStatus } = req.body;
-    const booking = await Booking.findById(bookingId);
+
+    const booking = await Booking.findById(bookingId).session(session);
     if (!booking) {
+      await session.abortTransaction();
+      session.endSession();
       return res
         .status(404)
         .json({ success: false, message: "Booking not found!" });
     }
 
+    // Determine booking status
     let bookingStat = null;
     switch (bookingStatus) {
       case 1:
@@ -112,12 +119,21 @@ exports.updateBookingStatus = async (req, res) => {
       case 4:
         bookingStat = BOOKING_STATUS.EXPIRED;
         break;
+      default:
+        await session.abortTransaction();
+        session.endSession();
+        return res
+          .status(400)
+          .json({ success: false, message: "Invalid booking status!" });
     }
 
+    // Prevent canceling paid bookings
     if (
-      bookingStatus === BOOKING_STATUS.CANCELED &&
+      bookingStat === BOOKING_STATUS.CANCELED &&
       (booking.rentalPaid || booking.depositPaid)
     ) {
+      await session.abortTransaction();
+      session.endSession();
       return res.status(403).json({
         success: false,
         message:
@@ -125,49 +141,65 @@ exports.updateBookingStatus = async (req, res) => {
       });
     }
 
+    // Update booking
     booking.status = bookingStat;
-    await booking.save();
+    await booking.save({ session });
 
+    await session.commitTransaction();
+    session.endSession();
+
+    // ===== EMAIL HANDLING AFTER TRANSACTION =====
     if (bookingStat === BOOKING_STATUS.CONFIRMED) {
-      const token = jwt.sign(
-        { bookingId: booking._id },
-        process.env.BOOKING_JWT_SECRET,
-        {
-          expiresIn: "24h",
+      try {
+        const token = jwt.sign(
+          { bookingId: booking._id },
+          process.env.BOOKING_JWT_SECRET,
+          { expiresIn: "24h" }
+        );
+
+        const customer = await User.findById(booking.customer);
+        if (!customer)
+          return res
+            .status(404)
+            .json({ success: false, ...messages.AUTH_USER_NOT_FOUND });
+
+        const car = await RentalListing.findById(booking.listing).select(
+          "title depositRequired"
+        );
+
+        const emailData = {
+          customerName: customer.name,
+          carName: car.title,
+          depositRequired: car.depositRequired,
+          rentalPaymentLink: `${process.env.APP_LINK}/api/payments/rental/${booking._id}?token=${token}`,
+        };
+
+        if (car.depositRequired) {
+          emailData.depositPaymentLink = `${process.env.APP_LINK}/api/payments/deposit/${booking._id}?token=${token}`;
         }
-      );
 
-      const customer = await User.findById(booking.customer);
-      if (!customer)
-        return res
-          .status(404)
-          .json({ success: false, ...messages.AUTH_USER_NOT_FOUND });
+        await sendEmailFromTemplate(
+          "booking_payment_links",
+          customer.email,
+          emailData
+        );
 
-      const car = await RentalListing.findById(booking.listing).select(
-        "title depositRequired"
-      );
-
-      const emailData = {
-        customerName: customer.name,
-        carName: car.title,
-        depositRequired: car.depositRequired,
-        rentalPaymentLink: `${process.env.APP_LINK}/api/payments/rental/${booking._id}?token=${token}`,
-      };
-
-      if (car.depositRequired) {
-        emailData.depositPaymentLink = `${process.env.APP_LINK}/api/payments/deposit/${booking._id}?token=${token}`;
+        // Optional: mark email as sent
+        await Booking.findByIdAndUpdate(booking._id, { emailSent: true });
+      } catch (emailErr) {
+        console.error("Email sending failed:", emailErr);
+        await Booking.findByIdAndUpdate(booking._id, { emailSent: false });
       }
-
-      await sendEmailFromTemplate(
-        "booking_payment_links",
-        customer.email,
-        emailData
-      );
     }
 
-    res.status(200).json({ success: true, ...vendor.BOOKING_STATUS_UPDATED });
+    res.status(200).json({
+      success: true,
+      message: "Booking status updated successfully.",
+    });
   } catch (err) {
-    console.log("Approve Booking Err", err);
+    await session.abortTransaction();
+    session.endSession();
+    console.error("Approve Booking Err:", err);
     return res
       .status(500)
       .json({ success: false, ...messages.INTERNAL_SERVER_ERROR });
